@@ -16,8 +16,7 @@ bin/
 /runs/
 
 # Sauvegardes internes MCreator : conserver le fichier *.mcreator principal
-/.mcreator/*.zip
-/.mcreator/backups/
+/.mcreator/*
 
 # Journaux et rapports de plantage
 /logs/
