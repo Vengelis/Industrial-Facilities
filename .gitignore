@@ -1,0 +1,54 @@
+# Projet MCreator : placer ce fichier a cote du fichier *.mcreator.
+# Conserver : *.mcreator, elements/, src/, textures/, models/, sounds/,
+# structures/, les fichiers Gradle et le wrapper Gradle.
+
+# Caches et resultats de compilation Gradle / Java
+.gradle/
+build/
+out/
+bin/
+*.class
+
+# Environnements Minecraft de test (mondes, mods, logs, configuration)
+/run/
+/runClient/
+/runServer/
+/runs/
+
+# Sauvegardes internes MCreator : conserver le fichier *.mcreator principal
+/.mcreator/*.zip
+/.mcreator/backups/
+
+# Journaux et rapports de plantage
+/logs/
+/crash-reports/
+hs_err_pid*.log
+replay_pid*.log
+
+# Configuration locale des IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+.metadata/
+.factorypath
+.externalToolBuilders/
+
+# Fichiers temporaires des editeurs
+*~
+*.swp
+*.swo
+.~lock.*#
+
+# Fichiers du systeme
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Ne pas ignorer globalement les *.jar ou *.zip : le wrapper Gradle,
+# les dependances locales et certaines ressources peuvent etre necessaires.
