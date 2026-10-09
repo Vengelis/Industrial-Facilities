@@ -6,9 +6,10 @@ license="GNU General Public License version 3 (GPLv3)"
 modId="industrial_facilities"
 version="1.0.0"
 displayName="Industrial Facilities"
-displayURL="https://mcreator.net"
-credits="Created using mod maker MCreator - https://mcreator.net/about"
+displayURL="https://github.com/Vengelis/Industrial-Facilities"
+credits="https://github.com/Vengelis/Industrial-Facilities"
 authors="Vengelis_"
+description="A Minecraft mod adding various blocks and items useful for industrial-style building."
 
 # Start of user code block mod configuration
 # End of user code block mod configuration

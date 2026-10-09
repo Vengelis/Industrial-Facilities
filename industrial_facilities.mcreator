@@ -1626,6 +1626,34 @@
         ]
       },
       "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "AirlockFrameRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_frame_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/airlock_frame_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/airlock_frame_recipe.json"
+        ]
+      },
+      "path": "~/Airlock"
+    },
+    {
+      "name": "AirlockControllerRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_controller_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/airlock_controller_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/airlock_controller_recipe.json"
+        ]
+      },
+      "path": "~/Airlock"
     }
   ],
   "variable_elements": [],
@@ -1856,8 +1884,9 @@
     "modid": "industrial_facilities",
     "modName": "Industrial Facilities",
     "version": "1.0.0",
+    "description": "A Minecraft mod adding various blocks and items useful for industrial-style building.",
     "author": "Vengelis_",
-    "websiteURL": "https://mcreator.net",
+    "websiteURL": "https://github.com/Vengelis/Industrial-Facilities",
     "license": "GNU General Public License version 3 (GPLv3)",
     "serverSideOnly": false,
     "requiredMods": [],
@@ -1865,7 +1894,7 @@
     "dependants": [],
     "mcreatorDependencies": [],
     "currentGenerator": "neoforge-1.21.1",
-    "credits": "Created using mod maker MCreator - https://mcreator.net/about",
+    "credits": "https://github.com/Vengelis/Industrial-Facilities",
     "modElementsPackage": "fr.vengelis.industrialfacilities"
   },
   "mcreatorVersion": 202600233518

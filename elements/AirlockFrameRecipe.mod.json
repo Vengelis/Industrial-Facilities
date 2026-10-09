@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 2,
+    "group": "",
+    "unlockingItems": [
+      "CUSTOM:AirlockController"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": false,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.COPPER_INGOT",
+      "Items.REDSTONE",
+      "Items.COPPER_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT"
+    ],
+    "recipeReturnStack": "CUSTOM:AirlockFrame",
+    "name": "airlock_frame_recipe",
+    "namespace": "mod"
+  }
+}
