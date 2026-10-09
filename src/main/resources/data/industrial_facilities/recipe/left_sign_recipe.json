@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "industrial_facilities:empty_sign"
+  },
+  "result": {
+    "id": "industrial_facilities:left_sign",
+    "count": 1
+  }
+}

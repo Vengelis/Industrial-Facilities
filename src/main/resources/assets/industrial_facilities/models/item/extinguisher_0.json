@@ -1,0 +1,8 @@
+{
+  "parent": "industrial_facilities:custom/extincteur_left",
+  "textures": {
+    "0": "industrial_facilities:block/corpextincteur",
+    "missing": "industrial_facilities:block/",
+    "particle": "industrial_facilities:item/corpextincteur"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "industrial_facilities:custom/sign",
+  "textures": {
+    "all": "industrial_facilities:block/monster",
+    "particle": "industrial_facilities:block/air_lock_frame",
+    "0": "industrial_facilities:block/monster"
+  },
+  "render_type": "solid"
+}

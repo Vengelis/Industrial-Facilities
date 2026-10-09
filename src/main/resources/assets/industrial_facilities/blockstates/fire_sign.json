@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "industrial_facilities:block/fire_sign"
+    },
+    "facing=east": {
+      "model": "industrial_facilities:block/fire_sign",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "industrial_facilities:block/fire_sign",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industrial_facilities:block/fire_sign",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "industrial_facilities:block/fire_sign",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "industrial_facilities:block/fire_sign",
+      "x": 90
+    }
+  }
+}

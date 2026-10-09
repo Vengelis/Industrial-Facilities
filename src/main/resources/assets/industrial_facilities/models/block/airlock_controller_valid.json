@@ -1,0 +1,9 @@
+{
+  "parent": "industrial_facilities:block/airlock_controller",
+  "textures": {
+    "north": "industrial_facilities:block/air_lock_controller",
+    "east": "industrial_facilities:block/air_lock_controller",
+    "south": "industrial_facilities:block/air_lock_controller",
+    "west": "industrial_facilities:block/air_lock_controller"
+  }
+}

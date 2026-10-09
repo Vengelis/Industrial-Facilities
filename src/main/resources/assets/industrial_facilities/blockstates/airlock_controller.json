@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "structure_valid=false": { "model": "industrial_facilities:block/airlock_controller" },
+    "structure_valid=true": { "model": "industrial_facilities:block/airlock_controller_valid" }
+  }
+}

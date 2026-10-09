@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "industrial_facilities:block/air_lock_frame",
+    "up": "industrial_facilities:block/air_lock_frame",
+    "north": "industrial_facilities:block/airlock_control_off",
+    "east": "industrial_facilities:block/airlock_control_off",
+    "south": "industrial_facilities:block/airlock_control_off",
+    "west": "industrial_facilities:block/airlock_control_off",
+    "particle": "industrial_facilities:block/air_lock_frame"
+  },
+  "render_type": "solid"
+}

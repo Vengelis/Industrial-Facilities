@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "industrial_facilities:block/extinguisher_placed"
+    },
+    "facing=east": {
+      "model": "industrial_facilities:block/extinguisher_placed",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "industrial_facilities:block/extinguisher_placed",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industrial_facilities:block/extinguisher_placed",
+      "y": 270
+    }
+  }
+}

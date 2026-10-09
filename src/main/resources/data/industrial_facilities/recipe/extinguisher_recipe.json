@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "extinguisher",
+  "category": "misc",
+  "pattern": [
+    "ab ",
+    "cdc",
+    " c "
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:hopper"
+    },
+    "b": {
+      "item": "minecraft:lever"
+    },
+    "c": {
+      "item": "minecraft:iron_ingot"
+    },
+    "d": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "id": "industrial_facilities:extinguisher",
+    "count": 1
+  }
+}

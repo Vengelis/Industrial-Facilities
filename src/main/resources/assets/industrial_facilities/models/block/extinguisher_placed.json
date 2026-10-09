@@ -1,0 +1,10 @@
+{
+  "parent": "industrial_facilities:custom/extincteur_placed",
+  "textures": {
+    "all": "industrial_facilities:block/corpextincteur",
+    "particle": "industrial_facilities:block/corpextincteur",
+    "0": "industrial_facilities:block/corpextincteur",
+    "missing": "industrial_facilities:block/"
+  },
+  "render_type": "solid"
+}

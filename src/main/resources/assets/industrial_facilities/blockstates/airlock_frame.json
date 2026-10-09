@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "industrial_facilities:block/airlock_frame"
+    }
+  }
+}

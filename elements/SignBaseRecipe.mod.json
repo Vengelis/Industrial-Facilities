@@ -1,0 +1,51 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 4,
+    "group": "",
+    "unlockingItems": [
+      "CUSTOM:BiohazardSign",
+      "CUSTOM:RadioactiveSign",
+      "CUSTOM:WarningSign",
+      "CUSTOM:ExtinguisherSign",
+      "CUSTOM:DeadSign",
+      "CUSTOM:MedicSign",
+      "CUSTOM:ColdSign",
+      "CUSTOM:FireSign",
+      "CUSTOM:AsphyxiaSign",
+      "CUSTOM:ExplosionSign",
+      "CUSTOM:MonsterSign",
+      "CUSTOM:ForbiddenSign",
+      "CUSTOM:StopSign",
+      "CUSTOM:InformationSign",
+      "CUSTOM:StairsSign",
+      "CUSTOM:ElevatorSign",
+      "CUSTOM:LeftSign",
+      "CUSTOM:RightSign",
+      "CUSTOM:UpSign",
+      "CUSTOM:DownSign",
+      "CUSTOM:StorageSign"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": false,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:EmptySign",
+    "name": "sign_base_recipe",
+    "namespace": "mod"
+  }
+}

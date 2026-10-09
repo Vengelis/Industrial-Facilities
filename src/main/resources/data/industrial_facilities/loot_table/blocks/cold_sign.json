@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "industrial_facilities:blocks/cold_sign",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "industrial_facilities:cold_sign"
+        }
+      ]
+    }
+  ]
+}

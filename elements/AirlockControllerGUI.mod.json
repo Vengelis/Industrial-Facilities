@@ -1,0 +1,220 @@
+{
+  "_fv": 89,
+  "_type": "gui",
+  "definition": {
+    "type": 0,
+    "width": 256,
+    "height": 220,
+    "inventoryOffsetX": 0,
+    "inventoryOffsetY": 0,
+    "renderBgLayer": true,
+    "doesPauseGame": false,
+    "components": [
+      {
+        "type": "label",
+        "data": {
+          "name": "label_airlock_controller",
+          "text": {
+            "fixedValue": "AIRLOCK CONTROLLER"
+          },
+          "color": {
+            "value": -12829636,
+            "falpha": 0.0
+          },
+          "hasShadow": false,
+          "x": 96,
+          "y": 19,
+          "locked": false
+        }
+      },
+      {
+        "type": "label",
+        "data": {
+          "name": "label_player_detection",
+          "text": {
+            "fixedValue": "Player Detection"
+          },
+          "color": {
+            "value": -12829636,
+            "falpha": 0.0
+          },
+          "hasShadow": false,
+          "x": 96,
+          "y": 44,
+          "locked": false
+        }
+      },
+      {
+        "type": "button",
+        "data": {
+          "name": "button_enabled",
+          "text": "Enabled",
+          "isUndecorated": false,
+          "onClick": "AirlockTogglePlayerDetection",
+          "width": 74,
+          "height": 20,
+          "x": 253,
+          "y": 39,
+          "locked": false
+        }
+      },
+      {
+        "type": "label",
+        "data": {
+          "name": "label_detection_range",
+          "text": {
+            "fixedValue": "Detection range"
+          },
+          "color": {
+            "value": -12829636,
+            "falpha": 0.0
+          },
+          "hasShadow": false,
+          "x": 96,
+          "y": 65,
+          "locked": false
+        }
+      },
+      {
+        "type": "slider",
+        "data": {
+          "name": "slider_detect_range",
+          "min": 1.0,
+          "max": 10.0,
+          "value": 5.0,
+          "step": 1.0,
+          "prefix": "",
+          "suffix": "",
+          "width": 45,
+          "height": 20,
+          "x": 275,
+          "y": 62,
+          "locked": false
+        }
+      },
+      {
+        "type": "label",
+        "data": {
+          "name": "label_redstone_detection",
+          "text": {
+            "fixedValue": "Redstone detection"
+          },
+          "color": {
+            "value": -12829636,
+            "falpha": 0.0
+          },
+          "hasShadow": false,
+          "x": 96,
+          "y": 87,
+          "locked": false
+        }
+      },
+      {
+        "type": "button",
+        "data": {
+          "name": "button_enabled1",
+          "text": "Disabled",
+          "isUndecorated": false,
+          "width": 60,
+          "height": 20,
+          "x": 267,
+          "y": 84,
+          "locked": false
+        }
+      },
+      {
+        "type": "label",
+        "data": {
+          "name": "label_restricted_access",
+          "text": {
+            "fixedValue": "Restricted access"
+          },
+          "color": {
+            "value": -12829636,
+            "falpha": 0.0
+          },
+          "hasShadow": false,
+          "x": 96,
+          "y": 108,
+          "locked": false
+        }
+      },
+      {
+        "type": "textfield",
+        "data": {
+          "placeholder": "",
+          "name": "text_input_restricted_access",
+          "width": 120,
+          "height": 20,
+          "x": 207,
+          "y": 105,
+          "locked": false
+        }
+      },
+      {
+        "type": "button",
+        "data": {
+          "name": "button_add",
+          "text": "Add",
+          "isUndecorated": false,
+          "width": 40,
+          "height": 20,
+          "x": 286,
+          "y": 126,
+          "locked": false
+        }
+      },
+      {
+        "type": "button",
+        "data": {
+          "name": "button_close",
+          "text": "Close door",
+          "isUndecorated": false,
+          "onClick": "AirlockDetectStructure",
+          "width": 50,
+          "height": 20,
+          "x": 187,
+          "y": 195,
+          "locked": false
+        }
+      },
+      {
+        "type": "label",
+        "data": {
+          "name": "label_restricted_access_mode",
+          "text": {
+            "fixedValue": "Restricted Access Mode"
+          },
+          "color": {
+            "value": -12829636,
+            "falpha": 0.0
+          },
+          "hasShadow": false,
+          "x": 96,
+          "y": 153,
+          "locked": false
+        }
+      },
+      {
+        "type": "button",
+        "data": {
+          "name": "button_disabled",
+          "text": "Disabled",
+          "isUndecorated": false,
+          "width": 65,
+          "height": 20,
+          "x": 262,
+          "y": 148,
+          "locked": false
+        }
+      }
+    ],
+    "gridSettings": {
+      "sx": 18,
+      "sy": 18,
+      "ox": 11,
+      "oy": 15,
+      "snapOnGrid": false
+    }
+  }
+}

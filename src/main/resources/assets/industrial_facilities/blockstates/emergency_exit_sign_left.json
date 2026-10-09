@@ -1,0 +1,87 @@
+
+{
+  "multipart": [
+    {
+      "when": {
+        "mount": "wall",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_0"
+      }
+    },
+    {
+      "when": {
+        "mount": "wall",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "mount": "wall",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "mount": "wall",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "mount": "ceiling",
+        "facing": "down",
+        "horizontal_facing": "north"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_1"
+      }
+    },
+    {
+      "when": {
+        "mount": "ceiling",
+        "facing": "down",
+        "horizontal_facing": "east"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "mount": "ceiling",
+        "facing": "down",
+        "horizontal_facing": "south"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "mount": "ceiling",
+        "facing": "down",
+        "horizontal_facing": "west"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/emergency_exit_sign_left_1",
+        "y": 270
+      }
+    }
+  ]
+}

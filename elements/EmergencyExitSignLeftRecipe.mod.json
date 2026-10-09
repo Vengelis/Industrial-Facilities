@@ -1,0 +1,29 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "",
+    "unlockingItems": [],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "REDSTONE",
+    "recipeShapeless": false,
+    "recipeSlots": [
+      "",
+      "",
+      "",
+      "Items.DYE#10",
+      "Items.REDSTONE",
+      "Items.IRON_INGOT",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:EmergencyExitSignLeft",
+    "name": "emergency_exit_sign_left_recipe",
+    "namespace": "mod"
+  }
+}

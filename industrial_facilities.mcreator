@@ -1,0 +1,1872 @@
+{
+  "mod_elements": [
+    {
+      "name": "ExtinguisherEveryTickWhileUsingItem",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_every_tick_while_using_item",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "itemstack",
+            "type": "itemstack"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherEveryTickWhileUsingItemProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "Extinguisher",
+      "type": "item",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/extinguisher.json",
+          "src/main/resources/assets/industrial_facilities/models/item/extinguisher_0.json",
+          "src/main/resources/assets/industrial_facilities/models/item/extinguisher_1.json",
+          "src/main/java/fr/vengelis/industrialfacilities/item/ExtinguisherItem.java",
+          "src/main/resources/assets/industrial_facilities/models/item/extinguisher_2.json"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "ExtinguisherItemIsCraftedsmelted",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_item_is_craftedsmelted",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "itemstack",
+            "type": "itemstack"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherItemIsCraftedsmeltedProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "IndustrialFacilities",
+      "type": "tab",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "industrial_facilities",
+      "metadata": {
+        "files": []
+      }
+    },
+    {
+      "name": "IndustrialFacilitiesCommand",
+      "type": "command",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "industrial_facilities_command",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/command/IndustrialFacilitiesCommandCommand.java"
+        ]
+      },
+      "path": "~/Commands"
+    },
+    {
+      "name": "ExtinguisherRefillProcedure",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_refill_procedure",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherRefillProcedureProcedure.java"
+        ]
+      },
+      "path": "~/Commands"
+    },
+    {
+      "name": "ExtinguisherPlaced",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_placed",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/extinguisher_placed.json",
+          "src/main/resources/assets/industrial_facilities/models/item/extinguisher_placed.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/extinguisher_placed.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/entity/ExtinguisherPlacedBlockEntity.java",
+          "src/main/java/fr/vengelis/industrialfacilities/block/ExtinguisherPlacedBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/extinguisher_placed.json"
+        ]
+      },
+      "path": "~/Extinguisher/Blocks"
+    },
+    {
+      "name": "ExtinguisherPlacedOnBlockRightclicked",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_placed_on_block_rightclicked",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherPlacedOnBlockRightclickedProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Blocks"
+    },
+    {
+      "name": "OnRightclickOnBlockWithExtinguisher",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "on_rightclick_on_block_with_extinguisher",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "direction",
+            "type": "direction"
+          },
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/OnRightclickOnBlockWithExtinguisherProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "ExtinguisherOnPlayerStoppedUsing",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_on_player_stopped_using",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "itemstack",
+            "type": "itemstack"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherOnPlayerStoppedUsingProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "ExtinguisherPropertyValueProvider",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_property_value_provider",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "itemstack",
+            "type": "itemstack"
+          }
+        ],
+        "return_type": "number",
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherPropertyValueProviderProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "ExtinguisherRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/extinguisher_recipe.json"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "ExtinguisherPlacedBlockDestroyedByPlayer",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_placed_block_destroyed_by_player",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/ExtinguisherPlacedBlockDestroyedByPlayerProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Blocks"
+    },
+    {
+      "name": "EmergencyExitSignRightBlockValidPlacementCondition",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "emergency_exit_sign_right_block_valid_placement_condition",
+      "metadata": {
+        "dependencies": [],
+        "return_type": "logic",
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/EmergencyExitSignRightBlockValidPlacementConditionProcedure.java"
+        ]
+      },
+      "path": "~/Extinguisher/Blocks"
+    },
+    {
+      "name": "EmergencyExitSignRight",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "emergency_exit_sign_right",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/EmergencyExitSignRightBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/item/emergency_exit_sign_right.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/emergency_exit_sign_right.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/emergency_exit_sign_right.json",
+          "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_right.json",
+          "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_right_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_right_1.json"
+        ]
+      },
+      "path": "~/EmergencyExitSign"
+    },
+    {
+      "name": "EmergencyExitSignLeft",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "emergency_exit_sign_left",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/EmergencyExitSignLeftBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/emergency_exit_sign_left.json",
+          "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_left_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_left_1.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/emergency_exit_sign_left.json",
+          "src/main/resources/assets/industrial_facilities/models/item/emergency_exit_sign_left.json",
+          "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_left.json"
+        ]
+      },
+      "path": "~/EmergencyExitSign"
+    },
+    {
+      "name": "EmergencyExitSignRightRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "emergency_exit_sign_right_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/emergency_exit_sign_right_recipe.json"
+        ]
+      },
+      "path": "~/EmergencyExitSign"
+    },
+    {
+      "name": "EmergencyExitSignLeftRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "emergency_exit_sign_left_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/emergency_exit_sign_left_recipe.json"
+        ]
+      },
+      "path": "~/EmergencyExitSign"
+    },
+    {
+      "name": "AirlockFrame",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_frame",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/airlock_frame.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/AirlockFrameBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/airlock_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/item/airlock_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/airlock_frame.json"
+        ]
+      },
+      "path": "~/Airlock"
+    },
+    {
+      "name": "AirlockController",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_controller",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/airlock_controller.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/AirlockControllerBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/airlock_controller.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/entity/AirlockControllerBlockEntity.java",
+          "src/main/resources/assets/industrial_facilities/models/block/airlock_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/item/airlock_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/airlock_controller_valid.json"
+        ]
+      },
+      "path": "~/Airlock"
+    },
+    {
+      "name": "AirlockSeal",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_seal",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/airlock_seal.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/AirlockSealBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/airlock_seal.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/airlock_seal.json",
+          "src/main/resources/assets/industrial_facilities/models/block/airlock_seal.json"
+        ]
+      },
+      "path": "~/Airlock"
+    },
+    {
+      "name": "AirlockDetectStructure",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_detect_structure",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockDetectStructureProcedure.java"
+        ]
+      },
+      "path": "~/Airlock"
+    },
+    {
+      "name": "AirlockControllerGUI",
+      "type": "gui",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_controller_gui",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/world/inventory/AirlockControllerGUIMenu.java",
+          "src/main/java/fr/vengelis/industrialfacilities/network/AirlockControllerGUIButtonMessage.java",
+          "src/main/java/fr/vengelis/industrialfacilities/client/gui/AirlockControllerGUIScreen.java",
+          "src/main/java/fr/vengelis/industrialfacilities/airlock/AirlockGuiSupport.java",
+          "src/main/java/fr/vengelis/industrialfacilities/airlock/AirlockAutomationManager.java",
+          "src/main/java/fr/vengelis/industrialfacilities/airlock/AirlockDoorManager.java",
+          "src/main/java/fr/vengelis/industrialfacilities/airlock/AirlockStructureManager.java",
+          "src/main/java/fr/vengelis/industrialfacilities/airlock/AirlockStatusManager.java",
+          "src/main/java/fr/vengelis/industrialfacilities/airlock/AirlockFrameGeometry.java"
+        ]
+      },
+      "path": "~/Extinguisher/Items"
+    },
+    {
+      "name": "AirlockTogglePlayerDetection",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_toggle_player_detection",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockTogglePlayerDetectionProcedure.java"
+        ]
+      },
+      "path": "~/Airlock"
+    },
+    {
+      "name": "AirlockToggleRedstone",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_toggle_redstone",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockToggleRedstoneProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockToggleAccessRestriction",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_toggle_access_restriction",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockToggleAccessRestrictionProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockToggleInvertSelection",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_toggle_invert_selection",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "entity",
+            "type": "entity"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockToggleInvertSelectionProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockAddPlayer",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_add_player",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "entity",
+            "type": "entity"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockAddPlayerProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockRemovePlayer",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_remove_player",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "entity",
+            "type": "entity"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockRemovePlayerProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockGetPlayersText",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_get_players_text",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockGetPlayersTextProcedure.java"
+        ],
+        "return_type": "string"
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockAutomaticTick",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "airlock_automatic_tick",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "world",
+            "type": "world"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockAutomaticTickProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockGetStatusText",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_get_status_text",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockGetStatusTextProcedure.java"
+        ],
+        "return_type": "string"
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockInitializeGUI",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_initialize_gui",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockInitializeGUIProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockSetDetectionRange",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_set_detection_range",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          },
+          {
+            "name": "entity",
+            "type": "entity"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockSetDetectionRangeProcedure.java"
+        ]
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "AirlockGetPlayerText",
+      "type": "procedure",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "airlock_get_player_text",
+      "metadata": {
+        "dependencies": [
+          {
+            "name": "world",
+            "type": "world"
+          },
+          {
+            "name": "x",
+            "type": "number"
+          },
+          {
+            "name": "y",
+            "type": "number"
+          },
+          {
+            "name": "z",
+            "type": "number"
+          }
+        ],
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/procedures/AirlockGetPlayerTextProcedure.java"
+        ],
+        "return_type": "string"
+      },
+      "path": "~/Airlock/Procedures"
+    },
+    {
+      "name": "BiohazardSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "biohazard_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/biohazard_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/biohazard_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/biohazard_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/biohazard_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/BiohazardSignBlock.java"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "RadioactiveSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "radioactive_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/radioactive_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/radioactive_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/RadioactiveSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/radioactive_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/radioactive_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "WarningSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "warning_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/warning_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/warning_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/warning_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/warning_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/WarningSignBlock.java"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "ExtinguisherSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/extinguisher_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/extinguisher_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/extinguisher_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/extinguisher_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/ExtinguisherSignBlock.java"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "DeadSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "dead_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/dead_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/DeadSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/dead_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/dead_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/dead_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "MedicSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "medic_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/medic_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/MedicSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/medic_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/medic_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/medic_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "LaserSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "laser_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/laser_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/laser_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/LaserSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/item/laser_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/laser_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "ColdSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "cold_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/cold_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/cold_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/cold_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/ColdSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/item/cold_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "FireSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "fire_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/blockstates/fire_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/fire_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/fire_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/fire_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/FireSignBlock.java"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "AsphyxiaSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "asphyxia_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/blockstates/asphyxia_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/asphyxia_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/asphyxia_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/asphyxia_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/AsphyxiaSignBlock.java"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "ExplosionSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "explosion_sign",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/ExplosionSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/explosion_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/explosion_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/explosion_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/explosion_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "MonsterSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "monster_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/blockstates/monster_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/MonsterSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/monster_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/monster_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/monster_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "ForbiddenSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "forbidden_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/forbidden_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/forbidden_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/ForbiddenSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/forbidden_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/forbidden_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "StopSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "stop_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/stop_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/stop_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/StopSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/stop_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/stop_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "InformationSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "information_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/information_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/InformationSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/information_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/information_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/information_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "StairsSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "stairs_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/blockstates/stairs_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/stairs_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/stairs_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/stairs_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/StairsSignBlock.java"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "ElevatorSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "elevator_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/elevator_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/elevator_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/ElevatorSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/elevator_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/elevator_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "LeftSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "left_sign",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/LeftSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/left_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/left_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/left_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/left_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "RightSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "right_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/right_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/RightSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/item/right_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/right_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/right_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "UpSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "up_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/block/up_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/up_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/UpSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/up_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/up_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "DownSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "down_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/down_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/down_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/DownSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/down_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/item/down_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "StorageSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "storage_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/storage_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/StorageSignBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/item/storage_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/storage_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/storage_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "EmptySign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "empty_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/empty_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/empty_sign.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/empty_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/EmptySignBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/empty_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "SignBaseRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "sign_base_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/sign_base_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/sign_base_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "ElevatorSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "elevator_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/elevator_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/elevator_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "AsphyxiaSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "asphyxia_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/asphyxia_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/asphyxia_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "BiohazardSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "biohazard_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/biohazard_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/biohazard_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "FallingSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "falling_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/falling_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/falling_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "FallingSign",
+      "type": "block",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "falling_sign",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/models/item/falling_sign.json",
+          "src/main/java/fr/vengelis/industrialfacilities/block/FallingSignBlock.java",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/falling_sign.json",
+          "src/main/resources/assets/industrial_facilities/models/block/falling_sign.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/falling_sign.json"
+        ]
+      },
+      "path": "~/Signs/Blocks"
+    },
+    {
+      "name": "ColdSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "cold_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/cold_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/cold_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "DeadSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "dead_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/dead_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/dead_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "DownSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "down_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/down_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/down_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "ExplosionSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "explosion_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/explosion_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/explosion_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "ExtinguisherSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "extinguisher_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/extinguisher_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/extinguisher_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "FireSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "fire_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/fire_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/fire_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "ForbiddenSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "forbidden_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/forbidden_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/forbidden_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "InformationSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "information_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/information_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/information_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "LaserSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "laser_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/laser_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/laser_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "LeftSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "left_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/left_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/left_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "MedicSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "medic_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/medic_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/medic_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "MonsterSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "monster_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/monster_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/monster_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "RadioactiveSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "radioactive_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/radioactive_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/radioactive_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "RightSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "right_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/right_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/right_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "StairsSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "stairs_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/stairs_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/stairs_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "StopSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "stop_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/stop_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/stop_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "StorageSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "storage_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/storage_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/storage_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "UpSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "up_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/up_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/up_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    },
+    {
+      "name": "WarningSignRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "warning_sign_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/warning_sign_recipe.json",
+          "src/main/resources/data/industrial_facilities/advancement/recipes/warning_sign_recipe.json"
+        ]
+      },
+      "path": "~/Signs/Recipes"
+    }
+  ],
+  "variable_elements": [],
+  "sound_elements": [
+    {
+      "name": "extinguisher_spray",
+      "files": [
+        "extinguisher"
+      ],
+      "category": "player",
+      "subtitle": ""
+    },
+    {
+      "name": "airlock_open",
+      "files": [
+        "openairlock"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "airlock_close",
+      "files": [
+        "closeairlock"
+      ],
+      "category": "block",
+      "subtitle": ""
+    }
+  ],
+  "tag_elements": {
+    "BLOCKS:minecraft:mineable/pickaxe": [
+      "~AirlockFrame@CUSTOM:AirlockFrame"
+    ],
+    "BLOCKS:minecraft:needs_iron_tool": [
+      "~AirlockFrame@CUSTOM:AirlockFrame"
+    ]
+  },
+  "tab_element_order": {},
+  "language_map": {
+    "en_us": {
+      "item.industrial_facilities.extinguisher": "Extinguisher",
+      "item_group.industrial_facilities.industrial_facilities": "Industrial Facilities",
+      "subtitles.extinguishersound": "",
+      "subtitles.extinguisher_spray": "",
+      "block.industrial_facilities.extinguisher_placed": "Extinguisher Placed",
+      "tooltip.industrial_facilities.extinguisher.tank": "Tank: %s%%",
+      "message.industrial_facilities.extinguisher.refilled": "Extinguisher refilled to 100%.",
+      "message.industrial_facilities.extinguisher.need_extinguisher": "You must hold an extinguisher.",
+      "message.industrial_facilities.extinguisher.tank_full": "The extinguisher is already full.",
+      "message.industrial_facilities.extinguisher.water_added": "Water added: %s%%",
+      "message.industrial_facilities.extinguisher.place_failed": "The extinguisher cannot be placed here.",
+      "message.industrial_facilities.extinguisher.pickup_failed": "The extinguisher could not be picked up.",
+      "command.industrial_facilities.extinguisher.refill.success": "Extinguisher refilled to 100%.",
+      "command.industrial_facilities.extinguisher.refill.failure": "You must hold an extinguisher in your main hand.",
+      "block.industrial_facilities.emergency_exit_sign_right": "Emergency Exit Sign Right",
+      "block.industrial_facilities.emergency_exit_sign_left": "Emergency Exit Sign Left",
+      "block.industrial_facilities.airlock_frame": "Airlock Frame",
+      "block.industrial_facilities.airlock_controller": "Airlock Controller",
+      "block.industrial_facilities.airlock_seal": "Airlock Seal",
+      "gui.industrial_facilities.airlock_controller_gui.slider_detect_range_suffix": "",
+      "gui.industrial_facilities.airlock_controller_gui.label_player_detection": "Player Detection",
+      "gui.industrial_facilities.airlock_controller_gui.button_close": "Close door",
+      "gui.industrial_facilities.airlock_controller_gui.label_airlock_controller": "AIRLOCK CONTROLLER",
+      "gui.industrial_facilities.airlock_controller_gui.label_detection_range": "Detection range",
+      "gui.industrial_facilities.airlock_controller_gui.button_enabled": "Enabled",
+      "gui.industrial_facilities.airlock_controller_gui.button_add": "Add",
+      "gui.industrial_facilities.airlock_controller_gui.button_enabled1": "Disabled",
+      "gui.industrial_facilities.airlock_controller_gui.text_input_restricted_access": "",
+      "gui.industrial_facilities.airlock_controller_gui.label_restricted_access": "Restricted access",
+      "gui.industrial_facilities.airlock_controller_gui.label_redstone_detection": "Redstone detection",
+      "gui.industrial_facilities.airlock_controller_gui.slider_detect_range_prefix": "",
+      "gui.industrial_facilities.airlock_controller_gui.label_restricted_access_mode": "Restricted Access Mode",
+      "gui.industrial_facilities.airlock_controller_gui.button_disabled": "Disabled",
+      "subtitles.airlock_open": "",
+      "subtitles.airlock_close": "",
+      "block.industrial_facilities.biohazard_sign": "Biohazard Sign",
+      "block.industrial_facilities.radioactive_sign": "Radioactive Sign",
+      "block.industrial_facilities.warning_sign": "Warning Sign",
+      "block.industrial_facilities.extinguisher_sign": "Extinguisher Sign",
+      "block.industrial_facilities.dead_sign": "Dead Sign",
+      "block.industrial_facilities.medic_sign": "Medic Sign",
+      "block.industrial_facilities.laser_sign": "Laser Sign",
+      "block.industrial_facilities.cold_sign": "Cold Sign",
+      "block.industrial_facilities.fire_sign": "Fire Sign",
+      "block.industrial_facilities.asphyxia_sign": "Asphyxia Sign",
+      "block.industrial_facilities.explosion_sign": "Explosion Sign",
+      "block.industrial_facilities.monster_sign": "Monster Sign",
+      "block.industrial_facilities.forbidden_sign": "Forbidden Sign",
+      "block.industrial_facilities.stop_sign": "Stop Sign",
+      "block.industrial_facilities.information_sign": "Information Sign",
+      "block.industrial_facilities.stairs_sign": "Stairs Sign",
+      "block.industrial_facilities.elevator_sign": "Elevator Sign",
+      "block.industrial_facilities.left_sign": "Left Sign",
+      "block.industrial_facilities.right_sign": "Right Sign",
+      "block.industrial_facilities.up_sign": "Up Sign",
+      "block.industrial_facilities.down_sign": "Down Sign",
+      "block.industrial_facilities.storage_sign": "Storage Sign",
+      "block.industrial_facilities.empty_sign": "Empty Sign",
+      "block.industrial_facilities.falling_sign": "Fall Sign"
+    },
+    "fr_fr": {
+      "item.industrial_facilities.extinguisher": "Extincteur",
+      "item_group.industrial_facilities.industrial_facilities": "Industrial Facilities",
+      "subtitles.extinguishersound": "",
+      "subtitles.extinguisher_spray": "",
+      "block.industrial_facilities.extinguisher_placed": "Extincteur placÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©",
+      "tooltip.industrial_facilities.extinguisher.tank": "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©servoir : %s %%",
+      "message.industrial_facilities.extinguisher.refilled": "Extincteur rempli ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  100 %.",
+      "message.industrial_facilities.extinguisher.need_extinguisher": "Vous devez tenir un extincteur.",
+      "message.industrial_facilities.extinguisher.tank_full": "L\u0027extincteur est dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©jÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  plein.",
+      "message.industrial_facilities.extinguisher.water_added": "Eau ajoutÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e : %s %% ",
+      "message.industrial_facilities.extinguisher.place_failed": "Impossible de poser l\u0027extincteur ici.",
+      "message.industrial_facilities.extinguisher.pickup_failed": "Impossible de rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cupÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rer l\u0027extincteur.",
+      "command.industrial_facilities.extinguisher.refill.success": "Extincteur rempli ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  100 %.",
+      "command.industrial_facilities.extinguisher.refill.failure": "Vous devez tenir un extincteur dans votre main principale.",
+      "block.industrial_facilities.emergency_exit_sign_right": "Emergency Exit Sign Right",
+      "block.industrial_facilities.emergency_exit_sign_left": "Emergency Exit Sign Right",
+      "block.industrial_facilities.airlock_frame": "Airlock Frame",
+      "block.industrial_facilities.airlock_controller": "Airlock Controller",
+      "block.industrial_facilities.airlock_seal": "Airlock Seal",
+      "gui.industrial_facilities.airlock_controller_gui.slider_detect_range_suffix": "",
+      "gui.industrial_facilities.airlock_controller_gui.label_player_detection": "Player Detection",
+      "gui.industrial_facilities.airlock_controller_gui.button_close": "Close",
+      "gui.industrial_facilities.airlock_controller_gui.label_airlock_controller": "AIRLOCK CONTROLLER",
+      "gui.industrial_facilities.airlock_controller_gui.label_detection_range": "Detection range",
+      "gui.industrial_facilities.airlock_controller_gui.button_enabled": "Enabled",
+      "gui.industrial_facilities.airlock_controller_gui.button_add": "Add",
+      "gui.industrial_facilities.airlock_controller_gui.button_enabled1": "Enabled",
+      "gui.industrial_facilities.airlock_controller_gui.text_input_restricted_access": "",
+      "gui.industrial_facilities.airlock_controller_gui.label_restricted_access": "Restricted access",
+      "gui.industrial_facilities.airlock_controller_gui.label_redstone_detection": "Redstone detection",
+      "gui.industrial_facilities.airlock_controller_gui.slider_detect_range_prefix": "",
+      "gui.industrial_facilities.airlock_controller_gui.label_restricted_access_mode": "Restricted Access Mode",
+      "gui.industrial_facilities.airlock_controller_gui.button_disabled": "Disabled",
+      "subtitles.airlock_open": "",
+      "subtitles.airlock_close": "",
+      "block.industrial_facilities.biohazard_sign": "Biohazard Sign",
+      "block.industrial_facilities.radioactive_sign": "Biohazard Sign",
+      "block.industrial_facilities.warning_sign": "Radioactive Sign",
+      "block.industrial_facilities.extinguisher_sign": "Radioactive Sign",
+      "block.industrial_facilities.dead_sign": "Radioactive Sign",
+      "block.industrial_facilities.medic_sign": "Radioactive Sign",
+      "block.industrial_facilities.laser_sign": "Radioactive Sign",
+      "block.industrial_facilities.cold_sign": "Laser Sign",
+      "block.industrial_facilities.fire_sign": "Cold Sign",
+      "block.industrial_facilities.asphyxia_sign": "Fire Sign",
+      "block.industrial_facilities.explosion_sign": "Asphyxia Sign",
+      "block.industrial_facilities.monster_sign": "Explosion Sign",
+      "block.industrial_facilities.forbidden_sign": "Monster Sign",
+      "block.industrial_facilities.stop_sign": "Forbidden Sign",
+      "block.industrial_facilities.information_sign": "Forbidden Sign",
+      "block.industrial_facilities.stairs_sign": "Information Sign",
+      "block.industrial_facilities.elevator_sign": "Information Sign",
+      "block.industrial_facilities.left_sign": "Elevator Sign",
+      "block.industrial_facilities.right_sign": "Left Sign",
+      "block.industrial_facilities.up_sign": "Right Sign",
+      "block.industrial_facilities.down_sign": "Up Sign",
+      "block.industrial_facilities.storage_sign": "Up Sign",
+      "block.industrial_facilities.empty_sign": "Storage Sign",
+      "block.industrial_facilities.falling_sign": "Empty Sign"
+    }
+  },
+  "metadata": {
+    "files": [
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModMenus.java",
+      "src/main/java/fr/vengelis/industrialfacilities/network/MenuStateUpdateMessage.java",
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModScreens.java",
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModBlocks.java",
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModBlockEntities.java",
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModItems.java",
+      "src/main/java/fr/vengelis/industrialfacilities/IndustrialFacilitiesMod.java",
+      "src/main/resources/META-INF/neoforge.mods.toml",
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModTabs.java",
+      "src/main/resources/pack.mcmeta",
+      "src/main/resources/assets/industrial_facilities/sounds.json",
+      "src/main/java/fr/vengelis/industrialfacilities/init/IndustrialFacilitiesModSounds.java"
+    ]
+  },
+  "foldersRoot": {
+    "name": "~",
+    "children": [
+      {
+        "name": "Commands",
+        "children": []
+      },
+      {
+        "name": "Extinguisher",
+        "children": [
+          {
+            "name": "Items",
+            "children": []
+          },
+          {
+            "name": "Blocks",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "EmergencyExitSign",
+        "children": []
+      },
+      {
+        "name": "Airlock",
+        "children": [
+          {
+            "name": "Procedures",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Signs",
+        "children": [
+          {
+            "name": "Blocks",
+            "children": []
+          },
+          {
+            "name": "Recipes",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "workspaceSettings": {
+    "modid": "industrial_facilities",
+    "modName": "Industrial Facilities",
+    "version": "1.0.0",
+    "author": "Vengelis_",
+    "websiteURL": "https://mcreator.net",
+    "license": "GNU General Public License version 3 (GPLv3)",
+    "serverSideOnly": false,
+    "requiredMods": [],
+    "dependencies": [],
+    "dependants": [],
+    "mcreatorDependencies": [],
+    "currentGenerator": "neoforge-1.21.1",
+    "credits": "Created using mod maker MCreator - https://mcreator.net/about",
+    "modElementsPackage": "fr.vengelis.industrialfacilities"
+  },
+  "mcreatorVersion": 202600233518
+}

@@ -1,0 +1,252 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "industrial_facilities:sign_base_recipe"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_ingredient_0": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:biohazard_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_1": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:radioactive_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_2": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:warning_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_3": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:extinguisher_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_4": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:dead_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_5": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:medic_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_6": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:cold_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_7": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:fire_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_8": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:asphyxia_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_9": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:explosion_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_10": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:monster_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_11": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:forbidden_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_12": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:stop_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_13": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:information_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_14": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:stairs_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_15": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:elevator_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_16": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:left_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_17": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:right_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_18": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:up_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_19": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:down_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_ingredient_20": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industrial_facilities:storage_sign"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_ingredient_0",
+      "has_ingredient_1",
+      "has_ingredient_2",
+      "has_ingredient_3",
+      "has_ingredient_4",
+      "has_ingredient_5",
+      "has_ingredient_6",
+      "has_ingredient_7",
+      "has_ingredient_8",
+      "has_ingredient_9",
+      "has_ingredient_10",
+      "has_ingredient_11",
+      "has_ingredient_12",
+      "has_ingredient_13",
+      "has_ingredient_14",
+      "has_ingredient_15",
+      "has_ingredient_16",
+      "has_ingredient_17",
+      "has_ingredient_18",
+      "has_ingredient_19",
+      "has_ingredient_20"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industrial_facilities:sign_base_recipe"
+    ]
+  }
+}

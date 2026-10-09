@@ -1,0 +1,10 @@
+{
+  "_fv": 89,
+  "_type": "command",
+  "definition": {
+    "commandName": "industrialfacilitiescommand",
+    "type": "STANDARD",
+    "permissionLevel": "1",
+    "argsxml": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"args_start\" deletable=\"false\" x=\"100\" y=\"43\"><next><block type=\"literal\"><field name=\"name\">extinguisher</field><statement name=\"args\"><block type=\"literal\"><field name=\"name\">refill</field><statement name=\"args\"><block type=\"call_procedure\"><field name=\"procedure\">ExtinguisherRefillProcedure</field></block></statement></block></statement></block></next></block></xml>"
+  }
+}

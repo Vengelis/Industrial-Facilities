@@ -1,0 +1,29 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "extinguisher",
+    "unlockingItems": [],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": false,
+    "recipeSlots": [
+      "Blocks.HOPPER",
+      "Blocks.LEVER",
+      "",
+      "Items.IRON_INGOT",
+      "Items.REDSTONE",
+      "Items.IRON_INGOT",
+      "",
+      "Items.IRON_INGOT",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:Extinguisher",
+    "name": "extinguisher_recipe",
+    "namespace": "mod"
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "mappings": {
+    "default": {
+      "name": "default",
+      "map": {
+        "0": ""
+      }
+    },
+    "biohazard": {
+      "name": "biohazard",
+      "map": {
+        "0": "biohazard"
+      }
+    },
+    "radioactive": {
+      "name": "radioactive",
+      "map": {
+        "0": "radioactive"
+      }
+    },
+    "asphyxia": {
+      "name": "asphyxia",
+      "map": {
+        "0": "asphyxie"
+      }
+    },
+    "elevator": {
+      "name": "elevator",
+      "map": {
+        "0": "ascenseur"
+      }
+    },
+    "cold": {
+      "name": "cold",
+      "map": {
+        "0": "cold"
+      }
+    },
+    "dead": {
+      "name": "dead",
+      "map": {
+        "0": "dead"
+      }
+    },
+    "down": {
+      "name": "down",
+      "map": {
+        "0": "down"
+      }
+    },
+    "explosion": {
+      "name": "explosion",
+      "map": {
+        "0": "explosion"
+      }
+    },
+    "extinguisher": {
+      "name": "extinguisher",
+      "map": {
+        "0": "extinguisher"
+      }
+    },
+    "fire": {
+      "name": "fire",
+      "map": {
+        "0": "fire"
+      }
+    },
+    "forbidden": {
+      "name": "forbidden",
+      "map": {
+        "0": "forbidden"
+      }
+    },
+    "information": {
+      "name": "information",
+      "map": {
+        "0": "information"
+      }
+    },
+    "laser": {
+      "name": "laser",
+      "map": {
+        "0": "laser"
+      }
+    },
+    "left": {
+      "name": "left",
+      "map": {
+        "0": "left"
+      }
+    },
+    "medic": {
+      "name": "medic",
+      "map": {
+        "0": "medic"
+      }
+    },
+    "monster": {
+      "name": "monster",
+      "map": {
+        "0": "monster"
+      }
+    },
+    "right": {
+      "name": "right",
+      "map": {
+        "0": "right"
+      }
+    },
+    "stairs": {
+      "name": "stairs",
+      "map": {
+        "0": "stairs"
+      }
+    },
+    "stop": {
+      "name": "stop",
+      "map": {
+        "0": "stop"
+      }
+    },
+    "storage": {
+      "name": "storage",
+      "map": {
+        "0": "storage"
+      }
+    },
+    "up": {
+      "name": "up",
+      "map": {
+        "0": "up"
+      }
+    },
+    "danger": {
+      "name": "danger",
+      "map": {
+        "0": "warning"
+      }
+    },
+    "empty": {
+      "name": "empty",
+      "map": {
+        "0": "empty"
+      }
+    },
+    "falling": {
+      "name": "falling",
+      "map": {
+        "0": "chute"
+      }
+    }
+  }
+}

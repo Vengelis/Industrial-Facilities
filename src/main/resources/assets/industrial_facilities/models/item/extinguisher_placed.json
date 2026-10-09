@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "industrial_facilities:item/corpextincteur"
+  },
+  "render_type": "translucent"
+}

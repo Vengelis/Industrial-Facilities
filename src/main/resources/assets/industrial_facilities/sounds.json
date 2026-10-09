@@ -1,0 +1,26 @@
+{
+  "extinguisher_spray": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:extinguisher",
+        "stream": false
+      }
+    ]
+  },
+  "airlock_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:openairlock",
+        "stream": false
+      }
+    ]
+  },
+  "airlock_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:closeairlock",
+        "stream": false
+      }
+    ]
+  }
+}

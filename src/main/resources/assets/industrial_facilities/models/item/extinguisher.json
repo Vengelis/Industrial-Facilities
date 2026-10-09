@@ -1,0 +1,28 @@
+{
+  "parent": "industrial_facilities:custom/extincteur",
+  "textures": {
+    "0": "industrial_facilities:block/corpextincteur",
+    "missing": "industrial_facilities:block/",
+    "particle": "industrial_facilities:item/corpextincteur"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "industrial_facilities:extinguisher_spray_anim": 0
+      },
+      "model": "industrial_facilities:item/extinguisher_0"
+    },
+    {
+      "predicate": {
+        "industrial_facilities:extinguisher_spray_anim": 1
+      },
+      "model": "industrial_facilities:item/extinguisher_1"
+    },
+    {
+      "predicate": {
+        "industrial_facilities:extinguisher_spray_anim": 2
+      },
+      "model": "industrial_facilities:item/extinguisher_2"
+    }
+  ]
+}
