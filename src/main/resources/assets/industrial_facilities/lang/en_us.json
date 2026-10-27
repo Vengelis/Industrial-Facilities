@@ -57,5 +57,21 @@
   "block.industrial_facilities.down_sign": "Down Sign",
   "block.industrial_facilities.storage_sign": "Storage Sign",
   "block.industrial_facilities.empty_sign": "Empty Sign",
-  "block.industrial_facilities.falling_sign": "Fall Sign"
+  "block.industrial_facilities.falling_sign": "Fall Sign",
+  "block.industrial_facilities.fabricator": "Fabricator",
+  "gui.industrial_facilities.fabricator.search": "Search blocks...",
+  "gui.industrial_facilities.fabricator.inventory": "INVENTORY",
+  "gui.industrial_facilities.fabricator.cube": "1 cube",
+  "gui.industrial_facilities.fabricator.line": "Line",
+  "gui.industrial_facilities.fabricator.wall": "3 x 3",
+  "gui.industrial_facilities.fabricator.craft": "CRAFT",
+  "gui.industrial_facilities.fabricator.no_recipes": "No recipes",
+  "gui.industrial_facilities.fabricator.output": "Output: %s",
+  "gui.industrial_facilities.fabricator.ready": "READY",
+  "gui.industrial_facilities.fabricator.full": "FULL",
+  "gui.industrial_facilities.fabricator.missing": "MISSING",
+  "gui.industrial_facilities.fabricator.no_pattern": "No pattern",
+  "gui.industrial_facilities.fabricator.materials": "MATERIALS — available / required",
+  "gui.industrial_facilities.fabricator.scroll": "Scroll to view materials",
+  "container.industrial_facilities.fabricator": "Fabricator"
 }

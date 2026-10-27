@@ -1,0 +1,15 @@
+{
+  "mappings": {
+    "default": {
+      "name": "default",
+      "map": {
+        "0": "machine_back",
+        "1": "machine_bottom",
+        "2": "machine_side",
+        "3": "machine_top",
+        "4": "fabricator_front",
+        "missing": ""
+      }
+    }
+  }
+}

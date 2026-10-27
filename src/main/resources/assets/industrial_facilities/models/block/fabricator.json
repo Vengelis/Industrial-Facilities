@@ -1,0 +1,14 @@
+{
+  "parent": "industrial_facilities:custom/fabricator",
+  "textures": {
+    "all": "industrial_facilities:block/fabricator_front",
+    "particle": "industrial_facilities:block/machine_side",
+    "0": "industrial_facilities:block/machine_back",
+    "1": "industrial_facilities:block/machine_bottom",
+    "2": "industrial_facilities:block/machine_side",
+    "3": "industrial_facilities:block/machine_top",
+    "4": "industrial_facilities:block/fabricator_front",
+    "missing": "industrial_facilities:block/"
+  },
+  "render_type": "solid"
+}

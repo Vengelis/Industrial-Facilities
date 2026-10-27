@@ -43,6 +43,7 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> STORAGE_SIGN;
 	public static final DeferredBlock<Block> EMPTY_SIGN;
 	public static final DeferredBlock<Block> FALLING_SIGN;
+	public static final DeferredBlock<Block> FABRICATOR;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -74,6 +75,7 @@ public class IndustrialFacilitiesModBlocks {
 		STORAGE_SIGN = REGISTRY.register("storage_sign", StorageSignBlock::new);
 		EMPTY_SIGN = REGISTRY.register("empty_sign", EmptySignBlock::new);
 		FALLING_SIGN = REGISTRY.register("falling_sign", FallingSignBlock::new);
+		FABRICATOR = REGISTRY.register("fabricator", FabricatorBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "industrial_facilities:block/fabricator"
+    },
+    "facing=east": {
+      "model": "industrial_facilities:block/fabricator",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "industrial_facilities:block/fabricator",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industrial_facilities:block/fabricator",
+      "y": 270
+    }
+  }
+}

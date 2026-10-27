@@ -1,8 +1,12 @@
 {
-  "type": "minecraft:stonecutting",
-  "ingredient": {
-    "item": "industrial_facilities:empty_sign"
-  },
+  "type": "industrial_facilities:fabricator",
+  "category": "panels",
+  "materials": [
+    {
+      "item": "industrial_facilities:empty_sign",
+      "count": 1
+    }
+  ],
   "result": {
     "id": "industrial_facilities:cold_sign",
     "count": 1

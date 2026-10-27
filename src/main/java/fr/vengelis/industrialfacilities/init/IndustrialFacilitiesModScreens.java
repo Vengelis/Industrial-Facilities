@@ -8,6 +8,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.api.distmarker.Dist;
 
+import fr.vengelis.industrialfacilities.client.gui.FabricatorGUIScreen;
 import fr.vengelis.industrialfacilities.client.gui.AirlockControllerGUIScreen;
 
 @EventBusSubscriber(Dist.CLIENT)
@@ -15,6 +16,7 @@ public class IndustrialFacilitiesModScreens {
 	@SubscribeEvent
 	public static void clientLoad(RegisterMenuScreensEvent event) {
 		event.register(IndustrialFacilitiesModMenus.AIRLOCK_CONTROLLER_GUI.get(), AirlockControllerGUIScreen::new);
+		event.register(IndustrialFacilitiesModMenus.FABRICATOR_GUI.get(), FabricatorGUIScreen::new);
 	}
 
 	public interface ScreenAccessor {

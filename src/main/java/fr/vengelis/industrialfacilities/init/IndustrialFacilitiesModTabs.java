@@ -46,5 +46,6 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.STORAGE_SIGN.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.EMPTY_SIGN.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.FALLING_SIGN.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.FABRICATOR.get().asItem());
 			}).build());
 }

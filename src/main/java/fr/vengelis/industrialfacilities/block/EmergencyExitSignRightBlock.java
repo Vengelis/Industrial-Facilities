@@ -29,7 +29,6 @@ import net.minecraft.world.phys.AABB;
 import org.joml.Vector3f;
 
 import fr.vengelis.industrialfacilities.procedures.EmergencyExitSignRightBlockValidPlacementConditionProcedure;
-import fr.vengelis.industrialfacilities.procedures.EmergencyExitSignRightBlockIsPlacedByProcedure;
 
 import com.google.common.collect.ImmutableMap;
 

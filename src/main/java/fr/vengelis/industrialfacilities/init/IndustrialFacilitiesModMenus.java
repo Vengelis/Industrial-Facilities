@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 
 import java.util.Map;
 
+import fr.vengelis.industrialfacilities.world.inventory.FabricatorGUIMenu;
 import fr.vengelis.industrialfacilities.world.inventory.AirlockControllerGUIMenu;
 import fr.vengelis.industrialfacilities.network.MenuStateUpdateMessage;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
@@ -24,6 +25,7 @@ import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 public class IndustrialFacilitiesModMenus {
 	public static final DeferredRegister<MenuType<?>> REGISTRY = DeferredRegister.create(Registries.MENU, IndustrialFacilitiesMod.MODID);
 	public static final DeferredHolder<MenuType<?>, MenuType<AirlockControllerGUIMenu>> AIRLOCK_CONTROLLER_GUI = REGISTRY.register("airlock_controller_gui", () -> IMenuTypeExtension.create(AirlockControllerGUIMenu::new));
+	public static final DeferredHolder<MenuType<?>, MenuType<FabricatorGUIMenu>> FABRICATOR_GUI = REGISTRY.register("fabricator_gui", () -> IMenuTypeExtension.create(FabricatorGUIMenu::new));
 
 	public interface MenuAccessor {
 		Map<String, Object> getMenuState();

@@ -55,6 +55,7 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> STORAGE_SIGN;
 	public static final DeferredItem<Item> EMPTY_SIGN;
 	public static final DeferredItem<Item> FALLING_SIGN;
+	public static final DeferredItem<Item> FABRICATOR;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -87,6 +88,7 @@ public class IndustrialFacilitiesModItems {
 		STORAGE_SIGN = block(IndustrialFacilitiesModBlocks.STORAGE_SIGN);
 		EMPTY_SIGN = block(IndustrialFacilitiesModBlocks.EMPTY_SIGN);
 		FALLING_SIGN = block(IndustrialFacilitiesModBlocks.FALLING_SIGN);
+		FABRICATOR = block(IndustrialFacilitiesModBlocks.FABRICATOR);
 	}
 
 	// Start of user code block custom items

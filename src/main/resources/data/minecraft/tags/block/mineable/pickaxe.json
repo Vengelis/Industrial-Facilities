@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "industrial_facilities:fabricator",
     "industrial_facilities:airlock_frame"
   ]
 }
