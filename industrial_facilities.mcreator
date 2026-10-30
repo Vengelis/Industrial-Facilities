@@ -43,7 +43,7 @@
       "name": "Extinguisher",
       "type": "item",
       "compiles": true,
-      "locked_code": false,
+      "locked_code": true,
       "registry_name": "extinguisher",
       "metadata": {
         "files": [
@@ -249,19 +249,6 @@
       "path": "~/Extinguisher/Items"
     },
     {
-      "name": "ExtinguisherRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": false,
-      "registry_name": "extinguisher_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/extinguisher_recipe.json"
-        ]
-      },
-      "path": "~/Extinguisher/Items"
-    },
-    {
       "name": "ExtinguisherPlacedBlockDestroyedByPlayer",
       "type": "procedure",
       "compiles": true,
@@ -341,32 +328,6 @@
           "src/main/resources/assets/industrial_facilities/blockstates/emergency_exit_sign_left.json",
           "src/main/resources/assets/industrial_facilities/models/item/emergency_exit_sign_left.json",
           "src/main/resources/assets/industrial_facilities/models/block/emergency_exit_sign_left.json"
-        ]
-      },
-      "path": "~/Blocks/EmergencyExitSign"
-    },
-    {
-      "name": "EmergencyExitSignRightRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": false,
-      "registry_name": "emergency_exit_sign_right_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/emergency_exit_sign_right_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/EmergencyExitSign"
-    },
-    {
-      "name": "EmergencyExitSignLeftRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": false,
-      "registry_name": "emergency_exit_sign_left_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/emergency_exit_sign_left_recipe.json"
         ]
       },
       "path": "~/Blocks/EmergencyExitSign"
@@ -1275,76 +1236,6 @@
       "path": "~/Blocks/Signs/Blocks"
     },
     {
-      "name": "SignBaseRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": false,
-      "registry_name": "sign_base_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/sign_base_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/sign_base_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "ElevatorSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "elevator_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/elevator_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/elevator_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "AsphyxiaSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "asphyxia_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/asphyxia_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/asphyxia_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "BiohazardSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "biohazard_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/biohazard_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/biohazard_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "FallingSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "falling_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/advancement/recipes/falling_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/recipe/falling_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
       "name": "FallingSign",
       "type": "block",
       "compiles": true,
@@ -1360,300 +1251,6 @@
         ]
       },
       "path": "~/Blocks/Signs/Blocks"
-    },
-    {
-      "name": "ColdSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "cold_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/cold_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/cold_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "DeadSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "dead_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/dead_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/dead_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "DownSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "down_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/down_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/down_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "ExplosionSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "explosion_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/explosion_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/explosion_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "ExtinguisherSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "extinguisher_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/extinguisher_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/extinguisher_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "FireSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "fire_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/advancement/recipes/fire_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/recipe/fire_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "ForbiddenSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "forbidden_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/forbidden_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/forbidden_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "InformationSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "information_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/advancement/recipes/information_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/recipe/information_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "LaserSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "laser_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/laser_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/laser_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "LeftSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "left_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/advancement/recipes/left_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/recipe/left_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "MedicSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "medic_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/medic_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/medic_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "MonsterSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "monster_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/advancement/recipes/monster_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/recipe/monster_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "RadioactiveSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "radioactive_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/radioactive_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/radioactive_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "RightSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "right_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/right_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/right_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "StairsSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "stairs_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/advancement/recipes/stairs_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/recipe/stairs_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "StopSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "stop_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/stop_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/stop_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "StorageSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "storage_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/storage_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/storage_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "UpSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "up_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/up_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/up_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "WarningSignRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": true,
-      "registry_name": "warning_sign_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/warning_sign_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/warning_sign_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Signs/Recipes"
-    },
-    {
-      "name": "AirlockFrameRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": false,
-      "registry_name": "airlock_frame_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/airlock_frame_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/airlock_frame_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Airlock"
-    },
-    {
-      "name": "AirlockControllerRecipe",
-      "type": "recipe",
-      "compiles": true,
-      "locked_code": false,
-      "registry_name": "airlock_controller_recipe",
-      "metadata": {
-        "files": [
-          "src/main/resources/data/industrial_facilities/recipe/airlock_controller_recipe.json",
-          "src/main/resources/data/industrial_facilities/advancement/recipes/airlock_controller_recipe.json"
-        ]
-      },
-      "path": "~/Blocks/Airlock"
     },
     {
       "name": "Fabricator",
@@ -1694,6 +1291,2828 @@
         ]
       },
       "path": "~/Blocks/Machines"
+    },
+    {
+      "name": "RoadAsphalt",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_asphalt",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadAsphaltBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_asphalt.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_asphalt.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_asphalt.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_asphalt.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_asphalt.png",
+          "elements/RoadAsphalt.mod.json"
+        ]
+      },
+      "path": "~/Road/Blocks"
+    },
+    {
+      "name": "FabricatorRoadAsphalt",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_asphalt",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_asphalt.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAsphaltCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_asphalt_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_asphalt_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadConcrete",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_concrete",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadConcreteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_concrete.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_concrete.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_concrete.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_concrete.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_concrete.png",
+          "elements/RoadConcrete.mod.json"
+        ]
+      },
+      "path": "~/Road/Blocks"
+    },
+    {
+      "name": "FabricatorRoadConcrete",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_concrete",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_concrete.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadConcreteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_concrete_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_concrete_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadLine",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_line",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadLineBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_line.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_line.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_line.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_line.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_line.png",
+          "elements/RoadLine.mod.json",
+          "src/main/java/fr/vengelis/industrialfacilities/road/RoadMarkingBlock.java"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadLine",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_line",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_line.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadLineCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_line_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_line_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDashed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_dashed",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDashedBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_dashed.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_dashed.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_dashed.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_dashed.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_dashed.png",
+          "elements/RoadDashed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDashed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_dashed",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_dashed.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDashedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_dashed_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_dashed_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDoubleLine",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_double_line",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDoubleLineBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_double_line.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_double_line.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_double_line.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_double_line.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_double_line.png",
+          "elements/RoadDoubleLine.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDoubleLine",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_double_line",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_double_line.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDoubleLineCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_double_line_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_double_line_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCorner",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_corner",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadCornerBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_corner.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_corner.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_corner.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_corner.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_corner.png",
+          "elements/RoadCorner.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadCorner",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_corner",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_corner.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCornerCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_corner_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_corner_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadJunction",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_junction",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadJunctionBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_junction.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_junction.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_junction.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_junction.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_junction.png",
+          "elements/RoadJunction.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadJunction",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_junction",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_junction.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadJunctionCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_junction_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_junction_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCross",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_cross",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadCrossBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_cross.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_cross.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_cross.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_cross.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_cross.png",
+          "elements/RoadCross.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadCross",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_cross",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_cross.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCrossCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_cross_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_cross_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadArrow",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_arrow",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadArrowBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_arrow.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_arrow.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_arrow.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_arrow.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_arrow.png",
+          "elements/RoadArrow.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadArrow",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_arrow",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_arrow.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadArrowCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_arrow_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_arrow_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadHazard",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_hazard",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadHazardBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_hazard.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_hazard.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_hazard.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_hazard.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_hazard.png",
+          "elements/RoadHazard.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadHazard",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_hazard",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_hazard.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadHazardCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_hazard_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_hazard_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadKeepClear",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_keep_clear",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadKeepClearBlock.java",
+          "src/main/java/fr/vengelis/industrialfacilities/road/RoadTextMarkingBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_keep_clear.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_keep_clear.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_keep_clear.json",
+          "elements/RoadKeepClear.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadKeepClear",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_keep_clear",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_keep_clear.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadKeepClearCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_keep_clear_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_keep_clear_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedArea",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_area",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadRestrictedAreaBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_restricted_area.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_restricted_area.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_restricted_area.json",
+          "elements/RoadRestrictedArea.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadRestrictedArea",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_restricted_area",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_restricted_area.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedAreaCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_area_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_restricted_area_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonal",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal.json",
+          "elements/RoadDiagonal.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonal",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBeveledCorner",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_beveled_corner",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadBeveledCornerBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_beveled_corner.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_beveled_corner.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_beveled_corner.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_beveled_corner.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_beveled_corner.json",
+          "elements/RoadBeveledCorner.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadBeveledCorner",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_beveled_corner",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_beveled_corner.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBeveledCornerCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_beveled_corner_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_beveled_corner_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransition",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalTransitionBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_transition.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_transition.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_transition.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_transition.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_transition.json",
+          "elements/RoadDiagonalTransition.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalTransition",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_transition",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_transition.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_transition_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadChevron",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_chevron",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadChevronBlock.java",
+          "src/main/java/fr/vengelis/industrialfacilities/road/RoadRotatableMarkingBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_chevron.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_2.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_3.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_chevron.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_chevron.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_chevron.json",
+          "elements/RoadChevron.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadChevron",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_chevron",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_chevron.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadChevronCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_chevron_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_chevron_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadKeepClearWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_keep_clear_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadKeepClearWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_white_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_white_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_white_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_white_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_white_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_white_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_white_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_white_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_white_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_white_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_white_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_white_3_2.json",
+          "elements/RoadKeepClearWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_keep_clear_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_keep_clear_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_keep_clear_white.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadKeepClearWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_keep_clear_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_keep_clear_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadKeepClearWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_keep_clear_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_keep_clear_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedAreaWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_area_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadRestrictedAreaWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_white_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_white_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_white_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_white_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_white_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_white_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_white_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_white_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_white_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_white_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_white_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_white_3_2.json",
+          "elements/RoadRestrictedAreaWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_restricted_area_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_restricted_area_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_restricted_area_white.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadRestrictedAreaWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_restricted_area_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_restricted_area_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedAreaWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_area_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_restricted_area_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAuthorizedPersonnelOnly",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_authorized_personnel_only",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadAuthorizedPersonnelOnlyBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_3_2.json",
+          "elements/RoadAuthorizedPersonnelOnly.mod.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_authorized_personnel_only.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_authorized_personnel_only.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_authorized_personnel_only.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadAuthorizedPersonnelOnly",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_authorized_personnel_only",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_authorized_personnel_only.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAuthorizedPersonnelOnlyCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_authorized_personnel_only_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_authorized_personnel_only_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAuthorizedPersonnelOnlyWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_authorized_personnel_only_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadAuthorizedPersonnelOnlyWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_white_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_white_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_white_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_white_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_white_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_white_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_white_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_white_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_white_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_white_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_white_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_white_3_2.json",
+          "elements/RoadAuthorizedPersonnelOnlyWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_authorized_personnel_only_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_authorized_personnel_only_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_authorized_personnel_only_white.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadAuthorizedPersonnelOnlyWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_authorized_personnel_only_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_authorized_personnel_only_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAuthorizedPersonnelOnlyWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_authorized_personnel_only_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_authorized_personnel_only_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadLineWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_line_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadLineWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_line_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_line_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_line_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_line_white.json",
+          "elements/RoadLineWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_white_paint.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_line_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadLineWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_line_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_line_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadLineWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_line_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_line_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDashedWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_dashed_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDashedWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_dashed_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_dashed_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_dashed_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_dashed_white.json",
+          "elements/RoadDashedWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_dashed_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDashedWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_dashed_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_dashed_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDashedWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_dashed_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_dashed_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDoubleLineWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_double_line_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDoubleLineWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_double_line_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_double_line_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_double_line_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_double_line_white.json",
+          "elements/RoadDoubleLineWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_double_line_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDoubleLineWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_double_line_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_double_line_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDoubleLineWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_double_line_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_double_line_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCornerWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_corner_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadCornerWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_corner_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_corner_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_corner_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_corner_white.json",
+          "elements/RoadCornerWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_corner_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadCornerWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_corner_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_corner_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCornerWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_corner_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_corner_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadJunctionWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_junction_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadJunctionWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_junction_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_junction_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_junction_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_junction_white.json",
+          "elements/RoadJunctionWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_junction_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadJunctionWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_junction_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_junction_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadJunctionWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_junction_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_junction_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCrossWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_cross_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadCrossWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_cross_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_cross_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_cross_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_cross_white.json",
+          "elements/RoadCrossWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_cross_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadCrossWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_cross_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_cross_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCrossWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_cross_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_cross_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadArrowWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_arrow_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadArrowWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_arrow_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_arrow_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_arrow_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_arrow_white.json",
+          "elements/RoadArrowWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_arrow_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadArrowWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_arrow_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_arrow_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadArrowWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_arrow_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_arrow_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadHazardWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_hazard_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadHazardWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_hazard_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_hazard_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_hazard_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_hazard_white.json",
+          "elements/RoadHazardWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_hazard_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadHazardWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_hazard_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_hazard_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadHazardWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_hazard_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_hazard_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_white.json",
+          "elements/RoadDiagonalWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBeveledCornerWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_beveled_corner_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadBeveledCornerWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_beveled_corner_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_beveled_corner_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_beveled_corner_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_beveled_corner_white.json",
+          "elements/RoadBeveledCornerWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_beveled_corner_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadBeveledCornerWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_beveled_corner_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_beveled_corner_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBeveledCornerWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_beveled_corner_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_beveled_corner_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalTransitionWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_transition_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_transition_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_transition_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_transition_white.json",
+          "elements/RoadDiagonalTransitionWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_transition_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalTransitionWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_transition_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_transition_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_transition_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadChevronWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_chevron_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadChevronWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_white_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_white_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_white_2.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_white_3.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_chevron_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_chevron_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_chevron_white.json",
+          "elements/RoadChevronWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_chevron_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadChevronWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_chevron_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_chevron_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadChevronWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_chevron_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_chevron_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionMirror",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_mirror",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalTransitionMirrorBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_transition_mirror.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_transition_mirror.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_transition_mirror.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_transition_mirror.json",
+          "elements/RoadDiagonalTransitionMirror.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalTransitionMirror",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_transition_mirror",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_transition_mirror.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionMirrorCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_mirror_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_transition_mirror_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionMirrorWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_mirror_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalTransitionMirrorWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_transition_mirror_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_transition_mirror_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_transition_mirror_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_transition_mirror_white.json",
+          "elements/RoadDiagonalTransitionMirrorWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_transition_mirror_white.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalTransitionMirrorWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_transition_mirror_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_transition_mirror_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionMirrorWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_mirror_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_transition_mirror_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBrush",
+      "type": "item",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_brush",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/item/RoadBrushItem.java",
+          "src/main/resources/assets/industrial_facilities/textures/item/road_brush.png",
+          "src/main/resources/assets/industrial_facilities/models/item/road_brush.json",
+          "elements/RoadBrush.mod.json"
+        ]
+      },
+      "path": "~/Road/Tools"
+    },
+    {
+      "name": "FabricatorRoadBrush",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_brush",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_brush.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBrushCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_brush_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_brush_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadHazardRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_hazard_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/textures/block/road_red_paint.png",
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadHazardRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_hazard_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_hazard_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_hazard_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_hazard_red.json",
+          "elements/RoadHazardRed.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_hazard_red.png"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadHazardRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_hazard_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_hazard_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadHazardRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_hazard_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_hazard_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierYellow",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_yellow",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialBarrierYellowBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_post.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_side.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_inventory.json",
+          "models/industrial_barrier_yellow.json",
+          "models/industrial_barrier_yellow.json.textures",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_barrier_yellow.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_barrier_yellow.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_barrier_yellow.json",
+          "elements/IndustrialBarrierYellow.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_panel_yellow.png",
+          "src/main/java/fr/vengelis/industrialfacilities/barrier/IndustrialBarrierBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_frame.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_recess.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_edge.png"
+        ]
+      },
+      "path": "~/Blocks/Barriers"
+    },
+    {
+      "name": "FabricatorIndustrialBarrierYellow",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_industrial_barrier_yellow",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_industrial_barrier_yellow.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierYellowCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_yellow_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/industrial_barrier_yellow_crafting.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialBarrierWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_white_post.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_white_side.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_white_inventory.json",
+          "models/industrial_barrier_white.json",
+          "models/industrial_barrier_white.json.textures",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_barrier_white.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_barrier_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_barrier_white.json",
+          "elements/IndustrialBarrierWhite.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_panel_white.png"
+        ]
+      },
+      "path": "~/Blocks/Barriers"
+    },
+    {
+      "name": "FabricatorIndustrialBarrierWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_industrial_barrier_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_industrial_barrier_white.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/industrial_barrier_white_crafting.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierDarkGray",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_dark_gray",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialBarrierDarkGrayBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_dark_gray_post.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_dark_gray_side.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_dark_gray_inventory.json",
+          "models/industrial_barrier_dark_gray.json",
+          "models/industrial_barrier_dark_gray.json.textures",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_barrier_dark_gray.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_barrier_dark_gray.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_barrier_dark_gray.json",
+          "elements/IndustrialBarrierDarkGray.mod.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_panel_dark_gray.png"
+        ]
+      },
+      "path": "~/Blocks/Barriers"
+    },
+    {
+      "name": "FabricatorIndustrialBarrierDarkGray",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_industrial_barrier_dark_gray",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_industrial_barrier_dark_gray.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierDarkGrayCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_dark_gray_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/industrial_barrier_dark_gray_crafting.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierYellowHazard",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_yellow_hazard",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/textures/block/industrial_barrier_hazard_stripe.png",
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialBarrierYellowHazardBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_hazard_post.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_hazard_side.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_hazard_side_east.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_hazard_side_south.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_hazard_side_west.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_barrier_yellow_hazard_inventory.json",
+          "models/industrial_barrier_yellow_hazard.json",
+          "models/industrial_barrier_yellow_hazard.json.textures",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_barrier_yellow_hazard.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_barrier_yellow_hazard.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_barrier_yellow_hazard.json",
+          "elements/IndustrialBarrierYellowHazard.mod.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers"
+    },
+    {
+      "name": "FabricatorIndustrialBarrierYellowHazard",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_industrial_barrier_yellow_hazard",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_industrial_barrier_yellow_hazard.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "IndustrialBarrierYellowHazardCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_barrier_yellow_hazard_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/industrial_barrier_yellow_hazard_crafting.json"
+        ]
+      },
+      "path": "~/Blocks/Barriers/Recipes"
+    },
+    {
+      "name": "RoadLineRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_line_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadLineRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_line_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_line_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_line_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_line_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_line_red.json",
+          "elements/RoadLineRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadLineRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_line_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_line_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadLineRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_line_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_line_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDashedRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_dashed_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDashedRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_dashed_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_dashed_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_dashed_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_dashed_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_dashed_red.json",
+          "elements/RoadDashedRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDashedRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_dashed_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_dashed_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDashedRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_dashed_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_dashed_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDoubleLineRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_double_line_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDoubleLineRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_double_line_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_double_line_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_double_line_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_double_line_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_double_line_red.json",
+          "elements/RoadDoubleLineRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDoubleLineRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_double_line_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_double_line_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDoubleLineRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_double_line_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_double_line_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCornerRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_corner_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadCornerRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_corner_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_corner_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_corner_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_corner_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_corner_red.json",
+          "elements/RoadCornerRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadCornerRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_corner_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_corner_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCornerRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_corner_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_corner_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadJunctionRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_junction_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadJunctionRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_junction_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_junction_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_junction_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_junction_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_junction_red.json",
+          "elements/RoadJunctionRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadJunctionRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_junction_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_junction_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadJunctionRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_junction_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_junction_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCrossRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_cross_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadCrossRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_cross_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_cross_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_cross_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_cross_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_cross_red.json",
+          "elements/RoadCrossRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadCrossRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_cross_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_cross_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadCrossRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_cross_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_cross_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadArrowRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_arrow_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadArrowRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_arrow_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_arrow_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_arrow_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_arrow_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_arrow_red.json",
+          "elements/RoadArrowRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadArrowRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_arrow_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_arrow_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadArrowRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_arrow_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_arrow_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_red.json",
+          "elements/RoadDiagonalRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBeveledCornerRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_beveled_corner_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadBeveledCornerRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_beveled_corner_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_beveled_corner_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_beveled_corner_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_beveled_corner_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_beveled_corner_red.json",
+          "elements/RoadBeveledCornerRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadBeveledCornerRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_beveled_corner_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_beveled_corner_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadBeveledCornerRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_beveled_corner_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_beveled_corner_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalTransitionRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_transition_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_transition_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_transition_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_transition_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_transition_red.json",
+          "elements/RoadDiagonalTransitionRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalTransitionRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_transition_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_transition_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_transition_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadChevronRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_chevron_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadChevronRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_chevron_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_red_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_red_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_red_2.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_chevron_red_3.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_chevron_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_chevron_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_chevron_red.json",
+          "elements/RoadChevronRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadChevronRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_chevron_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_chevron_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadChevronRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_chevron_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_chevron_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionMirrorRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_mirror_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadDiagonalTransitionMirrorRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_diagonal_transition_mirror_red.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_diagonal_transition_mirror_red.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_diagonal_transition_mirror_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_diagonal_transition_mirror_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_diagonal_transition_mirror_red.json",
+          "elements/RoadDiagonalTransitionMirrorRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadDiagonalTransitionMirrorRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_diagonal_transition_mirror_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_diagonal_transition_mirror_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadDiagonalTransitionMirrorRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_diagonal_transition_mirror_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_diagonal_transition_mirror_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadKeepClearRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_keep_clear_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadKeepClearRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_red_1_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_red_2_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_red_2_1.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_red_3_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_red_3_1.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_keep_clear_red_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_red_1_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_red_2_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_red_2_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_red_3_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_red_3_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_keep_clear_red_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_keep_clear_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_keep_clear_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_keep_clear_red.json",
+          "elements/RoadKeepClearRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadKeepClearRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_keep_clear_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_keep_clear_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadKeepClearRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_keep_clear_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_keep_clear_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedAreaRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_area_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadRestrictedAreaRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_red_1_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_red_2_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_red_2_1.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_red_3_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_red_3_1.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_area_red_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_red_1_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_red_2_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_red_2_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_red_3_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_red_3_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_area_red_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_restricted_area_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_restricted_area_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_restricted_area_red.json",
+          "elements/RoadRestrictedAreaRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadRestrictedAreaRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_restricted_area_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_restricted_area_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedAreaRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_area_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_restricted_area_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAuthorizedPersonnelOnlyRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_authorized_personnel_only_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadAuthorizedPersonnelOnlyRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_red_1_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_red_2_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_red_2_1.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_red_3_0.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_red_3_1.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_authorized_personnel_only_red_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_red_1_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_red_2_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_red_2_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_red_3_0.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_red_3_1.json",
+          "src/main/resources/assets/industrial_facilities/models/block/road_authorized_personnel_only_red_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_authorized_personnel_only_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_authorized_personnel_only_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_authorized_personnel_only_red.json",
+          "elements/RoadAuthorizedPersonnelOnlyRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadAuthorizedPersonnelOnlyRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_authorized_personnel_only_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_authorized_personnel_only_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadAuthorizedPersonnelOnlyRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_authorized_personnel_only_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_authorized_personnel_only_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestricted",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadRestrictedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_restricted.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_restricted.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_restricted.json",
+          "elements/RoadRestricted.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadRestricted",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_restricted",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_restricted.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_restricted_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedWhite",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_white",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadRestrictedWhiteBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_white_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_white_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_white_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_white_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_white_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_white_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_white_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_white_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_white_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_white_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_white_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_white_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_restricted_white.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_restricted_white.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_restricted_white.json",
+          "elements/RoadRestrictedWhite.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadRestrictedWhite",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_restricted_white",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_restricted_white.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedWhiteCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_white_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_restricted_white_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedRed",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_red",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadRestrictedRedBlock.java",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_red_1_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_red_1_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_red_2_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_red_2_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_red_2_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_red_2_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_red_3_0.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_red_3_0.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_red_3_1.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_red_3_1.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/road_restricted_red_3_2.png",
+          "src/main/resources/assets/industrial_facilities/models/block/road_restricted_red_3_2.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_restricted_red.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_restricted_red.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_restricted_red.json",
+          "elements/RoadRestrictedRed.mod.json"
+        ]
+      },
+      "path": "~/Road/Markings"
+    },
+    {
+      "name": "FabricatorRoadRestrictedRed",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_restricted_red",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_restricted_red.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadRestrictedRedCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_restricted_red_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_restricted_red_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadConcreteLightGray",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_concrete_light_gray",
+      "metadata": {
+        "files": [
+          "src/main/resources/assets/industrial_facilities/textures/block/road_concrete_light_gray.png",
+          "src/main/java/fr/vengelis/industrialfacilities/block/RoadConcreteLightGrayBlock.java",
+          "src/main/resources/assets/industrial_facilities/models/block/road_concrete_light_gray.json",
+          "src/main/resources/assets/industrial_facilities/models/item/road_concrete_light_gray.json",
+          "src/main/resources/assets/industrial_facilities/blockstates/road_concrete_light_gray.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/road_concrete_light_gray.json",
+          "elements/RoadConcreteLightGray.mod.json"
+        ]
+      },
+      "path": "~/Road/Blocks"
+    },
+    {
+      "name": "FabricatorRoadConcreteLightGray",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "fabricator_road_concrete_light_gray",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_road_concrete_light_gray.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "RoadConcreteLightGrayCrafting",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "road_concrete_light_gray_crafting",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/road_concrete_light_gray_crafting.json"
+        ]
+      },
+      "path": "~/Road/Recipes"
+    },
+    {
+      "name": "FabricatorRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "fabricator_recipe",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/fabricator_recipe.json",
+          "src/main/resources/data/industrial_facilities/recipe/fabricator_recipe.json"
+        ]
+      },
+      "path": "~/Blocks/Machines"
     }
   ],
   "variable_elements": [],
@@ -1725,12 +4144,25 @@
   ],
   "tag_elements": {
     "BLOCKS:minecraft:mineable/pickaxe": [
+      "~AirlockFrame@CUSTOM:AirlockFrame",
       "~Fabricator@CUSTOM:Fabricator",
-      "~AirlockFrame@CUSTOM:AirlockFrame"
+      "~RoadAsphalt@CUSTOM:RoadAsphalt",
+      "~RoadConcrete@CUSTOM:RoadConcrete",
+      "~IndustrialBarrierYellow@CUSTOM:IndustrialBarrierYellow",
+      "~IndustrialBarrierWhite@CUSTOM:IndustrialBarrierWhite",
+      "~IndustrialBarrierDarkGray@CUSTOM:IndustrialBarrierDarkGray",
+      "~IndustrialBarrierYellowHazard@CUSTOM:IndustrialBarrierYellowHazard",
+      "~RoadConcreteLightGray@CUSTOM:RoadConcreteLightGray"
     ],
     "BLOCKS:minecraft:needs_iron_tool": [
-      "~Fabricator@CUSTOM:Fabricator",
-      "~AirlockFrame@CUSTOM:AirlockFrame"
+      "~AirlockFrame@CUSTOM:AirlockFrame",
+      "~Fabricator@CUSTOM:Fabricator"
+    ],
+    "BLOCKS:minecraft:walls": [
+      "~IndustrialBarrierYellow@CUSTOM:IndustrialBarrierYellow",
+      "~IndustrialBarrierWhite@CUSTOM:IndustrialBarrierWhite",
+      "~IndustrialBarrierDarkGray@CUSTOM:IndustrialBarrierDarkGray",
+      "~IndustrialBarrierYellowHazard@CUSTOM:IndustrialBarrierYellowHazard"
     ]
   },
   "tab_element_order": {},
@@ -1810,7 +4242,68 @@
       "gui.industrial_facilities.fabricator.no_pattern": "No pattern",
       "gui.industrial_facilities.fabricator.materials": "MATERIALS — available / required",
       "gui.industrial_facilities.fabricator.scroll": "Scroll to view materials",
-      "container.industrial_facilities.fabricator": "Fabricator"
+      "container.industrial_facilities.fabricator": "Fabricator",
+      "block.industrial_facilities.road_asphalt": "Industrial Asphalt",
+      "block.industrial_facilities.road_concrete": "Industrial Road Concrete",
+      "block.industrial_facilities.road_line": "Yellow Road Line",
+      "block.industrial_facilities.road_dashed": "Yellow Dashed Road Line",
+      "block.industrial_facilities.road_double_line": "Yellow Double Road Line",
+      "block.industrial_facilities.road_corner": "Yellow Road Corner",
+      "block.industrial_facilities.road_junction": "Yellow Road T Junction",
+      "block.industrial_facilities.road_cross": "Yellow Road Crossroads",
+      "block.industrial_facilities.road_arrow": "Yellow Direction Arrow",
+      "block.industrial_facilities.road_hazard": "Yellow Safety Hatching",
+      "block.industrial_facilities.road_keep_clear": "Yellow KEEP CLEAR Road Marking",
+      "block.industrial_facilities.road_restricted_area": "Yellow RESTRICTED AREA Road Marking",
+      "block.industrial_facilities.road_diagonal": "Yellow Diagonal Road Line",
+      "block.industrial_facilities.road_beveled_corner": "Yellow Beveled Road Corner",
+      "block.industrial_facilities.road_diagonal_transition": "Yellow Straight to Diagonal Transition",
+      "block.industrial_facilities.road_chevron": "Rotatable Yellow Chevron",
+      "block.industrial_facilities.road_keep_clear_white": "White KEEP CLEAR Road Marking",
+      "block.industrial_facilities.road_restricted_area_white": "White RESTRICTED AREA Road Marking",
+      "block.industrial_facilities.road_authorized_personnel_only": "Yellow AUTHORIZED PERSONNEL ONLY Road Marking",
+      "block.industrial_facilities.road_authorized_personnel_only_white": "White AUTHORIZED PERSONNEL ONLY Road Marking",
+      "block.industrial_facilities.road_line_white": "White Road Line",
+      "block.industrial_facilities.road_dashed_white": "White Dashed Road Line",
+      "block.industrial_facilities.road_double_line_white": "White Double Road Line",
+      "block.industrial_facilities.road_corner_white": "White Road Corner",
+      "block.industrial_facilities.road_junction_white": "White Road T Junction",
+      "block.industrial_facilities.road_cross_white": "White Road Crossroads",
+      "block.industrial_facilities.road_arrow_white": "White Direction Arrow",
+      "block.industrial_facilities.road_hazard_white": "White Safety Hatching",
+      "block.industrial_facilities.road_diagonal_white": "White Diagonal Road Line",
+      "block.industrial_facilities.road_beveled_corner_white": "White Beveled Road Corner",
+      "block.industrial_facilities.road_diagonal_transition_white": "White Straight to Diagonal Transition",
+      "block.industrial_facilities.road_chevron_white": "White Rotatable Chevron",
+      "block.industrial_facilities.road_diagonal_transition_mirror": "Yellow Straight to Diagonal Transition (Mirrored)",
+      "block.industrial_facilities.road_diagonal_transition_mirror_white": "White Straight to Diagonal Transition (Mirrored)",
+      "item.industrial_facilities.road_brush": "Road Brush",
+      "tooltip.industrial_facilities.road_brush.rotate": "Right-click: rotate. Sneak: reverse direction.",
+      "tooltip.industrial_facilities.road_brush.targets": "Road lines only; excludes text and solid blocks.",
+      "block.industrial_facilities.road_hazard_red": "Red Safety Hatching",
+      "block.industrial_facilities.industrial_barrier_yellow": "Yellow Industrial Barrier",
+      "block.industrial_facilities.industrial_barrier_white": "White Industrial Barrier",
+      "block.industrial_facilities.industrial_barrier_dark_gray": "Dark Gray Industrial Barrier",
+      "block.industrial_facilities.industrial_barrier_yellow_hazard": "Yellow Industrial Barrier with Safety Stripe",
+      "block.industrial_facilities.road_line_red": "Red Road Line",
+      "block.industrial_facilities.road_dashed_red": "Red Dashed Road Line",
+      "block.industrial_facilities.road_double_line_red": "Red Double Road Line",
+      "block.industrial_facilities.road_corner_red": "Red Road Corner",
+      "block.industrial_facilities.road_junction_red": "Red Road T Junction",
+      "block.industrial_facilities.road_cross_red": "Red Road Crossroads",
+      "block.industrial_facilities.road_arrow_red": "Red Direction Arrow",
+      "block.industrial_facilities.road_diagonal_red": "Red Diagonal Road Line",
+      "block.industrial_facilities.road_beveled_corner_red": "Red Beveled Road Corner",
+      "block.industrial_facilities.road_diagonal_transition_red": "Red Straight to Diagonal Transition",
+      "block.industrial_facilities.road_chevron_red": "Red Rotatable Chevron",
+      "block.industrial_facilities.road_diagonal_transition_mirror_red": "Red Straight to Diagonal Transition (Mirrored)",
+      "block.industrial_facilities.road_keep_clear_red": "Red KEEP CLEAR Road Marking",
+      "block.industrial_facilities.road_restricted_area_red": "Red RESTRICTED AREA Road Marking",
+      "block.industrial_facilities.road_authorized_personnel_only_red": "Red AUTHORIZED PERSONNEL ONLY Road Marking",
+      "block.industrial_facilities.road_restricted": "Yellow RESTRICTED Road Marking",
+      "block.industrial_facilities.road_restricted_white": "White RESTRICTED Road Marking",
+      "block.industrial_facilities.road_restricted_red": "Red RESTRICTED Road Marking",
+      "block.industrial_facilities.road_concrete_light_gray": "Light Gray Industrial Concrete"
     },
     "fr_fr": {
       "item.industrial_facilities.extinguisher": "Extincteur",
@@ -1887,7 +4380,68 @@
       "gui.industrial_facilities.fabricator.no_pattern": "Sans motif",
       "gui.industrial_facilities.fabricator.materials": "RESSOURCES â€” disponible / requis",
       "gui.industrial_facilities.fabricator.scroll": "Molette : parcourir les ressources",
-      "container.industrial_facilities.fabricator": "Fabricator"
+      "container.industrial_facilities.fabricator": "Fabricator",
+      "block.industrial_facilities.road_asphalt": "Asphalte industriel",
+      "block.industrial_facilities.road_concrete": "Béton routier industriel",
+      "block.industrial_facilities.road_line": "Ligne jaune continue",
+      "block.industrial_facilities.road_dashed": "Ligne jaune discontinue",
+      "block.industrial_facilities.road_double_line": "Double ligne jaune",
+      "block.industrial_facilities.road_corner": "Angle jaune",
+      "block.industrial_facilities.road_junction": "Jonction jaune en T",
+      "block.industrial_facilities.road_cross": "Croisement jaune",
+      "block.industrial_facilities.road_arrow": "Flèche directionnelle jaune",
+      "block.industrial_facilities.road_hazard": "Hachures jaunes de sécurité",
+      "block.industrial_facilities.road_keep_clear": "Marquage KEEP CLEAR jaune",
+      "block.industrial_facilities.road_restricted_area": "Marquage RESTRICTED AREA jaune",
+      "block.industrial_facilities.road_diagonal": "Ligne jaune diagonale",
+      "block.industrial_facilities.road_beveled_corner": "Angle jaune biseauté",
+      "block.industrial_facilities.road_diagonal_transition": "Raccord jaune droit-diagonal",
+      "block.industrial_facilities.road_chevron": "Chevron jaune orientable",
+      "block.industrial_facilities.road_keep_clear_white": "Marquage KEEP CLEAR blanc",
+      "block.industrial_facilities.road_restricted_area_white": "Marquage RESTRICTED AREA blanc",
+      "block.industrial_facilities.road_authorized_personnel_only": "Marquage AUTHORIZED PERSONNEL ONLY jaune",
+      "block.industrial_facilities.road_authorized_personnel_only_white": "Marquage AUTHORIZED PERSONNEL ONLY blanc",
+      "block.industrial_facilities.road_line_white": "Ligne continue blanche",
+      "block.industrial_facilities.road_dashed_white": "Ligne discontinue blanche",
+      "block.industrial_facilities.road_double_line_white": "Double ligne blanche",
+      "block.industrial_facilities.road_corner_white": "Angle droit blanc",
+      "block.industrial_facilities.road_junction_white": "Jonction en T blanche",
+      "block.industrial_facilities.road_cross_white": "Croisement blanc",
+      "block.industrial_facilities.road_arrow_white": "Flèche directionnelle blanche",
+      "block.industrial_facilities.road_hazard_white": "Hachures de sécurité blanches",
+      "block.industrial_facilities.road_diagonal_white": "Ligne diagonale blanche",
+      "block.industrial_facilities.road_beveled_corner_white": "Angle biseauté blanc",
+      "block.industrial_facilities.road_diagonal_transition_white": "Raccord droit-diagonal blanc",
+      "block.industrial_facilities.road_chevron_white": "Chevron orientable blanc",
+      "block.industrial_facilities.road_diagonal_transition_mirror": "Raccord droit-diagonal inversé jaune",
+      "block.industrial_facilities.road_diagonal_transition_mirror_white": "Raccord droit-diagonal inversé blanc",
+      "item.industrial_facilities.road_brush": "Pinceau",
+      "tooltip.industrial_facilities.road_brush.rotate": "Clic droit : tourner. Maj : sens inverse.",
+      "tooltip.industrial_facilities.road_brush.targets": "Uniquement les lignes Road ; hors textes et blocs pleins.",
+      "block.industrial_facilities.road_hazard_red": "Hachures de sécurité rouges",
+      "block.industrial_facilities.industrial_barrier_yellow": "Muret industriel jaune",
+      "block.industrial_facilities.industrial_barrier_white": "Muret industriel blanc",
+      "block.industrial_facilities.industrial_barrier_dark_gray": "Muret industriel gris foncé",
+      "block.industrial_facilities.industrial_barrier_yellow_hazard": "Muret industriel jaune à bande de sécurité",
+      "block.industrial_facilities.road_line_red": "Ligne continue rouge",
+      "block.industrial_facilities.road_dashed_red": "Ligne discontinue rouge",
+      "block.industrial_facilities.road_double_line_red": "Double ligne rouge",
+      "block.industrial_facilities.road_corner_red": "Angle droit rouge",
+      "block.industrial_facilities.road_junction_red": "Jonction en T rouge",
+      "block.industrial_facilities.road_cross_red": "Croisement rouge",
+      "block.industrial_facilities.road_arrow_red": "Flèche directionnelle rouge",
+      "block.industrial_facilities.road_diagonal_red": "Ligne diagonale rouge",
+      "block.industrial_facilities.road_beveled_corner_red": "Angle biseauté rouge",
+      "block.industrial_facilities.road_diagonal_transition_red": "Raccord droit-diagonal rouge",
+      "block.industrial_facilities.road_chevron_red": "Chevron orientable rouge",
+      "block.industrial_facilities.road_diagonal_transition_mirror_red": "Raccord droit-diagonal inversé rouge",
+      "block.industrial_facilities.road_keep_clear_red": "Marquage KEEP CLEAR rouge",
+      "block.industrial_facilities.road_restricted_area_red": "Marquage RESTRICTED AREA rouge",
+      "block.industrial_facilities.road_authorized_personnel_only_red": "Marquage AUTHORIZED PERSONNEL ONLY rouge",
+      "block.industrial_facilities.road_restricted": "Marquage RESTRICTED jaune",
+      "block.industrial_facilities.road_restricted_white": "Marquage RESTRICTED blanc",
+      "block.industrial_facilities.road_restricted_red": "Marquage RESTRICTED rouge",
+      "block.industrial_facilities.road_concrete_light_gray": "Béton industriel gris clair"
     }
   },
   "metadata": {
@@ -1935,10 +4489,6 @@
               {
                 "name": "Blocks",
                 "children": []
-              },
-              {
-                "name": "Recipes",
-                "children": []
               }
             ]
           },
@@ -1957,6 +4507,36 @@
           },
           {
             "name": "Machines",
+            "children": []
+          },
+          {
+            "name": "Barriers",
+            "children": [
+              {
+                "name": "Recipes",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Road",
+        "children": [
+          {
+            "name": "Blocks",
+            "children": []
+          },
+          {
+            "name": "Markings",
+            "children": []
+          },
+          {
+            "name": "Recipes",
+            "children": []
+          },
+          {
+            "name": "Tools",
             "children": []
           }
         ]

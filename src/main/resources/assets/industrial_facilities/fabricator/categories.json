@@ -2,8 +2,25 @@
   "all_label": "All",
   "uncategorized_label": "Others",
   "categories": [
-    { "id": "panels", "label": "Signs", "order": 10 },
-    { "id": "blocks", "label": "Blocks", "order": 20 },
-    { "id": "machines", "label": "Machines", "order": 30 }
+    {
+      "id": "panels",
+      "label": "Signs",
+      "order": 10
+    },
+    {
+      "id": "blocks",
+      "label": "Blocks",
+      "order": 20
+    },
+    {
+      "id": "machines",
+      "label": "Machines",
+      "order": 30
+    },
+    {
+      "id": "road",
+      "label": "Road",
+      "order": 40
+    }
   ]
 }

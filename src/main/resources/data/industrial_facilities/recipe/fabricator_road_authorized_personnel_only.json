@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "road",
+  "materials": [
+    {
+      "item": "minecraft:paper",
+      "count": 3
+    },
+    {
+      "item": "minecraft:yellow_dye",
+      "count": 3
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:road_authorized_personnel_only",
+    "count": 8
+  }
+}

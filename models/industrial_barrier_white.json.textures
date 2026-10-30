@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "default": {
+      "name": "default",
+      "map": {
+        "frame": "industrial_barrier_panel_white",
+        "panel": "industrial_barrier_panel_white",
+        "recess": "industrial_barrier_panel_white",
+        "particle": "industrial_barrier_panel_white",
+        "edge": "industrial_barrier_panel_white"
+      }
+    }
+  }
+}

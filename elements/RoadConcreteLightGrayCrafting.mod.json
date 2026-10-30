@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 8,
+    "group": "road_blocks",
+    "unlockingItems": [
+      "CUSTOM:RoadConcreteLightGray"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.STONE",
+      "Items.STONE",
+      "Items.STONE",
+      "Items.STONE",
+      "Items.LIGHT_GRAY_DYE",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:RoadConcreteLightGray",
+    "name": "road_concrete_light_gray_crafting",
+    "namespace": "mod"
+  }
+}

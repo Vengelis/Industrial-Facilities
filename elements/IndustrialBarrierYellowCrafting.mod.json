@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 4,
+    "group": "industrial_barriers",
+    "unlockingItems": [
+      "Items.IRON_INGOT"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.STONE",
+      "Items.STONE",
+      "Items.YELLOW_DYE",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:IndustrialBarrierYellow",
+    "name": "industrial_barrier_yellow_crafting",
+    "namespace": "mod"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "panels",
+  "materials": [
+    {
+      "item": "industrial_facilities:empty_sign",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:elevator_sign",
+    "count": 1
+  }
+}

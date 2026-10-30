@@ -14,6 +14,8 @@ bin/
 /runClient/
 /runServer/
 /runs/
+/tools/
+/docs/
 
 # Sauvegardes internes MCreator : conserver le fichier *.mcreator principal
 /.mcreator/*
@@ -42,6 +44,7 @@ replay_pid*.log
 *.swp
 *.swo
 .~lock.*#
+*-backup-*
 
 # Fichiers du systeme
 .DS_Store
@@ -49,5 +52,3 @@ replay_pid*.log
 Thumbs.db
 Desktop.ini
 
-# Ne pas ignorer globalement les *.jar ou *.zip : le wrapper Gradle,
-# les dependances locales et certaines ressources peuvent etre necessaires.

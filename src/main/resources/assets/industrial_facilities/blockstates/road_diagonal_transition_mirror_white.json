@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "industrial_facilities:block/road_diagonal_transition_mirror_white",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "industrial_facilities:block/road_diagonal_transition_mirror_white",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "industrial_facilities:block/road_diagonal_transition_mirror_white",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industrial_facilities:block/road_diagonal_transition_mirror_white",
+      "y": 270
+    }
+  }
+}

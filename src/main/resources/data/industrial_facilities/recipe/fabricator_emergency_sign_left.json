@@ -1,0 +1,26 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "panels",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 1
+    },
+    {
+      "item": "minecraft:lime_dye",
+      "count": 1
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 1
+    },
+    {
+      "item": "minecraft:glowstone_dust",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:emergency_exit_sign_left",
+    "count": 1
+  }
+}

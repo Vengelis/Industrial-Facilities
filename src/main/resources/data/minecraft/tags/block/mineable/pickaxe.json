@@ -1,7 +1,14 @@
 {
   "replace": false,
   "values": [
+    "industrial_facilities:industrial_barrier_yellow_hazard",
     "industrial_facilities:fabricator",
+    "industrial_facilities:industrial_barrier_dark_gray",
+    "industrial_facilities:road_asphalt",
+    "industrial_facilities:industrial_barrier_white",
+    "industrial_facilities:industrial_barrier_yellow",
+    "industrial_facilities:road_concrete_light_gray",
+    "industrial_facilities:road_concrete",
     "industrial_facilities:airlock_frame"
   ]
 }

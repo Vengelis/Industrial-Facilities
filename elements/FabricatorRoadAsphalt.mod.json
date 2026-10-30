@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 8,
+    "group": "road",
+    "unlockingItems": [
+      "CUSTOM:RoadAsphalt"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.GRAVEL",
+      "Items.GRAVEL",
+      "Items.GRAVEL",
+      "Items.GRAVEL",
+      "Items.BLACK_DYE",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:RoadAsphalt",
+    "name": "fabricator_road_asphalt",
+    "namespace": "mod"
+  }
+}

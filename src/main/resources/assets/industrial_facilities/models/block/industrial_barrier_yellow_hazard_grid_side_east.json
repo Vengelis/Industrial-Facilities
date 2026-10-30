@@ -1,0 +1,183 @@
+{
+  "ambientocclusion": true,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "industrial_facilities:block/industrial_barrier_panel_yellow",
+    "frame": "industrial_facilities:block/industrial_barrier_panel_yellow",
+    "mesh": "industrial_facilities:block/industrial_barrier_fine_mesh",
+    "hazard": "industrial_facilities:block/industrial_barrier_hazard_stripe"
+  },
+  "elements": [
+    {
+      "from": [
+        8,
+        0,
+        7.25
+      ],
+      "to": [
+        16,
+        0.75,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#frame",
+          "uv": [
+            8,
+            15.25,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#frame",
+          "uv": [
+            8,
+            15.25,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#frame",
+          "uv": [
+            7.25,
+            15.25,
+            8.75,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#frame",
+          "uv": [
+            7.25,
+            15.25,
+            8.75,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#frame",
+          "uv": [
+            8,
+            7.25,
+            16,
+            8.75
+          ]
+        },
+        "down": {
+          "texture": "#frame",
+          "uv": [
+            8,
+            7.25,
+            16,
+            8.75
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        15.25,
+        7.25
+      ],
+      "to": [
+        16,
+        16,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hazard",
+          "uv": [
+            8,
+            0,
+            16,
+            0.75
+          ]
+        },
+        "south": {
+          "texture": "#hazard",
+          "uv": [
+            8,
+            0,
+            16,
+            0.75
+          ]
+        },
+        "east": {
+          "texture": "#frame",
+          "uv": [
+            7.25,
+            0,
+            8.75,
+            0.75
+          ]
+        },
+        "west": {
+          "texture": "#frame",
+          "uv": [
+            7.25,
+            0,
+            8.75,
+            0.75
+          ]
+        },
+        "up": {
+          "texture": "#frame",
+          "uv": [
+            8,
+            7.25,
+            16,
+            8.75
+          ]
+        },
+        "down": {
+          "texture": "#frame",
+          "uv": [
+            8,
+            7.25,
+            16,
+            8.75
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        0.75,
+        8
+      ],
+      "to": [
+        16,
+        15.25,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#mesh",
+          "uv": [
+            8,
+            0.75,
+            16,
+            15.25
+          ],
+          "tintindex": 0
+        },
+        "south": {
+          "texture": "#mesh",
+          "uv": [
+            8,
+            0.75,
+            16,
+            15.25
+          ],
+          "tintindex": 0
+        }
+      },
+      "shade": false
+    }
+  ]
+}

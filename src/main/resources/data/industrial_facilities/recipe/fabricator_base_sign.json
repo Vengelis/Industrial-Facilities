@@ -1,0 +1,14 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "panels",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:empty_sign",
+    "count": 4
+  }
+}

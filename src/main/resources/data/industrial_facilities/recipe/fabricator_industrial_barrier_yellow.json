@@ -1,0 +1,22 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "blocks",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 2
+    },
+    {
+      "item": "minecraft:stone",
+      "count": 2
+    },
+    {
+      "item": "minecraft:yellow_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:industrial_barrier_yellow",
+    "count": 4
+  }
+}

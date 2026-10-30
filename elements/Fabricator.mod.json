@@ -106,6 +106,7 @@
       "fixedValue": 7.0
     },
     "hasInventory": true,
+    "guiBoundTo": "FabricatorGUI",
     "openGUIOnRightClick": true,
     "inventorySize": 0,
     "inventoryStackSize": 64,
@@ -130,7 +131,6 @@
     "frequencyPerChunks": 10,
     "frequencyOnChunk": 16,
     "minGenerateHeight": 0,
-    "maxGenerateHeight": 64,
-    "guiBoundTo": "FabricatorGUI"
+    "maxGenerateHeight": 64
   }
 }

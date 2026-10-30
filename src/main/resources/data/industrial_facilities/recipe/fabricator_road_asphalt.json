@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "road",
+  "materials": [
+    {
+      "item": "minecraft:gravel",
+      "count": 4
+    },
+    {
+      "item": "minecraft:black_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:road_asphalt",
+    "count": 8
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "variants": {
+    "facing=north,width=1,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 0
+    },
+    "facing=north,width=1,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 0
+    },
+    "facing=north,width=1,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 0
+    },
+    "facing=north,width=2,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_2_0",
+      "y": 0
+    },
+    "facing=north,width=2,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_2_1",
+      "y": 0
+    },
+    "facing=north,width=2,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 0
+    },
+    "facing=north,width=3,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_3_0",
+      "y": 0
+    },
+    "facing=north,width=3,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_3_1",
+      "y": 0
+    },
+    "facing=north,width=3,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_3_2",
+      "y": 0
+    },
+    "facing=east,width=1,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 90
+    },
+    "facing=east,width=1,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 90
+    },
+    "facing=east,width=1,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 90
+    },
+    "facing=east,width=2,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_2_0",
+      "y": 90
+    },
+    "facing=east,width=2,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_2_1",
+      "y": 90
+    },
+    "facing=east,width=2,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 90
+    },
+    "facing=east,width=3,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_3_0",
+      "y": 90
+    },
+    "facing=east,width=3,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_3_1",
+      "y": 90
+    },
+    "facing=east,width=3,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_3_2",
+      "y": 90
+    },
+    "facing=south,width=1,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 180
+    },
+    "facing=south,width=1,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 180
+    },
+    "facing=south,width=1,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 180
+    },
+    "facing=south,width=2,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_2_0",
+      "y": 180
+    },
+    "facing=south,width=2,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_2_1",
+      "y": 180
+    },
+    "facing=south,width=2,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 180
+    },
+    "facing=south,width=3,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_3_0",
+      "y": 180
+    },
+    "facing=south,width=3,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_3_1",
+      "y": 180
+    },
+    "facing=south,width=3,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_3_2",
+      "y": 180
+    },
+    "facing=west,width=1,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 270
+    },
+    "facing=west,width=1,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 270
+    },
+    "facing=west,width=1,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 270
+    },
+    "facing=west,width=2,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_2_0",
+      "y": 270
+    },
+    "facing=west,width=2,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_2_1",
+      "y": 270
+    },
+    "facing=west,width=2,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_1_0",
+      "y": 270
+    },
+    "facing=west,width=3,part=0": {
+      "model": "industrial_facilities:block/road_keep_clear_3_0",
+      "y": 270
+    },
+    "facing=west,width=3,part=1": {
+      "model": "industrial_facilities:block/road_keep_clear_3_1",
+      "y": 270
+    },
+    "facing=west,width=3,part=2": {
+      "model": "industrial_facilities:block/road_keep_clear_3_2",
+      "y": 270
+    }
+  }
+}

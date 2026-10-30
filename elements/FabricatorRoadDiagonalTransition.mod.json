@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 8,
+    "group": "road_markings",
+    "unlockingItems": [
+      "Items.PAPER"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.PAPER",
+      "Items.PAPER",
+      "Items.PAPER",
+      "Items.PAPER",
+      "Items.PAPER",
+      "Items.YELLOW_DYE",
+      "Items.YELLOW_DYE",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:RoadDiagonalTransition",
+    "name": "fabricator_road_diagonal_transition",
+    "namespace": "mod"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 8,
+    "group": "road_markings",
+    "unlockingItems": [
+      "Items.PAPER"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.PAPER",
+      "Items.RED_DYE",
+      "Items.RED_DYE",
+      "Items.RED_DYE",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:RoadRestrictedRed",
+    "name": "fabricator_road_restricted_red",
+    "namespace": "mod"
+  }
+}

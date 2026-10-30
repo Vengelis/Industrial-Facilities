@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "industrial_facilities:industrial_barrier_yellow_hazard",
+    "industrial_facilities:industrial_barrier_dark_gray",
+    "industrial_facilities:industrial_barrier_white",
+    "industrial_facilities:industrial_barrier_yellow"
+  ]
+}

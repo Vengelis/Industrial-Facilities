@@ -1,0 +1,68 @@
+{
+  "variants": {
+    "rotation=0": {
+      "model": "industrial_facilities:block/road_chevron_white_0",
+      "y": 0
+    },
+    "rotation=1": {
+      "model": "industrial_facilities:block/road_chevron_white_1",
+      "y": 0
+    },
+    "rotation=2": {
+      "model": "industrial_facilities:block/road_chevron_white_2",
+      "y": 0
+    },
+    "rotation=3": {
+      "model": "industrial_facilities:block/road_chevron_white_3",
+      "y": 90
+    },
+    "rotation=4": {
+      "model": "industrial_facilities:block/road_chevron_white_0",
+      "y": 90
+    },
+    "rotation=5": {
+      "model": "industrial_facilities:block/road_chevron_white_1",
+      "y": 90
+    },
+    "rotation=6": {
+      "model": "industrial_facilities:block/road_chevron_white_2",
+      "y": 90
+    },
+    "rotation=7": {
+      "model": "industrial_facilities:block/road_chevron_white_3",
+      "y": 180
+    },
+    "rotation=8": {
+      "model": "industrial_facilities:block/road_chevron_white_0",
+      "y": 180
+    },
+    "rotation=9": {
+      "model": "industrial_facilities:block/road_chevron_white_1",
+      "y": 180
+    },
+    "rotation=10": {
+      "model": "industrial_facilities:block/road_chevron_white_2",
+      "y": 180
+    },
+    "rotation=11": {
+      "model": "industrial_facilities:block/road_chevron_white_3",
+      "y": 270
+    },
+    "rotation=12": {
+      "model": "industrial_facilities:block/road_chevron_white_0",
+      "y": 270
+    },
+    "rotation=13": {
+      "model": "industrial_facilities:block/road_chevron_white_1",
+      "y": 270
+    },
+    "rotation=14": {
+      "model": "industrial_facilities:block/road_chevron_white_2",
+      "y": 270
+    },
+    "rotation=15": {
+      "model": "industrial_facilities:block/road_chevron_white_3",
+      "y": 0
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "",
+    "unlockingItems": [
+      "CUSTOM:Fabricator"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": false,
+    "recipeSlots": [
+      "",
+      "Items.IRON_INGOT",
+      "",
+      "Items.IRON_INGOT",
+      "Blocks.CRAFTING_TABLE",
+      "Items.IRON_INGOT",
+      "",
+      "Items.IRON_INGOT",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:Fabricator",
+    "name": "fabricator_recipe",
+    "namespace": "mod"
+  }
+}

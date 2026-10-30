@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "road",
+  "materials": [
+    {
+      "item": "minecraft:stone",
+      "count": 4
+    },
+    {
+      "item": "minecraft:light_gray_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:road_concrete_light_gray",
+    "count": 8
+  }
+}
