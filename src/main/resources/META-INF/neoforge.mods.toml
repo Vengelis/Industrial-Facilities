@@ -1,10 +1,10 @@
 modLoader="javafml"
 loaderVersion="[4,)"
-license="GNU General Public License version 3 (GPLv3)"
+license="MIT License"
 
 [[mods]]
 modId="industrial_facilities"
-version="1.0.0"
+version="1.1.0"
 displayName="Industrial Facilities"
 displayURL="https://github.com/Vengelis/Industrial-Facilities"
 credits="https://github.com/Vengelis/Industrial-Facilities"

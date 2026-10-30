@@ -4546,11 +4546,11 @@
   "workspaceSettings": {
     "modid": "industrial_facilities",
     "modName": "Industrial Facilities",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "A Minecraft mod adding various blocks and items useful for industrial-style building.",
     "author": "Vengelis_",
     "websiteURL": "https://github.com/Vengelis/Industrial-Facilities",
-    "license": "GNU General Public License version 3 (GPLv3)",
+    "license": "MIT License",
     "serverSideOnly": false,
     "requiredMods": [],
     "dependencies": [],

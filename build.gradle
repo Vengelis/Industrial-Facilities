@@ -3,7 +3,42 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.141'
 }
 
-version = '1.0.0'
+// Keep the last successful package version outside build/ so clean preserves it.
+def versionFile = layout.projectDirectory.file('version.properties')
+def savedVersion = new Properties()
+savedVersion.load(new StringReader(providers.fileContents(versionFile).asText
+        .orElse('version=1.1.0\n').get()))
+def lastVersion = savedVersion.getProperty('version')
+if (lastVersion == null || !(lastVersion ==~ /\d+\.\d+\.\d+/)) {
+    throw new GradleException('version.properties must contain version=major.minor.patch')
+}
+
+// IDE syncs, help, tests and runClient do not consume a version number.
+def packagingTasks = ['build', 'buildNeeded', 'buildDependents', 'assemble', 'jar']
+def requestedPackagingTasks = gradle.startParameter.taskNames
+        .collect { it.tokenize(':').last() }
+        .findAll { packagingTasks.contains(it) }
+def parts = lastVersion.tokenize('.')
+def buildVersion = requestedPackagingTasks.isEmpty() ? lastVersion :
+        "${parts[0]}.${parts[1]}.${new BigInteger(parts[2]) + BigInteger.ONE}".toString()
+version = buildVersion
+
+// Commit the version only when the requested packaging task succeeds.
+tasks.matching { requestedPackagingTasks.contains(it.name) }.configureEach {
+    doLast {
+        versionFile.asFile.setText("version=${buildVersion}\n", 'UTF-8')
+    }
+}
+
+// MCreator writes a fixed source version; replace it in the packaged resources.
+tasks.named('processResources') {
+    inputs.property('modVersion', buildVersion)
+    filesMatching('META-INF/neoforge.mods.toml') {
+        filter { String line ->
+            line.replaceFirst(/^version\s*=.*$/, "version=\"${buildVersion}\"")
+        }
+    }
+}
 base.archivesName = "IndustrialFacilities"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
