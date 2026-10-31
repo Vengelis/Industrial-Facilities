@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 8,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:IndustrialDoorFrame"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.REDSTONE"
+    ],
+    "recipeReturnStack": "CUSTOM:IndustrialDoorFrame",
+    "name": "industrial_door_frame",
+    "namespace": "mod"
+  }
+}

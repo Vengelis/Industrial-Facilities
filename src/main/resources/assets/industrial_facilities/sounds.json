@@ -22,5 +22,37 @@
         "stream": false
       }
     ]
+  },
+  "industrial_door_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_open_stop": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_open_stop",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_close_stop": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_close_stop",
+        "stream": false
+      }
+    ]
   }
 }

@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "industrial_facilities:industrial_door_dark_controller",
+      "count": 1
+    },
+    {
+      "item": "minecraft:orange_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:industrial_door_radiation_controller",
+    "count": 1
+  }
+}

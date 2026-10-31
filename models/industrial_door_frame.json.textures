@@ -1,0 +1,12 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "metal": "industrial_door_frame_32",
+        "panel": "industrial_door_panel_32",
+        "indicator": "industrial_door_atlas",
+        "particle": "industrial_door_frame_32"
+      }
+    }
+  }
+}

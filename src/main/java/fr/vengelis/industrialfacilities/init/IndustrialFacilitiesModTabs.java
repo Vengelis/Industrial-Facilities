@@ -106,5 +106,19 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.ROAD_RESTRICTED_WHITE.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ROAD_RESTRICTED_RED.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ROAD_CONCRETE_LIGHT_GRAY.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_DARK_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_DARK_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RESTRICTED_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RESTRICTED_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_GLASS_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_GLASS_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RUSTY_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RUSTY_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER.get().asItem());
 			}).build());
 }

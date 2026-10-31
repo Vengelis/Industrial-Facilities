@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "industrial_facilities:block/industrial_door_safe_frame"
+    }
+  }
+}

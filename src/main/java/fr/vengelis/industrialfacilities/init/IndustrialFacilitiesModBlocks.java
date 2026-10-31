@@ -102,6 +102,21 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> ROAD_RESTRICTED_WHITE;
 	public static final DeferredBlock<Block> ROAD_RESTRICTED_RED;
 	public static final DeferredBlock<Block> ROAD_CONCRETE_LIGHT_GRAY;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_PART;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_DARK_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_DARK_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RESTRICTED_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RESTRICTED_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_GLASS_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_GLASS_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RUSTY_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RUSTY_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_SAFE_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_SAFE_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -192,6 +207,21 @@ public class IndustrialFacilitiesModBlocks {
 		ROAD_RESTRICTED_WHITE = REGISTRY.register("road_restricted_white", RoadRestrictedWhiteBlock::new);
 		ROAD_RESTRICTED_RED = REGISTRY.register("road_restricted_red", RoadRestrictedRedBlock::new);
 		ROAD_CONCRETE_LIGHT_GRAY = REGISTRY.register("road_concrete_light_gray", RoadConcreteLightGrayBlock::new);
+		INDUSTRIAL_DOOR_FRAME = REGISTRY.register("industrial_door_frame", IndustrialDoorFrameBlock::new);
+		INDUSTRIAL_DOOR_CONTROLLER = REGISTRY.register("industrial_door_controller", IndustrialDoorControllerBlock::new);
+		INDUSTRIAL_DOOR_PART = REGISTRY.register("industrial_door_part", IndustrialDoorPartBlock::new);
+		INDUSTRIAL_DOOR_DARK_FRAME = REGISTRY.register("industrial_door_dark_frame", IndustrialDoorDarkFrameBlock::new);
+		INDUSTRIAL_DOOR_DARK_CONTROLLER = REGISTRY.register("industrial_door_dark_controller", IndustrialDoorDarkControllerBlock::new);
+		INDUSTRIAL_DOOR_RESTRICTED_FRAME = REGISTRY.register("industrial_door_restricted_frame", IndustrialDoorRestrictedFrameBlock::new);
+		INDUSTRIAL_DOOR_RESTRICTED_CONTROLLER = REGISTRY.register("industrial_door_restricted_controller", IndustrialDoorRestrictedControllerBlock::new);
+		INDUSTRIAL_DOOR_GLASS_FRAME = REGISTRY.register("industrial_door_glass_frame", IndustrialDoorGlassFrameBlock::new);
+		INDUSTRIAL_DOOR_GLASS_CONTROLLER = REGISTRY.register("industrial_door_glass_controller", IndustrialDoorGlassControllerBlock::new);
+		INDUSTRIAL_DOOR_RUSTY_FRAME = REGISTRY.register("industrial_door_rusty_frame", IndustrialDoorRustyFrameBlock::new);
+		INDUSTRIAL_DOOR_RUSTY_CONTROLLER = REGISTRY.register("industrial_door_rusty_controller", IndustrialDoorRustyControllerBlock::new);
+		INDUSTRIAL_DOOR_SAFE_FRAME = REGISTRY.register("industrial_door_safe_frame", IndustrialDoorSafeFrameBlock::new);
+		INDUSTRIAL_DOOR_SAFE_CONTROLLER = REGISTRY.register("industrial_door_safe_controller", IndustrialDoorSafeControllerBlock::new);
+		INDUSTRIAL_DOOR_RADIATION_FRAME = REGISTRY.register("industrial_door_radiation_frame", IndustrialDoorRadiationFrameBlock::new);
+		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = REGISTRY.register("industrial_door_radiation_controller", IndustrialDoorRadiationControllerBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

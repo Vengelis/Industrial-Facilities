@@ -116,6 +116,20 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> ROAD_RESTRICTED_WHITE;
 	public static final DeferredItem<Item> ROAD_RESTRICTED_RED;
 	public static final DeferredItem<Item> ROAD_CONCRETE_LIGHT_GRAY;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_DARK_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_DARK_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RESTRICTED_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RESTRICTED_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_GLASS_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_GLASS_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RUSTY_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RUSTY_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_SAFE_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_SAFE_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -208,6 +222,20 @@ public class IndustrialFacilitiesModItems {
 		ROAD_RESTRICTED_WHITE = block(IndustrialFacilitiesModBlocks.ROAD_RESTRICTED_WHITE);
 		ROAD_RESTRICTED_RED = block(IndustrialFacilitiesModBlocks.ROAD_RESTRICTED_RED);
 		ROAD_CONCRETE_LIGHT_GRAY = block(IndustrialFacilitiesModBlocks.ROAD_CONCRETE_LIGHT_GRAY);
+		INDUSTRIAL_DOOR_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FRAME);
+		INDUSTRIAL_DOOR_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_CONTROLLER);
+		INDUSTRIAL_DOOR_DARK_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_DARK_FRAME);
+		INDUSTRIAL_DOOR_DARK_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_DARK_CONTROLLER);
+		INDUSTRIAL_DOOR_RESTRICTED_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RESTRICTED_FRAME);
+		INDUSTRIAL_DOOR_RESTRICTED_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RESTRICTED_CONTROLLER);
+		INDUSTRIAL_DOOR_GLASS_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_GLASS_FRAME);
+		INDUSTRIAL_DOOR_GLASS_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_GLASS_CONTROLLER);
+		INDUSTRIAL_DOOR_RUSTY_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RUSTY_FRAME);
+		INDUSTRIAL_DOOR_RUSTY_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RUSTY_CONTROLLER);
+		INDUSTRIAL_DOOR_SAFE_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_FRAME);
+		INDUSTRIAL_DOOR_SAFE_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_CONTROLLER);
+		INDUSTRIAL_DOOR_RADIATION_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME);
+		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER);
 	}
 
 	// Start of user code block custom items

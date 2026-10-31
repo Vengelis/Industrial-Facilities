@@ -1,0 +1,11 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "metal": "industrial_door_radiation_frame_32",
+        "controller": "industrial_door_radiation_controller_32",
+        "particle": "industrial_door_radiation_frame_32"
+      }
+    }
+  }
+}

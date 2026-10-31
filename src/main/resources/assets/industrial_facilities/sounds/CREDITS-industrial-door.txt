@@ -1,0 +1,12 @@
+INDUSTRIAL DOOR AUDIO — SOURCE AND ATTRIBUTION
+
+Title: Heavy Metal Door Opening and Closing
+Creator/channel: Royalty Free Sound FX
+Source: https://www.youtube.com/watch?v=c90uCjVbW_g
+License displayed by YouTube at retrieval: Creative Commons Attribution license (reuse allowed)
+
+Files industrial_door_open.ogg and industrial_door_close.ogg contain excerpts
+from this source, converted to mono 44100 Hz, shortened to the 2-second door
+animation without pitch transposition, with short fades and adjusted levels.
+No synthesized motor or extra end-stop effect is mixed into this version.
+See docs/Industrial-Door-Audio-Generation.json for exact excerpt timings.

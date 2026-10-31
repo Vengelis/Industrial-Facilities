@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:IndustrialDoorDarkFrame"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "CUSTOM:IndustrialDoorDarkFrame",
+      "Items.ORANGE_DYE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:IndustrialDoorRadiationFrame",
+    "name": "industrial_door_radiation_frame",
+    "namespace": "mod"
+  }
+}

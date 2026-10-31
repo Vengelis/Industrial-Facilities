@@ -1,0 +1,260 @@
+{
+  "variants": {
+    "active=false,facing=south,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 0
+    },
+    "active=false,facing=south,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 0
+    },
+    "active=false,facing=south,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 0
+    },
+    "active=false,facing=south,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 0
+    },
+    "active=false,facing=south,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 0
+    },
+    "active=false,facing=south,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 0
+    },
+    "active=false,facing=south,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 0
+    },
+    "active=false,facing=south,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 0
+    },
+    "active=true,facing=south,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 0
+    },
+    "active=true,facing=south,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 0
+    },
+    "active=true,facing=south,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_red_horizontal",
+      "y": 0
+    },
+    "active=true,facing=south,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_red",
+      "y": 0
+    },
+    "active=true,facing=south,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 0
+    },
+    "active=true,facing=south,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 0
+    },
+    "active=true,facing=south,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_green_horizontal",
+      "y": 0
+    },
+    "active=true,facing=south,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_green",
+      "y": 0
+    },
+    "active=false,facing=west,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 90
+    },
+    "active=false,facing=west,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 90
+    },
+    "active=false,facing=west,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 90
+    },
+    "active=false,facing=west,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 90
+    },
+    "active=false,facing=west,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 90
+    },
+    "active=false,facing=west,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 90
+    },
+    "active=false,facing=west,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 90
+    },
+    "active=false,facing=west,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 90
+    },
+    "active=true,facing=west,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 90
+    },
+    "active=true,facing=west,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 90
+    },
+    "active=true,facing=west,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_red_horizontal",
+      "y": 90
+    },
+    "active=true,facing=west,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_red",
+      "y": 90
+    },
+    "active=true,facing=west,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 90
+    },
+    "active=true,facing=west,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 90
+    },
+    "active=true,facing=west,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_green_horizontal",
+      "y": 90
+    },
+    "active=true,facing=west,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_green",
+      "y": 90
+    },
+    "active=false,facing=north,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 180
+    },
+    "active=false,facing=north,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 180
+    },
+    "active=false,facing=north,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 180
+    },
+    "active=false,facing=north,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 180
+    },
+    "active=false,facing=north,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 180
+    },
+    "active=false,facing=north,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 180
+    },
+    "active=false,facing=north,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 180
+    },
+    "active=false,facing=north,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 180
+    },
+    "active=true,facing=north,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 180
+    },
+    "active=true,facing=north,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 180
+    },
+    "active=true,facing=north,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_red_horizontal",
+      "y": 180
+    },
+    "active=true,facing=north,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_red",
+      "y": 180
+    },
+    "active=true,facing=north,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 180
+    },
+    "active=true,facing=north,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 180
+    },
+    "active=true,facing=north,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_green_horizontal",
+      "y": 180
+    },
+    "active=true,facing=north,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_green",
+      "y": 180
+    },
+    "active=false,facing=east,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 270
+    },
+    "active=false,facing=east,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 270
+    },
+    "active=false,facing=east,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 270
+    },
+    "active=false,facing=east,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 270
+    },
+    "active=false,facing=east,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 270
+    },
+    "active=false,facing=east,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 270
+    },
+    "active=false,facing=east,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 270
+    },
+    "active=false,facing=east,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 270
+    },
+    "active=true,facing=east,open=false,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 270
+    },
+    "active=true,facing=east,open=false,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 270
+    },
+    "active=true,facing=east,open=false,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_red_horizontal",
+      "y": 270
+    },
+    "active=true,facing=east,open=false,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_red",
+      "y": 270
+    },
+    "active=true,facing=east,open=true,rail=false,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal_horizontal",
+      "y": 270
+    },
+    "active=true,facing=east,open=true,rail=false,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_metal",
+      "y": 270
+    },
+    "active=true,facing=east,open=true,rail=true,vertical=false": {
+      "model": "industrial_facilities:block/industrial_door_controller_green_horizontal",
+      "y": 270
+    },
+    "active=true,facing=east,open=true,rail=true,vertical=true": {
+      "model": "industrial_facilities:block/industrial_door_controller_green",
+      "y": 270
+    }
+  }
+}

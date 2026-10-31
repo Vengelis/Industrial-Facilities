@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:IndustrialDoorDarkController"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "CUSTOM:IndustrialDoorDarkController",
+      "Items.RED_DYE",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:IndustrialDoorRestrictedController",
+    "name": "industrial_door_restricted_controller",
+    "namespace": "mod"
+  }
+}

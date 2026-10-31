@@ -1,0 +1,22 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 5
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 3
+    },
+    {
+      "item": "minecraft:comparator",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:industrial_door_controller",
+    "count": 1
+  }
+}
