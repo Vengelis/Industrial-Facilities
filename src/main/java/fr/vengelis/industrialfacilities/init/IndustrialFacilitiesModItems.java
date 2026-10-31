@@ -130,6 +130,7 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_SAFE_CONTROLLER;
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_FRAME;
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
+	public static final DeferredItem<Item> ALARM;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -236,6 +237,7 @@ public class IndustrialFacilitiesModItems {
 		INDUSTRIAL_DOOR_SAFE_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_CONTROLLER);
 		INDUSTRIAL_DOOR_RADIATION_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME);
 		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER);
+		ALARM = block(IndustrialFacilitiesModBlocks.ALARM);
 	}
 
 	// Start of user code block custom items

@@ -152,5 +152,13 @@
   "block.industrial_facilities.industrial_door_safe_frame": "Cadre de porte SAFE ZONE",
   "block.industrial_facilities.industrial_door_safe_controller": "Contrôleur de porte SAFE ZONE",
   "block.industrial_facilities.industrial_door_radiation_frame": "Cadre de porte radioactive",
-  "block.industrial_facilities.industrial_door_radiation_controller": "Contrôleur de porte radioactive"
+  "block.industrial_facilities.industrial_door_radiation_controller": "Contrôleur de porte radioactive",
+  "block.industrial_facilities.alarm": "Alarme industrielle",
+  "gui.industrial_facilities.alarm.sounds": "Son de l’alarme",
+  "gui.industrial_facilities.alarm.range": "Portée : %s blocs",
+  "gui.industrial_facilities.alarm.preview": "Écouter",
+  "gui.industrial_facilities.alarm.cancel": "Annuler",
+  "gui.industrial_facilities.alarm.save": "Enregistrer",
+  "gui.industrial_facilities.alarm.redstone": "En boucle tant que la redstone est active",
+  "gui.industrial_facilities.alarm.missing": "Son absent du client — vérifier la configuration"
 }

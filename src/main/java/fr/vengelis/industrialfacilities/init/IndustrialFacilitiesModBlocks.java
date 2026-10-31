@@ -117,6 +117,7 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_SAFE_CONTROLLER;
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_FRAME;
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
+	public static final DeferredBlock<Block> ALARM;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -222,6 +223,7 @@ public class IndustrialFacilitiesModBlocks {
 		INDUSTRIAL_DOOR_SAFE_CONTROLLER = REGISTRY.register("industrial_door_safe_controller", IndustrialDoorSafeControllerBlock::new);
 		INDUSTRIAL_DOOR_RADIATION_FRAME = REGISTRY.register("industrial_door_radiation_frame", IndustrialDoorRadiationFrameBlock::new);
 		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = REGISTRY.register("industrial_door_radiation_controller", IndustrialDoorRadiationControllerBlock::new);
+		ALARM = REGISTRY.register("alarm", AlarmBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

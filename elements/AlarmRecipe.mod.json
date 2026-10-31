@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:Alarm"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.REDSTONE",
+      "Items.REDSTONE",
+      "Blocks.NOTE_BLOCK",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:Alarm",
+    "name": "alarm",
+    "namespace": "mod"
+  }
+}

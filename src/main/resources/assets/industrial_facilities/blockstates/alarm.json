@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=up,powered=false": {
+      "model": "industrial_facilities:block/alarm",
+      "x": 0,
+      "y": 0
+    },
+    "facing=up,powered=true": {
+      "model": "industrial_facilities:block/alarm_on",
+      "x": 0,
+      "y": 0
+    },
+    "facing=down,powered=false": {
+      "model": "industrial_facilities:block/alarm",
+      "x": 180,
+      "y": 0
+    },
+    "facing=down,powered=true": {
+      "model": "industrial_facilities:block/alarm_on",
+      "x": 180,
+      "y": 0
+    },
+    "facing=north,powered=false": {
+      "model": "industrial_facilities:block/alarm",
+      "x": 90,
+      "y": 0
+    },
+    "facing=north,powered=true": {
+      "model": "industrial_facilities:block/alarm_on",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,powered=false": {
+      "model": "industrial_facilities:block/alarm",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,powered=true": {
+      "model": "industrial_facilities:block/alarm_on",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west,powered=false": {
+      "model": "industrial_facilities:block/alarm",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,powered=true": {
+      "model": "industrial_facilities:block/alarm_on",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,powered=false": {
+      "model": "industrial_facilities:block/alarm",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,powered=true": {
+      "model": "industrial_facilities:block/alarm_on",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

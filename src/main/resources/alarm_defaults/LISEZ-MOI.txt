@@ -1,0 +1,40 @@
+ALARME INDUSTRIELLE — Minecraft 1.21.1 / NeoForge
+
+Petite dalle centrée de 10 × 10 × 3 pixels, orientable sur les six faces.
+Pose sur un mur, au sol ou au plafond : la face cliquée définit l’orientation.
+Clic droit : choisir un son, écouter un aperçu de 3 secondes, régler la portée
+de 1 à 128 blocs puis Enregistrer. Annuler ne change aucun réglage.
+Signal redstone, direct ou via le support : lecture en boucle. Sans signal,
+le son s’arrête. Chaque alarme garde ses propres réglages dans le monde.
+Le volume décroît linéairement jusqu’à devenir nul à la portée choisie.
+Les sons d’alarme suivent le réglage audio « Blocs » du jeu.
+Fabrication : Fabricator > Machines ; 3 lingots de fer + 2 redstones + 1 bloc musical.
+
+CONFIGURATION (créée au premier lancement)
+config/industrial_facilities/alarms/alarms.json
+config/industrial_facilities/alarms/*.ogg
+
+Ajouter un fichier Ogg/Vorbis mono (16 Mio maximum), puis une entrée dans sounds :
+{ "id": "mon_alarme", "name": "Mon alarme", "file": "mon_alarme.ogg" }
+id : unique, 1 à 48 caractères a-z, 0-9 ou _ ; nom : 80 caractères maximum.
+Les chemins de fichiers utilisent des minuscules et restent dans ce dossier.
+Sous-dossiers possibles, par exemple "file": "usine/sirene.ogg".
+Une entrée peut aussi référencer un son existant du jeu ou d’un autre mod :
+{ "id": "cloche", "name": "Cloche", "sound": "minecraft:block.bell.use" }
+default_range fixe la portée initiale des nouvelles alarmes (32 par défaut).
+Le catalogue contient au maximum 128 entrées ; la portée maximale est 128 blocs.
+Redémarrer le jeu et le serveur après modification du catalogue ou des sons.
+Un fichier JSON invalide n’est pas écrasé ; un avertissement est écrit dans les logs.
+Une entrée retirée du catalogue est remplacée par la première entrée valide.
+Le sous-dossier _generated_pack est créé automatiquement ; ne pas le modifier.
+
+MULTIJOUEUR
+Le serveur décide de la liste, des réglages et de l’activation redstone.
+Copier le même dossier alarms (catalogue + fichiers Ogg) sur chaque client et sur
+le serveur, puis les redémarrer. Les fichiers audio ne sont pas transférés par
+le réseau du mod. Le GUI signale un son absent du client.
+Un son fourni par un autre mod/resource pack doit également exister chez les clients.
+Une alarme fonctionne tant que son chunk est chargé et que le monde tourne.
+
+Les trois sons fournis sont des synthèses originales : sirène montante/descendante,
+pulsations d’évacuation et alerte à deux tons. Aucun extrait tiers n’est utilisé.

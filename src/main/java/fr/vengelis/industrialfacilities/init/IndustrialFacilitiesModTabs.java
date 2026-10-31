@@ -120,5 +120,6 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.ALARM.get().asItem());
 			}).build());
 }

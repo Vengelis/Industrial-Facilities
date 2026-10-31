@@ -152,5 +152,13 @@
   "block.industrial_facilities.industrial_door_safe_frame": "Safe Zone Door Frame",
   "block.industrial_facilities.industrial_door_safe_controller": "Safe Zone Door Controller",
   "block.industrial_facilities.industrial_door_radiation_frame": "Radioactive Door Frame",
-  "block.industrial_facilities.industrial_door_radiation_controller": "Radioactive Door Controller"
+  "block.industrial_facilities.industrial_door_radiation_controller": "Radioactive Door Controller",
+  "block.industrial_facilities.alarm": "Industrial Alarm",
+  "gui.industrial_facilities.alarm.sounds": "Alarm sound",
+  "gui.industrial_facilities.alarm.range": "Range: %s blocks",
+  "gui.industrial_facilities.alarm.preview": "Preview",
+  "gui.industrial_facilities.alarm.cancel": "Cancel",
+  "gui.industrial_facilities.alarm.save": "Save",
+  "gui.industrial_facilities.alarm.redstone": "Loops while powered by redstone",
+  "gui.industrial_facilities.alarm.missing": "Client sound missing — check configuration"
 }

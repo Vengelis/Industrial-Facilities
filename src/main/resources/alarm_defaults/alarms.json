@@ -1,0 +1,20 @@
+{
+  "default_range": 32,
+  "sounds": [
+    {
+      "id": "siren",
+      "name": "Sirène industrielle",
+      "file": "siren.ogg"
+    },
+    {
+      "id": "evacuation",
+      "name": "Évacuation — pulsations",
+      "file": "evacuation.ogg"
+    },
+    {
+      "id": "beacon",
+      "name": "Alerte deux tons",
+      "file": "beacon.ogg"
+    }
+  ]
+}
