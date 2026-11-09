@@ -13,7 +13,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 public final class AccessContent {
     public static BlockEntityType<AccessTerminalEntity> TYPE;
     @SubscribeEvent public static void register(RegisterEvent event){event.register(Registries.BLOCK_ENTITY_TYPE,helper->{
-        TYPE=BlockEntityType.Builder.of(AccessTerminalEntity::new,IndustrialFacilitiesModBlocks.TERMINAL_READER.get(),IndustrialFacilitiesModBlocks.TERMINAL_ENCODER.get(),IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get()).build(null);
+        TYPE=BlockEntityType.Builder.<AccessTerminalEntity>of((pos,state)->state.getBlock() instanceof fr.vengelis.industrialfacilities.security.CameraTerminalBlock?new fr.vengelis.industrialfacilities.security.CameraTerminalEntity(pos,state):new AccessTerminalEntity(pos,state),IndustrialFacilitiesModBlocks.TERMINAL_READER.get(),IndustrialFacilitiesModBlocks.TERMINAL_ENCODER.get(),IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get(),IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get()).build(null);
         helper.register(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"access_terminal"),TYPE);
     });}
     private AccessContent(){}

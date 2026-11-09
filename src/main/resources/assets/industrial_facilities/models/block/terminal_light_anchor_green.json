@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "source": "industrial_facilities:block/terminal_reader_open_screen_32",
+    "particle": "industrial_facilities:block/terminal_body_32"
+  },
+  "elements": [
+    {
+      "name": "shader_light_anchor_hidden_inside_terminal_head",
+      "from": [
+        7.75,
+        4,
+        7.75
+      ],
+      "to": [
+        8.25,
+        4.5,
+        8.25
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#source",
+          "uv": [
+            5.25,
+            7.25,
+            5.25,
+            7.25
+          ]
+        },
+        "south": {
+          "texture": "#source",
+          "uv": [
+            5.25,
+            7.25,
+            5.25,
+            7.25
+          ]
+        },
+        "west": {
+          "texture": "#source",
+          "uv": [
+            5.25,
+            7.25,
+            5.25,
+            7.25
+          ]
+        },
+        "east": {
+          "texture": "#source",
+          "uv": [
+            5.25,
+            7.25,
+            5.25,
+            7.25
+          ]
+        },
+        "up": {
+          "texture": "#source",
+          "uv": [
+            5.25,
+            7.25,
+            5.25,
+            7.25
+          ]
+        },
+        "down": {
+          "texture": "#source",
+          "uv": [
+            5.25,
+            7.25,
+            5.25,
+            7.25
+          ]
+        }
+      }
+    }
+  ]
+}

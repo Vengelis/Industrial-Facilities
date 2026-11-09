@@ -33,13 +33,16 @@ import java.util.*;
 @EventBusSubscriber(modid=IndustrialFacilitiesMod.MODID,value=Dist.CLIENT)
 public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessTerminalEntity> {
     private static final ResourceLocation OPEN_SCREEN=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_reader_open_screen_32");
+    private static final ResourceLocation INDICATOR=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_indicator_emissive_32");
     private static final Map<BakedQuad,BakedQuad> OPEN_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<BakedQuad,BakedQuad> INDICATOR_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
     public AccessTerminalRenderer(BlockEntityRendererProvider.Context context){}
     @SubscribeEvent public static void register(EntityRenderersEvent.RegisterRenderers event){event.registerBlockEntityRenderer(AccessContent.TYPE,AccessTerminalRenderer::new);}
     @SubscribeEvent public static void registerScreen(ModelEvent.RegisterAdditional event){
         event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_reader_open_screen")));
+        event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_indicator_emissive")));
     }
-    @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();}
+    @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();INDICATOR_QUADS.clear();}
     @SubscribeEvent public static void itemColours(RegisterColorHandlersEvent.Item event){
         event.register((stack,index)->0xff000000|colour(index,1,false),IndustrialFacilitiesModItems.TERMINAL_READER.get(),IndustrialFacilitiesModItems.TERMINAL_ENCODER.get(),IndustrialFacilitiesModItems.TERMINAL_BADGE_BANK.get());
     }
@@ -54,8 +57,11 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     /** Remap only the screen's sprite; every bevel, vertex and normal stays intact. */
     public static BakedQuad screenQuad(BakedQuad quad,boolean granted){
         if(!granted||!quad.getSprite().contents().name().getPath().equals("block/terminal_reader_screen_32"))return quad;
-        return OPEN_QUADS.computeIfAbsent(quad,source->{
-            TextureAtlasSprite closed=source.getSprite(),open=Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(OPEN_SCREEN);
+        return remap(quad,OPEN_SCREEN,OPEN_QUADS);
+    }
+    private static BakedQuad remap(BakedQuad quad,ResourceLocation target,Map<BakedQuad,BakedQuad> cache){
+        return cache.computeIfAbsent(quad,source->{
+            TextureAtlasSprite closed=source.getSprite(),open=Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(target);
             int[] vertices=source.getVertices().clone();int stride=vertices.length/4;
             for(int i=0;i<4;i++){
                 int u=i*stride+4,v=i*stride+5;
@@ -67,6 +73,14 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
             return new BakedQuad(vertices,source.getTintIndex(),source.getDirection(),open,source.isShade(),source.hasAmbientOcclusion());
         });
     }
+    public static boolean isEmissive(BakedQuad quad,int level){
+        String sprite=quad.getSprite().contents().name().getPath();int index=quad.getTintIndex();
+        return sprite.contains("terminal_reader_screen")||sprite.contains("terminal_encoder_screen")||sprite.contains("terminal_badge_bank_screen")||sprite.contains("camera_terminal_screen")
+            ||index==200||(index>=100&&index<100+Math.clamp(level,1,5));
+    }
+    /** Native glowing-eyes lane is recognized by Iris shader packs. The normal
+     * pass still writes the dark screen backing and depth before this overlay. */
+    public static RenderType emissiveRenderType(){return RenderType.eyes(TextureAtlas.LOCATION_BLOCKS);}
     @Override public AABB getRenderBoundingBox(AccessTerminalEntity be){return new AABB(be.getBlockPos()).expandTowards(0,1,0).inflate(.05);}
     @Override public int getViewDistance(){return 64;}
     @Override public void render(AccessTerminalEntity be,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
@@ -76,19 +90,29 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
         pose.pushPose();pose.translate(.5,0,.5);
         pose.mulPose(Axis.YP.rotationDegrees(switch(facing){case EAST->90;case NORTH->180;case WEST->270;default->0;}));
         pose.translate(-.5,0,-.5);
-        // All sprites belong to the block atlas: no stale buffer when switching
-        // between casing, screen, keys and the five dynamic level indicators.
         VertexConsumer out=buffers.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+        record Glow(BakedQuad quad,int color){}
+        List<Glow> emissiveQuads=new ArrayList<>();
         for(int side=0;side<=6;side++){
             random.setSeed(42);
             for(BakedQuad quad:model.getQuads(null,side==6?null:Direction.values()[side],random)){
                 int index=quad.getTintIndex();int color=colour(index,Math.clamp(be.accessLevel,1,5),be.accessGranted);
-                String sprite=quad.getSprite().contents().name().getPath();
-                boolean emissive=sprite.contains("terminal_reader_screen")||sprite.contains("terminal_encoder_screen")||sprite.contains("terminal_badge_bank_screen")
-                    ||index==200||(index>=100&&index<100+Math.clamp(be.accessLevel,1,5));
+                boolean emissive=isEmissive(quad,be.accessLevel);
                 int packedLight=emissive?LightTexture.FULL_BRIGHT:lighting.sample(quad);
-                out.putBulkData(pose.last(),screenQuad(quad,be.accessGranted),(color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,1f,packedLight,OverlayTexture.NO_OVERLAY);
+                BakedQuad display=screenQuad(quad,be.accessGranted);
+                if(emissive&&(index==200||index>=100&&index<105))display=remap(display,INDICATOR,INDICATOR_QUADS);
+                // Eyes uses additive blending. A black depth-writing backing
+                // prevents transparent screens and avoids doubling the color.
+                float base=emissive?0f:1f;
+                out.putBulkData(pose.last(),display,base*(color>>16&255)/255f,base*(color>>8&255)/255f,base*(color&255)/255f,1f,packedLight,OverlayTexture.NO_OVERLAY);
+                if(emissive)emissiveQuads.add(new Glow(display,color));
             }
+        }
+        // Request the second buffer only after completing the first pass:
+        // BufferSource may flush and reuse its builder when the lane changes.
+        if(!emissiveQuads.isEmpty()){
+            VertexConsumer glow=buffers.getBuffer(emissiveRenderType());
+            for(Glow entry:emissiveQuads){int color=entry.color();glow.putBulkData(pose.last(),entry.quad(),(color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,1f,LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);}
         }
         pose.popPose();
     }

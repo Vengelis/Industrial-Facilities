@@ -2,5 +2,13 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "industrial_facilities:item/terminal_link_card"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "industrial_facilities:automation_mode": 1
+      },
+      "model": "industrial_facilities:item/terminal_link_card_automation"
+    }
+  ]
 }

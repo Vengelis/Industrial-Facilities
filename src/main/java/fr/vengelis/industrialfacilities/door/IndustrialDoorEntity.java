@@ -18,6 +18,8 @@ public class IndustrialDoorEntity extends BlockEntity {
     public int size;
     public java.util.UUID doorInstanceId;
     public boolean allowLinkedRedstone;
+    public boolean allowCameraAutomation;
+    public java.util.UUID automationOwner;
     public long accessOpenUntil;
     public float progress, previousProgress;
     public boolean targetOpen, tearingDown, paused;
@@ -52,6 +54,7 @@ public class IndustrialDoorEntity extends BlockEntity {
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider) {
         super.saveAdditional(tag,provider);
         if(doorInstanceId!=null)tag.putUUID("DoorInstanceId",doorInstanceId);
+        if(automationOwner!=null)tag.putUUID("AutomationOwner",automationOwner);tag.putBoolean("AllowCameraAutomation",allowCameraAutomation);
         tag.putBoolean("AllowLinkedRedstone",allowLinkedRedstone);tag.putLong("AccessOpenUntil",accessOpenUntil);
         if(owner!=null)tag.putLong("Owner",owner.asLong());
         if(size>0)tag.putLong("Origin",doorOrigin().asLong());
@@ -60,6 +63,7 @@ public class IndustrialDoorEntity extends BlockEntity {
     @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider) {
         super.loadAdditional(tag,provider);
         doorInstanceId=tag.hasUUID("DoorInstanceId")?tag.getUUID("DoorInstanceId"):null;
+        automationOwner=tag.hasUUID("AutomationOwner")?tag.getUUID("AutomationOwner"):null;allowCameraAutomation=tag.getBoolean("AllowCameraAutomation");
         allowLinkedRedstone=tag.getBoolean("AllowLinkedRedstone");accessOpenUntil=tag.getLong("AccessOpenUntil");
         owner=tag.contains("Owner")?BlockPos.of(tag.getLong("Owner")):null;
         origin=tag.contains("Origin")?BlockPos.of(tag.getLong("Origin")):null;

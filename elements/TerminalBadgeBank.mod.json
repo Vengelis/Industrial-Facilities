@@ -95,7 +95,7 @@
     "placeSound": "",
     "stepSound": "",
     "luminance": {
-      "fixedValue": 0.0
+      "fixedValue": 4.0
     },
     "unbreakable": false,
     "vanillaToolTier": "IRON",

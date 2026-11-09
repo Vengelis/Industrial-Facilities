@@ -26,20 +26,24 @@ import net.minecraft.world.phys.shapes.*;
 public class AccessTerminalBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING=BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ASSEMBLED=BooleanProperty.create("assembled");
+    /** Public state for shader-pack material rules; both halves mirror the reader. */
+    public static final BooleanProperty ACCESS_GRANTED=BooleanProperty.create("access_granted");
     public static final EnumProperty<DoubleBlockHalf> HALF=BlockStateProperties.DOUBLE_BLOCK_HALF;
     public final boolean encoder,bank;
     public AccessTerminalBlock(boolean encoder){
         this(encoder,false);
     }
     public AccessTerminalBlock(boolean encoder,boolean bank){
-        super(Properties.of().strength(3,20).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().dynamicShape());this.encoder=encoder;this.bank=bank;
-        registerDefaultState(stateDefinition.any().setValue(FACING,Direction.SOUTH).setValue(ASSEMBLED,false).setValue(HALF,DoubleBlockHalf.LOWER));
+        super(Properties.of().strength(3,20).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().dynamicShape().lightLevel(state->4));this.encoder=encoder;this.bank=bank;
+        registerDefaultState(stateDefinition.any().setValue(FACING,Direction.SOUTH).setValue(ASSEMBLED,false).setValue(ACCESS_GRANTED,false).setValue(HALF,DoubleBlockHalf.LOWER));
     }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(FACING,ASSEMBLED,HALF);}
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(FACING,ASSEMBLED,ACCESS_GRANTED,HALF);}
     @Override public BlockState getStateForPlacement(BlockPlaceContext context){return defaultBlockState().setValue(FACING,context.getHorizontalDirection().getOpposite());}
     @Override public BlockEntity newBlockEntity(BlockPos pos,BlockState state){return new AccessTerminalEntity(pos,state);}
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level,BlockState state,BlockEntityType<T> type){return type==AccessContent.TYPE?(l,p,s,be)->AccessTerminalEntity.tick(l,p,s,(AccessTerminalEntity)be):null;}
-    @Override protected RenderShape getRenderShape(BlockState state){return state.getValue(ASSEMBLED)?RenderShape.INVISIBLE:RenderShape.MODEL;}
+    // Assembled terrain geometry is a tiny shader light anchor hidden inside
+    // the head. The full terminal continues to be drawn by its BER.
+    @Override protected RenderShape getRenderShape(BlockState state){return RenderShape.MODEL;}
     @Override protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return state.getValue(ASSEMBLED)?Block.box(2,0,2,14,state.getValue(HALF)==DoubleBlockHalf.LOWER?16:12.8,14):Shapes.block();}
     @Override protected VoxelShape getCollisionShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return getShape(state,level,pos,context);}
     @Override public PushReaction getPistonPushReaction(BlockState state){return PushReaction.BLOCK;}

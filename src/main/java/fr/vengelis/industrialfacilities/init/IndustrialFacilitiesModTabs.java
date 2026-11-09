@@ -135,5 +135,8 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_MASTER.get());
 				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_LIMITED.get());
 				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.SECURITY_CAMERA.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.SIGNAL_EMITTER.get().asItem());
 			}).build());
 }

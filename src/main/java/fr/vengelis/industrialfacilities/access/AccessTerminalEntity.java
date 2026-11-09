@@ -39,10 +39,28 @@ public class AccessTerminalEntity extends BlockEntity {
         boolean next=AccessDoorService.readerGranted(this);
         if(accessGranted!=next){accessGranted=next;sync();}
     }
-    public void sync(){setChanged();if(level!=null)level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),3);}
-    @Override public void onLoad(){super.onLoad();if(level instanceof ServerLevel server&&terminalId!=null&&getBlockState().getValue(AccessTerminalBlock.ASSEMBLED)&&getBlockState().getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER)AccessRegistry.get(server.getServer()).put(this);}
+    public void sync(){
+        setChanged();
+        syncReaderMaterialState();
+        if(level!=null)level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),3);
+    }
+    /** Minecraft lighting is scalar; this state exposes the red/green choice to
+     * shader packs without making them inspect block-entity NBT. */
+    private void syncReaderMaterialState(){
+        if(!(level instanceof ServerLevel)||!getBlockState().hasProperty(AccessTerminalBlock.ACCESS_GRANTED))return;
+        BlockState state=getBlockState();
+        if(state.getValue(AccessTerminalBlock.HALF)!=DoubleBlockHalf.LOWER)return;
+        boolean granted=!encoder&&!bank&&state.getValue(AccessTerminalBlock.ASSEMBLED)&&accessGranted;
+        for(BlockPos pos:new BlockPos[]{worldPosition,worldPosition.above()}){
+            if(!level.hasChunkAt(pos))continue;
+            BlockState part=level.getBlockState(pos);
+            if(part.is(state.getBlock())&&part.hasProperty(AccessTerminalBlock.ACCESS_GRANTED)&&part.getValue(AccessTerminalBlock.ACCESS_GRANTED)!=granted)
+                level.setBlock(pos,part.setValue(AccessTerminalBlock.ACCESS_GRANTED,granted),3);
+        }
+    }
+    @Override public void onLoad(){super.onLoad();syncReaderMaterialState();if(level instanceof ServerLevel server&&terminalId!=null&&getBlockState().getValue(AccessTerminalBlock.ASSEMBLED)&&getBlockState().getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER)AccessRegistry.get(server.getServer()).put(this);}
     public static void tick(Level level,BlockPos pos,BlockState state,AccessTerminalEntity be){
-        if(level instanceof ServerLevel&&state.getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER)be.updateAccessState();
+        if(level instanceof ServerLevel&&state.getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER){be.updateAccessState();be.syncReaderMaterialState();}
         if(level instanceof ServerLevel&&(level.getGameTime()+pos.asLong())%20==0){
             if(state.getValue(AccessTerminalBlock.ASSEMBLED)&&level.hasChunkAt(state.getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER?pos.above():pos.below()))AccessTerminalBlock.checkStructure(level,pos,state);
             else if(!state.getValue(AccessTerminalBlock.ASSEMBLED)){AccessTerminalBlock.tryAssemble(level,pos);AccessTerminalBlock.tryAssemble(level,pos.below());}

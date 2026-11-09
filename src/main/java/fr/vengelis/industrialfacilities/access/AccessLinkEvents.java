@@ -22,6 +22,10 @@ public final class AccessLinkEvents {
         if(event.getLevel().isClientSide||event.getAction()!=PlayerInteractEvent.LeftClickBlock.Action.START||!(event.getEntity() instanceof ServerPlayer player)||!player.isAlive()
             ||!player.level().hasChunkAt(event.getPos())||player.distanceToSqr(event.getPos().getCenter())>64)return;
         AccessBadges.Result result;var terminal=AccessTerminalEntity.resolve(player.level(),event.getPos());
+        if(TerminalLinkCardItem.automationMode(stack)){
+            result=fr.vengelis.industrialfacilities.security.CameraLinking.click(player,event.getPos(),stack);
+            player.displayClientMessage(Component.translatable(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();return;
+        }
         if(terminal!=null){
             if(terminal.encoder||terminal.bank)result=AccessBadges.Result.fail("La carte de liaison se configure sur un terminal lecteur.");
             else if(!terminal.isOwner(player))result=AccessBadges.Result.fail("Seul le créateur du terminal peut le lier.");

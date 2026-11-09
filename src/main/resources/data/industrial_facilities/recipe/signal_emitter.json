@@ -1,0 +1,26 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 3
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 4
+    },
+    {
+      "item": "minecraft:repeater",
+      "count": 1
+    },
+    {
+      "item": "minecraft:quartz",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:signal_emitter",
+    "count": 1
+  }
+}

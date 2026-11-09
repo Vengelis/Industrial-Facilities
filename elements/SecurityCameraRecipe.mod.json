@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:SecurityCamera"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.COPPER_INGOT",
+      "Items.COPPER_INGOT",
+      "Items.REDSTONE",
+      "Items.REDSTONE",
+      "Blocks.GLASS",
+      "Items.QUARTZ"
+    ],
+    "recipeReturnStack": "CUSTOM:SecurityCamera",
+    "name": "security_camera",
+    "namespace": "mod"
+  }
+}

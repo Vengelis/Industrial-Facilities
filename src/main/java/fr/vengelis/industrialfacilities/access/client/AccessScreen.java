@@ -23,7 +23,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private String codeDraft="",limitDraft="0",lastCode="",nameDraft="",lastCustomName="";
     private boolean nameDirty,updatingName;
     private ItemStack observedNameBadge=ItemStack.EMPTY;
-    private Button clearLinks,clearBadge,redstone,nextCode,renameBadge,bankSharing;
+    private Button clearLinks,clearBadge,redstone,nextCode,renameBadge,bankSharing,cameraAutomation;
     private final List<Button> readerLevels=new ArrayList<>(),masterLevels=new ArrayList<>(),ownerButtons=new ArrayList<>(),encodingButtons=new ArrayList<>();
     public AccessScreen(AccessMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=340;imageHeight=menu.mode==AccessMenu.ENCODER?284:218;}
     private static Component tr(String key,Object... args){return Component.translatable("gui.industrial_facilities.access."+key,args);}
@@ -86,7 +86,8 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         });
     }
     private void initDoor(){
-        redstone=button(14,69,imageWidth-28,24,Component.empty(),b->send(AccessMenu.REDSTONE,"",menu.allowRedstone?0:1));ownerButtons.add(redstone);
+        redstone=button(14,62,imageWidth-28,22,Component.empty(),b->send(AccessMenu.REDSTONE,"",menu.allowRedstone?0:1));ownerButtons.add(redstone);
+        cameraAutomation=button(14,88,imageWidth-28,22,Component.empty(),b->send(AccessMenu.CAMERA_AUTOMATION,"",menu.allowCameraAutomation?0:1));ownerButtons.add(cameraAutomation);
         button(imageWidth-88,168,74,20,tr("close"),b->onClose());
     }
     @Override protected void containerTick(){super.containerTick();refresh();}
@@ -96,6 +97,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         for(int i=0;i<masterLevels.size();i++)masterLevels.get(i).setMessage(Component.literal((i+1==selectedLevel?"[":"")+(i+1)+(i+1==selectedLevel?"]":"")));
         if(codeDisplay!=null&&!menu.code.equals(lastCode)){codeDisplay.setValue(menu.code);lastCode=menu.code;}
         if(redstone!=null)redstone.setMessage(tr(menu.allowRedstone?"redstone_on":"redstone_off"));
+        if(cameraAutomation!=null)cameraAutomation.setMessage(tr(menu.allowCameraAutomation?"camera_automation_on":"camera_automation_off"));
         if(nextCode!=null)nextCode.active=!AccessBadges.codes(menu.input.getItem(0)).isEmpty();
         if(nameInput!=null&&menu.mode==AccessMenu.ENCODER){
             boolean canEncode=AccessMenu.badge(menu.input.getItem(0));
@@ -152,7 +154,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             g.drawString(font,tr("card_slot"),14,invY+10,ACCENT,false);if(!compact)g.drawString(font,playerInventoryTitle,89,invY-11,MUTED,false);
         }else{
             g.drawString(font,tr(menu.secured?"secured":"unsecured"),14,41,ACCENT,false);
-            wrapped(g,tr(menu.secured?(menu.allowRedstone?"door_redstone_hint":"door_badge_hint"):"door_unsecured_hint"),14,109,imageWidth-28,MUTED);
+            wrapped(g,tr(menu.secured?(menu.allowRedstone?"door_redstone_hint":"door_badge_hint"):"door_unsecured_hint"),14,120,imageWidth-28,MUTED);
             if(!menu.editable)drawFit(g,tr("read_only"),14,149,imageWidth-28,0xD6A97B);
             drawFit(g,status(menu.status),14,197,imageWidth-28,TEXT);
         }
@@ -172,6 +174,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         if(menu.mode==AccessMenu.ENCODER&&limitInput!=null&&limitInput.isMouseOver(mouseX,mouseY))g.renderTooltip(font,tr("zero_unlimited"),mouseX,mouseY);
         if(nameInput!=null&&nameInput.isMouseOver(mouseX,mouseY))g.renderTooltip(font,tr("name_hint"),mouseX,mouseY);
         if(bankSharing!=null&&bankSharing.isMouseOver(mouseX,mouseY))g.renderTooltip(font,font.split(tr("bank_sharing_hint"),240),mouseX,mouseY);
+        if(cameraAutomation!=null&&cameraAutomation.isMouseOver(mouseX,mouseY))g.renderTooltip(font,font.split(tr("camera_automation_hint"),240),mouseX,mouseY);
         if(nextCode!=null&&nextCode.isMouseOver(mouseX,mouseY))g.renderTooltip(font,tr("next_code_hint"),mouseX,mouseY);
     }
 }

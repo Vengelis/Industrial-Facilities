@@ -1,20 +1,62 @@
 {
-  "variants": {
-    "facing=south": {
-      "model": "industrial_facilities:block/terminal_badge_bank",
-      "y": 0
+  "multipart": [
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_badge_bank",
+        "y": 0
+      }
     },
-    "facing=east": {
-      "model": "industrial_facilities:block/terminal_badge_bank",
-      "y": 270
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_badge_bank",
+        "y": 270
+      }
     },
-    "facing=north": {
-      "model": "industrial_facilities:block/terminal_badge_bank",
-      "y": 180
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_badge_bank",
+        "y": 180
+      }
     },
-    "facing=west": {
-      "model": "industrial_facilities:block/terminal_badge_bank",
-      "y": 90
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_badge_bank",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "assembled": "true",
+        "half": "lower"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_light_anchor_empty"
+      }
+    },
+    {
+      "when": {
+        "assembled": "true",
+        "half": "upper"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_light_anchor_orange"
+      }
     }
-  }
+  ]
 }

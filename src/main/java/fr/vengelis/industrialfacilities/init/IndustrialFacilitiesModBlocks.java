@@ -8,6 +8,9 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 
 import net.minecraft.world.level.block.Block;
 
+import fr.vengelis.industrialfacilities.security.SignalEmitterBlock;
+import fr.vengelis.industrialfacilities.security.SecurityCameraBlock;
+import fr.vengelis.industrialfacilities.security.CameraTerminalBlock;
 import fr.vengelis.industrialfacilities.block.*;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 
@@ -127,6 +130,9 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> TERMINAL_READER;
 	public static final DeferredBlock<Block> TERMINAL_ENCODER;
 	public static final DeferredBlock<Block> TERMINAL_BADGE_BANK;
+	public static final DeferredBlock<Block> SECURITY_CAMERA;
+	public static final DeferredBlock<Block> CAMERA_TERMINAL;
+	public static final DeferredBlock<Block> SIGNAL_EMITTER;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -242,6 +248,9 @@ public class IndustrialFacilitiesModBlocks {
 		TERMINAL_READER = REGISTRY.register("terminal_reader", TerminalReaderBlock::new);
 		TERMINAL_ENCODER = REGISTRY.register("terminal_encoder", TerminalEncoderBlock::new);
 		TERMINAL_BADGE_BANK = REGISTRY.register("terminal_badge_bank", TerminalBadgeBankBlock::new);
+		SECURITY_CAMERA = REGISTRY.register("security_camera", SecurityCameraBlock::new);
+		CAMERA_TERMINAL = REGISTRY.register("camera_terminal", CameraTerminalBlock::new);
+		SIGNAL_EMITTER = REGISTRY.register("signal_emitter", SignalEmitterBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

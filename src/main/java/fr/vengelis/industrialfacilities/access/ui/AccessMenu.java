@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 public class AccessMenu extends AbstractContainerMenu {
     public static final int READER=0,ENCODER=1,DOOR=2;
-    public static final int SET_LEVEL=0,CLEAR_LINKS=1,ADD_CODE=2,REMOVE_CODE=3,CLEAR_BADGE=4,MASTER=5,LIMIT=6,REDSTONE=7,RENAME=8,SET_BANK_SHARING=9;
+    public static final int SET_LEVEL=0,CLEAR_LINKS=1,ADD_CODE=2,REMOVE_CODE=3,CLEAR_BADGE=4,MASTER=5,LIMIT=6,REDSTONE=7,RENAME=8,SET_BANK_SHARING=9,CAMERA_AUTOMATION=10;
     public final Inventory inventory;
     public final BlockPos position;
     public final int mode;
@@ -24,7 +24,7 @@ public class AccessMenu extends AbstractContainerMenu {
     public final SimpleContainer input=new SimpleContainer(1);
     public String code="",status="";
     public int accessLevel=1,links;
-    public boolean editable,allowRedstone,secured;
+    public boolean editable,allowRedstone,secured,allowCameraAutomation;
     private final AccessTerminalEntity terminal;
     private final IndustrialDoorEntity door;
     private final UUID instanceId;
@@ -86,16 +86,16 @@ public class AccessMenu extends AbstractContainerMenu {
     }
     private void refresh(){
         if(terminal!=null){code=terminal.code();accessLevel=terminal.accessLevel;links=terminal.linkedCount();editable=terminal.isOwner(inventory.player);}
-        else if(door!=null){allowRedstone=door.allowLinkedRedstone;editable=AccessDoorService.canConfigure(inventory.player,door);secured=AccessDoorService.isSecured(door);}
+        else if(door!=null){allowRedstone=door.allowLinkedRedstone;allowCameraAutomation=door.allowCameraAutomation;editable=AccessDoorService.canConfigure(inventory.player,door);secured=AccessDoorService.isSecured(door);}
     }
     @Override public void broadcastChanges(){
         super.broadcastChanges();if(!(inventory.player instanceof ServerPlayer server))return;
-        refresh();var current=new AccessMessages.State(containerId,code,accessLevel,links,editable,allowRedstone,secured,status);
+        refresh();var current=new AccessMessages.State(containerId,code,accessLevel,links,editable,allowRedstone,secured,allowCameraAutomation,status);
         if(!current.equals(lastState)){lastState=current;PacketDistributor.sendToPlayer(server,current);}
     }
     public void receive(AccessMessages.State state){
         if(state.menuId()!=containerId)return;
-        code=state.code();accessLevel=Math.clamp(state.level(),1,5);links=Math.max(0,state.links());editable=state.editable();allowRedstone=state.redstone();secured=state.secured();status=state.status();
+        code=state.code();accessLevel=Math.clamp(state.level(),1,5);links=Math.max(0,state.links());editable=state.editable();allowRedstone=state.redstone();secured=state.secured();allowCameraAutomation=state.cameraAutomation();status=state.status();
     }
     public void apply(Player player,int action,String enteredCode,int value){
         if(player.level().isClientSide()||player.containerMenu!=this||!stillValid(player)||enteredCode==null||enteredCode.length()>64)return;
@@ -106,8 +106,8 @@ public class AccessMenu extends AbstractContainerMenu {
             else return;
             status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";
         }else if(mode==DOOR){
-            if(action!=REDSTONE||(value!=0&&value!=1))return;
-            changed=AccessDoorService.setAllowRedstone(player,door,value==1);
+            if((action!=REDSTONE&&action!=CAMERA_AUTOMATION)||(value!=0&&value!=1))return;
+            changed=action==REDSTONE?AccessDoorService.setAllowRedstone(player,door,value==1):AccessDoorService.setAllowCameraAutomation(player,door,value==1);
             status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";
         }else{
             ItemStack stack=input.getItem(0);

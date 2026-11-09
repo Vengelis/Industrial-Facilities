@@ -144,6 +144,9 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> ACCESS_BADGE_MASTER;
 	public static final DeferredItem<Item> ACCESS_BADGE_LIMITED;
 	public static final DeferredItem<Item> TERMINAL_BADGE_BANK;
+	public static final DeferredItem<Item> SECURITY_CAMERA;
+	public static final DeferredItem<Item> CAMERA_TERMINAL;
+	public static final DeferredItem<Item> SIGNAL_EMITTER;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -265,6 +268,9 @@ public class IndustrialFacilitiesModItems {
 		ACCESS_BADGE_MASTER = REGISTRY.register("access_badge_master", AccessBadgeMasterItem::new);
 		ACCESS_BADGE_LIMITED = REGISTRY.register("access_badge_limited", AccessBadgeLimitedItem::new);
 		TERMINAL_BADGE_BANK = block(IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK);
+		SECURITY_CAMERA = block(IndustrialFacilitiesModBlocks.SECURITY_CAMERA);
+		CAMERA_TERMINAL = block(IndustrialFacilitiesModBlocks.CAMERA_TERMINAL);
+		SIGNAL_EMITTER = block(IndustrialFacilitiesModBlocks.SIGNAL_EMITTER);
 	}
 
 	// Start of user code block custom items

@@ -20,11 +20,16 @@ public final class AccessDoorService {
     public static boolean isSecured(IndustrialDoorEntity door){return door.getLevel() instanceof ServerLevel level&&door.doorInstanceId!=null&&!AccessRegistry.get(level.getServer()).readers(door.doorInstanceId).isEmpty();}
     public static boolean canConfigure(Player player,IndustrialDoorEntity door){
         if(!(door.getLevel() instanceof ServerLevel level)||player.level()!=level||door.size==0)return false;
+        return canConfigureOwner(player.getUUID(),door);
+    }
+    public static boolean canConfigureOwner(UUID owner,IndustrialDoorEntity door){
+        if(owner==null||!(door.getLevel() instanceof ServerLevel level)||door.size==0||door.automationOwner!=null&&!door.automationOwner.equals(owner))return false;
         var readers=door.doorInstanceId==null?List.<AccessRegistry.Entry>of():AccessRegistry.get(level.getServer()).readers(door.doorInstanceId);
-        return readers.stream().allMatch(e->e.owner.equals(player.getUUID()));
+        return readers.stream().allMatch(e->e.owner.equals(owner));
     }
     public static boolean setAllowRedstone(Player player,IndustrialDoorEntity door,boolean allow){if(!player.isAlive()||player.distanceToSqr(door.getBlockPos().getCenter())>64||!canConfigure(player,door))return false;door.allowLinkedRedstone=allow;door.sync();return true;}
-    public static boolean shouldOpen(ServerLevel level,IndustrialDoorEntity door){return level.getGameTime()<door.accessOpenUntil||((!isSecured(door)||door.allowLinkedRedstone)&&level.hasNeighborSignal(door.getBlockPos()));}
+    public static boolean setAllowCameraAutomation(Player player,IndustrialDoorEntity door,boolean allow){if(!player.isAlive()||player.distanceToSqr(door.getBlockPos().getCenter())>64||!canConfigure(player,door))return false;door.allowCameraAutomation=allow;if(allow&&door.automationOwner==null)door.automationOwner=player.getUUID();door.sync();return true;}
+    public static boolean shouldOpen(ServerLevel level,IndustrialDoorEntity door){return level.getGameTime()<door.accessOpenUntil||((!isSecured(door)||door.allowLinkedRedstone)&&level.hasNeighborSignal(door.getBlockPos()))||(door.allowCameraAutomation&&fr.vengelis.industrialfacilities.security.AutomationOutputs.active(level,door.getBlockPos(),"door",door.doorInstanceId));}
     /** Keep the open display through closing/obstruction, not just the badge lease. */
     public static boolean readerGranted(AccessTerminalEntity terminal){
         if(!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal.terminalId==null
@@ -45,7 +50,7 @@ public final class AccessDoorService {
         // observed state until its chunk returns, without forcing it to load.
         return unknown&&terminal.accessGranted;
     }
-    public static void dismantle(ServerLevel level,IndustrialDoorEntity door){if(door.doorInstanceId!=null)AccessRegistry.get(level.getServer()).invalidateDoor(door.doorInstanceId);door.doorInstanceId=null;door.accessOpenUntil=0;door.allowLinkedRedstone=false;}
+    public static void dismantle(ServerLevel level,IndustrialDoorEntity door){if(door.doorInstanceId!=null)AccessRegistry.get(level.getServer()).invalidateDoor(door.doorInstanceId);door.doorInstanceId=null;door.accessOpenUntil=0;door.allowLinkedRedstone=false;door.allowCameraAutomation=false;door.automationOwner=null;}
     public static AccessBadges.Result link(Player player,UUID source,IndustrialDoorEntity door){
         if(!(player instanceof ServerPlayer serverPlayer)||!(door.getLevel() instanceof ServerLevel level))return AccessBadges.Result.fail("Liaison impossible.");
         AccessRegistry registry=AccessRegistry.get(level.getServer());AccessRegistry.Entry reader=registry.find(source);

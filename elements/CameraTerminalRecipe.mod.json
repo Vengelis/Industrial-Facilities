@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 2,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:CameraTerminal"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.COPPER_INGOT",
+      "Items.COPPER_INGOT",
+      "Items.REDSTONE",
+      "Items.REDSTONE"
+    ],
+    "recipeReturnStack": "CUSTOM:CameraTerminal",
+    "name": "camera_terminal",
+    "namespace": "mod"
+  }
+}

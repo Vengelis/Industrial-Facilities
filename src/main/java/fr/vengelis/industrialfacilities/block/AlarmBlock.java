@@ -6,6 +6,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
@@ -39,6 +41,7 @@ public class AlarmBlock extends Block implements EntityBlock {
     @Override public boolean canConnectRedstone(BlockState s,BlockGetter l,BlockPos p,Direction side) { return true; }
     @Override public PushReaction getPistonPushReaction(BlockState s) { return PushReaction.BLOCK; }
     @Override public BlockEntity newBlockEntity(BlockPos p,BlockState s) { return new AlarmBlockEntity(p,s); }
+    @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,LivingEntity entity,ItemStack stack){super.setPlacedBy(level,pos,state,entity,stack);if(!level.isClientSide&&entity instanceof Player player&&level.getBlockEntity(pos) instanceof AlarmBlockEntity alarm){alarm.automationOwner=player.getUUID();alarm.setChanged();}}
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level l,BlockState s,BlockEntityType<T> t) {
         return !l.isClientSide && t == AlarmContent.TYPE ? (w,p,state,be) -> ((AlarmBlockEntity)be).tick() : null;
     }

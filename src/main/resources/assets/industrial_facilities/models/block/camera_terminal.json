@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "industrial_facilities:block/terminal_metal_32",
+    "down": "industrial_facilities:block/terminal_metal_32",
+    "up": "industrial_facilities:block/terminal_metal_32",
+    "north": "industrial_facilities:block/terminal_metal_32",
+    "south": "industrial_facilities:block/camera_terminal_screen_32",
+    "east": "industrial_facilities:block/terminal_metal_32",
+    "west": "industrial_facilities:block/terminal_metal_32"
+  }
+}

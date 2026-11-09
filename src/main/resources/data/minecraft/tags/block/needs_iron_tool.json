@@ -13,6 +13,7 @@
     "industrial_facilities:industrial_door_radiation_controller",
     "industrial_facilities:falling_sign",
     "industrial_facilities:road_line",
+    "industrial_facilities:signal_emitter",
     "industrial_facilities:storage_sign",
     "industrial_facilities:elevator_sign",
     "industrial_facilities:left_sign",
@@ -64,6 +65,7 @@
     "industrial_facilities:road_concrete_light_gray",
     "industrial_facilities:industrial_door_dark_controller",
     "industrial_facilities:road_arrow_white",
+    "industrial_facilities:camera_terminal",
     "industrial_facilities:road_line_white",
     "industrial_facilities:industrial_barrier_dark_gray",
     "industrial_facilities:energy_barrier_pillar",
@@ -111,6 +113,7 @@
     "industrial_facilities:industrial_door_dark_frame",
     "industrial_facilities:road_junction_red",
     "industrial_facilities:road_diagonal_red",
-    "industrial_facilities:stop_sign"
+    "industrial_facilities:stop_sign",
+    "industrial_facilities:security_camera"
   ]
 }

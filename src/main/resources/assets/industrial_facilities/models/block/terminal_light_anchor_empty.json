@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "industrial_facilities:block/terminal_body_32"
+  },
+  "elements": []
+}

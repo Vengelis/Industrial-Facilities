@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.*;
 
 public class AlarmBlockEntity extends BlockEntity {
+    public UUID automationOwner,automationInstanceId=UUID.randomUUID();
     private String soundId = "";
     private int range = AlarmConfig.defaultRange();
     private int ticks;
@@ -18,7 +19,7 @@ public class AlarmBlockEntity extends BlockEntity {
     public AlarmBlockEntity(BlockPos p,BlockState s) { super(AlarmContent.TYPE,p,s); }
     public String soundId() { return AlarmConfig.resolve(soundId).id(); }
     public int range() { return range; }
-    public boolean powered() { return level != null && level.hasNeighborSignal(worldPosition); }
+    public boolean powered() { return level != null && (level.hasNeighborSignal(worldPosition)||level instanceof ServerLevel server&&fr.vengelis.industrialfacilities.security.AutomationOutputs.active(server,worldPosition,"alarm",automationInstanceId)); }
     public void configure(String id,int radius) {
         if (AlarmConfig.find(id) == null) return;
         soundId = id; range = Math.clamp(radius,1,AlarmConfig.MAX_RANGE); setChanged();
@@ -60,9 +61,11 @@ public class AlarmBlockEntity extends BlockEntity {
     }
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider registries) {
         super.saveAdditional(tag,registries); tag.putString("AlarmSound",soundId); tag.putInt("AlarmRange",range);
+        if(automationOwner!=null)tag.putUUID("AutomationOwner",automationOwner);tag.putUUID("AutomationInstanceId",automationInstanceId);
     }
     @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider registries) {
         super.loadAdditional(tag,registries); soundId=tag.getString("AlarmSound");
+        automationOwner=tag.hasUUID("AutomationOwner")?tag.getUUID("AutomationOwner"):null;automationInstanceId=tag.hasUUID("AutomationInstanceId")?tag.getUUID("AutomationInstanceId"):UUID.randomUUID();
         range=tag.contains("AlarmRange") ? Math.clamp(tag.getInt("AlarmRange"),1,AlarmConfig.MAX_RANGE) : AlarmConfig.defaultRange();
     }
 }
