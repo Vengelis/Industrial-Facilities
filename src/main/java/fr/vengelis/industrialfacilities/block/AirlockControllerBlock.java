@@ -31,7 +31,7 @@ public class AirlockControllerBlock extends Block implements EntityBlock {
 		net.minecraft.world.level.block.state.properties.BooleanProperty.create("structure_valid");
 
 	public AirlockControllerBlock() {
-		super(BlockBehaviour.Properties.of().sound(SoundType.METAL).strength(5f, 1200f));
+		super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().sound(SoundType.METAL).strength(5f, 1200f));
 		this.registerDefaultState(this.stateDefinition.any().setValue(STRUCTURE_VALID, false));
 	}
 

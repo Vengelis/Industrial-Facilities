@@ -1,0 +1,22 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 4
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 2
+    },
+    {
+      "item": "minecraft:yellow_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:energy_barrier_base",
+    "count": 4
+  }
+}

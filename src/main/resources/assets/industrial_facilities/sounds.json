@@ -54,5 +54,21 @@
         "stream": false
       }
     ]
+  },
+  "terminal_access_granted": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:terminal_access_granted",
+        "stream": false
+      }
+    ]
+  },
+  "terminal_access_denied": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:terminal_access_denied",
+        "stream": false
+      }
+    ]
   }
 }

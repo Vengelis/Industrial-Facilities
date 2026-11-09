@@ -32,7 +32,8 @@
     {
       "when": {
         "north": "low",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -54,7 +55,8 @@
     {
       "when": {
         "north": "tall",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -76,7 +78,8 @@
     {
       "when": {
         "east": "low",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -98,7 +101,8 @@
     {
       "when": {
         "east": "tall",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -120,7 +124,8 @@
     {
       "when": {
         "south": "low",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -142,7 +147,8 @@
     {
       "when": {
         "south": "tall",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -164,7 +170,8 @@
     {
       "when": {
         "west": "low",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
@@ -186,10 +193,247 @@
     {
       "when": {
         "west": "tall",
-        "stacked": "true"
+        "stacked": "true",
+        "panelled": "false"
       },
       "apply": {
         "model": "industrial_facilities:block/industrial_barrier_white_grid_side",
+        "y": 270,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north": "low",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 0,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north": "tall",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 0,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "east": "low",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "east": "tall",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south": "low",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south": "tall",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "west": "low",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 270,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "west": "tall",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_side",
+        "y": 270,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north_east": "true",
+        "stacked": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_diagonal",
+        "y": 0,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north_east": "true",
+        "stacked": "true",
+        "panelled": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_grid_diagonal",
+        "y": 0,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south_east": "true",
+        "stacked": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_diagonal",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south_east": "true",
+        "stacked": "true",
+        "panelled": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_grid_diagonal",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south_west": "true",
+        "stacked": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_diagonal",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south_west": "true",
+        "stacked": "true",
+        "panelled": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_grid_diagonal",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north_west": "true",
+        "stacked": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_diagonal",
+        "y": 270,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north_west": "true",
+        "stacked": "true",
+        "panelled": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_grid_diagonal",
+        "y": 270,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north_east": "true",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_diagonal",
+        "y": 0,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south_east": "true",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_diagonal",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south_west": "true",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_diagonal",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "north_west": "true",
+        "stacked": "true",
+        "panelled": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/industrial_barrier_white_infill_diagonal",
         "y": 270,
         "uvlock": false
       }

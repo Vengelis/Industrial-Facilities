@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 4,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:LuminousPanel"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "MISC",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.REDSTONE",
+      "Items.REDSTONE",
+      "Blocks.GLASS",
+      "Blocks.GLASS",
+      "Blocks.GLASS",
+      "Items.GLOWSTONE_DUST"
+    ],
+    "recipeReturnStack": "CUSTOM:LuminousPanel",
+    "name": "luminous_panel",
+    "namespace": "mod"
+  }
+}

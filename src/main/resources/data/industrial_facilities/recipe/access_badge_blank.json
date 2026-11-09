@@ -1,0 +1,22 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "minecraft:paper",
+      "count": 2
+    },
+    {
+      "item": "minecraft:iron_nugget",
+      "count": 2
+    },
+    {
+      "item": "minecraft:gold_nugget",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:access_badge_blank",
+    "count": 1
+  }
+}

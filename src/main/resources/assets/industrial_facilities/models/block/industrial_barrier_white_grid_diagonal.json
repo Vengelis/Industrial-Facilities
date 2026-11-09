@@ -1,0 +1,214 @@
+{
+  "ambientocclusion": true,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "industrial_facilities:block/industrial_barrier_panel_white",
+    "frame": "industrial_facilities:block/industrial_barrier_panel_white",
+    "panel": "industrial_facilities:block/industrial_barrier_panel_white",
+    "hazard": "industrial_facilities:block/industrial_barrier_hazard_stripe",
+    "mesh": "industrial_facilities:block/industrial_barrier_fine_mesh"
+  },
+  "elements": [
+    {
+      "from": [
+        7.25,
+        0,
+        -3.313708498984761
+      ],
+      "to": [
+        8.75,
+        0.75,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            15.25,
+            8,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            15.25,
+            8,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            15.25,
+            8,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            15.25,
+            8,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        },
+        "down": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        7.25,
+        15.25,
+        -3.313708498984761
+      ],
+      "to": [
+        8.75,
+        16,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            0.75
+          ]
+        },
+        "south": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            0.75
+          ]
+        },
+        "west": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            0.75
+          ]
+        },
+        "east": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            0.75
+          ]
+        },
+        "up": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        },
+        "down": {
+          "texture": "#frame",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        0.75,
+        -3.313708498984761
+      ],
+      "to": [
+        8,
+        15.25,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "west": {
+          "texture": "#mesh",
+          "uv": [
+            0,
+            0.75,
+            8,
+            15.25
+          ],
+          "tintindex": 0
+        },
+        "east": {
+          "texture": "#mesh",
+          "uv": [
+            0,
+            0.75,
+            8,
+            15.25
+          ],
+          "tintindex": 0
+        }
+      },
+      "shade": false
+    }
+  ]
+}

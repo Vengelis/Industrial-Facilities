@@ -19,8 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.item.ItemProperties;
 
 import fr.vengelis.industrialfacilities.procedures.ExtinguisherPropertyValueProviderProcedure;
-import fr.vengelis.industrialfacilities.item.RoadBrushItem;
-import fr.vengelis.industrialfacilities.item.ExtinguisherItem;
+import fr.vengelis.industrialfacilities.item.*;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 
 public class IndustrialFacilitiesModItems {
@@ -97,6 +96,7 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> INDUSTRIAL_BARRIER_WHITE;
 	public static final DeferredItem<Item> INDUSTRIAL_BARRIER_DARK_GRAY;
 	public static final DeferredItem<Item> INDUSTRIAL_BARRIER_YELLOW_HAZARD;
+	public static final DeferredItem<Item> BARRIER_PLIERS;
 	public static final DeferredItem<Item> ROAD_LINE_RED;
 	public static final DeferredItem<Item> ROAD_DASHED_RED;
 	public static final DeferredItem<Item> ROAD_DOUBLE_LINE_RED;
@@ -131,6 +131,19 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_FRAME;
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
 	public static final DeferredItem<Item> ALARM;
+	public static final DeferredItem<Item> LUMINOUS_PANEL;
+	public static final DeferredItem<Item> LUMINOUS_PANEL_THIN;
+	public static final DeferredItem<Item> LUMINOUS_PANEL_SURFACE;
+	public static final DeferredItem<Item> ENERGY_BARRIER_BASE;
+	public static final DeferredItem<Item> ENERGY_BARRIER_PILLAR;
+	public static final DeferredItem<Item> TERMINAL_READER;
+	public static final DeferredItem<Item> TERMINAL_ENCODER;
+	public static final DeferredItem<Item> TERMINAL_LINK_CARD;
+	public static final DeferredItem<Item> ACCESS_BADGE_BLANK;
+	public static final DeferredItem<Item> ACCESS_BADGE_ENCODED;
+	public static final DeferredItem<Item> ACCESS_BADGE_MASTER;
+	public static final DeferredItem<Item> ACCESS_BADGE_LIMITED;
+	public static final DeferredItem<Item> TERMINAL_BADGE_BANK;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -204,6 +217,7 @@ public class IndustrialFacilitiesModItems {
 		INDUSTRIAL_BARRIER_WHITE = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_BARRIER_WHITE);
 		INDUSTRIAL_BARRIER_DARK_GRAY = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_BARRIER_DARK_GRAY);
 		INDUSTRIAL_BARRIER_YELLOW_HAZARD = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_BARRIER_YELLOW_HAZARD);
+		BARRIER_PLIERS = REGISTRY.register("barrier_pliers", BarrierPliersItem::new);
 		ROAD_LINE_RED = block(IndustrialFacilitiesModBlocks.ROAD_LINE_RED);
 		ROAD_DASHED_RED = block(IndustrialFacilitiesModBlocks.ROAD_DASHED_RED);
 		ROAD_DOUBLE_LINE_RED = block(IndustrialFacilitiesModBlocks.ROAD_DOUBLE_LINE_RED);
@@ -238,6 +252,19 @@ public class IndustrialFacilitiesModItems {
 		INDUSTRIAL_DOOR_RADIATION_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME);
 		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER);
 		ALARM = block(IndustrialFacilitiesModBlocks.ALARM);
+		LUMINOUS_PANEL = block(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL);
+		LUMINOUS_PANEL_THIN = block(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL_THIN);
+		LUMINOUS_PANEL_SURFACE = block(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL_SURFACE);
+		ENERGY_BARRIER_BASE = block(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_BASE);
+		ENERGY_BARRIER_PILLAR = block(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_PILLAR);
+		TERMINAL_READER = block(IndustrialFacilitiesModBlocks.TERMINAL_READER);
+		TERMINAL_ENCODER = block(IndustrialFacilitiesModBlocks.TERMINAL_ENCODER);
+		TERMINAL_LINK_CARD = REGISTRY.register("terminal_link_card", TerminalLinkCardItem::new);
+		ACCESS_BADGE_BLANK = REGISTRY.register("access_badge_blank", AccessBadgeBlankItem::new);
+		ACCESS_BADGE_ENCODED = REGISTRY.register("access_badge_encoded", AccessBadgeEncodedItem::new);
+		ACCESS_BADGE_MASTER = REGISTRY.register("access_badge_master", AccessBadgeMasterItem::new);
+		ACCESS_BADGE_LIMITED = REGISTRY.register("access_badge_limited", AccessBadgeLimitedItem::new);
+		TERMINAL_BADGE_BANK = block(IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK);
 	}
 
 	// Start of user code block custom items

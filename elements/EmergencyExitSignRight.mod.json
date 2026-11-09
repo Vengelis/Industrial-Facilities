@@ -141,13 +141,13 @@
     "creativeTabs": [
       "CUSTOM:IndustrialFacilities"
     ],
-    "destroyTool": "Not specified",
+    "destroyTool": "pickaxe",
     "customDrop": "",
     "dropAmount": 1,
     "xpAmountMin": 0,
     "xpAmountMax": 0,
     "useLootTableForDrops": false,
-    "requiresCorrectTool": false,
+    "requiresCorrectTool": true,
     "enchantPowerBonus": 0.0,
     "plantsGrowOn": false,
     "canRedstoneConnect": true,
@@ -186,7 +186,7 @@
       "fixedValue": 0.0
     },
     "unbreakable": false,
-    "vanillaToolTier": "NONE",
+    "vanillaToolTier": "IRON",
     "placingCondition": "EmergencyExitSignRightBlockValidPlacementCondition",
     "isBonemealable": false,
     "sensitiveToVibration": false,

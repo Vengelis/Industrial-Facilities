@@ -1,0 +1,12 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "front": "luminous_panel_front_15",
+        "side": "luminous_panel_side",
+        "back": "luminous_panel_back",
+        "particle": "luminous_panel_side"
+      }
+    }
+  }
+}

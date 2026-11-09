@@ -41,7 +41,7 @@ public class ExtinguisherPlacedBlock extends Block implements SimpleWaterloggedB
 	private final ImmutableMap<BlockState, VoxelShape> shapes = this.makeShapes();
 
 	public ExtinguisherPlacedBlock() {
-		super(BlockBehaviour.Properties.of().sound(SoundType.METAL).strength(3f, 10f).noOcclusion().isRedstoneConductor((bs, br, bp) -> false));
+		super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().sound(SoundType.METAL).strength(3f, 10f).noOcclusion().isRedstoneConductor((bs, br, bp) -> false));
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
 	}
 
@@ -118,10 +118,12 @@ public class ExtinguisherPlacedBlock extends Block implements SimpleWaterloggedB
 	}
 
 	@Override
-	public boolean onDestroyedByPlayer(BlockState blockstate, Level world, BlockPos pos, Player entity, boolean willHarvest, FluidState fluid) {
-		boolean retval = super.onDestroyedByPlayer(blockstate, world, pos, entity, willHarvest, fluid);
-		ExtinguisherPlacedBlockDestroyedByPlayerProcedure.execute(world, pos.getX(), pos.getY(), pos.getZ());
-		return retval;
+	public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack tool) {
+		super.playerDestroy(world, player, pos, state, blockEntity, tool);
+		if (!world.isClientSide && !player.isCreative() && tool.isCorrectToolForDrops(state)) {
+			double tank = blockEntity != null ? blockEntity.getPersistentData().getDouble("tank") : 0;
+			ExtinguisherPlacedBlockDestroyedByPlayerProcedure.execute(world, pos.getX(), pos.getY(), pos.getZ(), tank);
+		}
 	}
 
 	@Override

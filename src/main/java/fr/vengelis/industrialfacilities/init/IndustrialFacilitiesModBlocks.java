@@ -118,6 +118,15 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_FRAME;
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
 	public static final DeferredBlock<Block> ALARM;
+	public static final DeferredBlock<Block> LUMINOUS_PANEL;
+	public static final DeferredBlock<Block> LUMINOUS_PANEL_THIN;
+	public static final DeferredBlock<Block> LUMINOUS_PANEL_SURFACE;
+	public static final DeferredBlock<Block> ENERGY_BARRIER_BASE;
+	public static final DeferredBlock<Block> ENERGY_BARRIER_PILLAR;
+	public static final DeferredBlock<Block> ENERGY_BARRIER_FIELD;
+	public static final DeferredBlock<Block> TERMINAL_READER;
+	public static final DeferredBlock<Block> TERMINAL_ENCODER;
+	public static final DeferredBlock<Block> TERMINAL_BADGE_BANK;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -224,6 +233,15 @@ public class IndustrialFacilitiesModBlocks {
 		INDUSTRIAL_DOOR_RADIATION_FRAME = REGISTRY.register("industrial_door_radiation_frame", IndustrialDoorRadiationFrameBlock::new);
 		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = REGISTRY.register("industrial_door_radiation_controller", IndustrialDoorRadiationControllerBlock::new);
 		ALARM = REGISTRY.register("alarm", AlarmBlock::new);
+		LUMINOUS_PANEL = REGISTRY.register("luminous_panel", LuminousPanelBlock::new);
+		LUMINOUS_PANEL_THIN = REGISTRY.register("luminous_panel_thin", LuminousPanelThinBlock::new);
+		LUMINOUS_PANEL_SURFACE = REGISTRY.register("luminous_panel_surface", LuminousPanelSurfaceBlock::new);
+		ENERGY_BARRIER_BASE = REGISTRY.register("energy_barrier_base", EnergyBarrierBaseBlock::new);
+		ENERGY_BARRIER_PILLAR = REGISTRY.register("energy_barrier_pillar", EnergyBarrierPillarBlock::new);
+		ENERGY_BARRIER_FIELD = REGISTRY.register("energy_barrier_field", EnergyBarrierFieldBlock::new);
+		TERMINAL_READER = REGISTRY.register("terminal_reader", TerminalReaderBlock::new);
+		TERMINAL_ENCODER = REGISTRY.register("terminal_encoder", TerminalEncoderBlock::new);
+		TERMINAL_BADGE_BANK = REGISTRY.register("terminal_badge_bank", TerminalBadgeBankBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

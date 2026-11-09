@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "blocks",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 3
+    },
+    {
+      "item": "minecraft:stick",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:barrier_pliers",
+    "count": 1
+  }
+}

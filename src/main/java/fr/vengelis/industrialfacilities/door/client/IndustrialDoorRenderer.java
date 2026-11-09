@@ -35,20 +35,17 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
     @Override public void render(IndustrialDoorEntity be,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay) {
         if(!(be.getBlockState().getBlock() instanceof IndustrialDoorBlock block)||be.getLevel()==null)return;
         Direction f=be.getBlockState().getValue(IndustrialDoorBlock.FACING);
-        // Frame blocks are opaque: sample exterior light, rather than the dark block center.
-        int frontLight=LevelRenderer.getLightColor(be.getLevel(),be.getBlockPos().relative(f));
-        int backLight=LevelRenderer.getLightColor(be.getLevel(),be.getBlockPos().relative(f.getOpposite()));
-        light=LightTexture.pack(Math.max(LightTexture.block(frontLight),LightTexture.block(backLight)),Math.max(LightTexture.sky(frontLight),LightTexture.sky(backLight)));
+        IndustrialDoorLighting lighting=new IndustrialDoorLighting(be.getLevel(),be.getBlockPos(),f);
         pose.pushPose();pose.translate(.5,0,.5);
         float angle=rotationDegrees(f);
         pose.mulPose(Axis.YP.rotationDegrees(angle));pose.translate(-.5,0,-.5);
         VertexConsumer out;
-        frame(be,f,pose,buffers,light);
+        frame(be,f,pose,buffers,lighting);
         if(((IndustrialDoorBlock)be.getBlockState().getBlock()).controller && !be.getBlockState().getValue(IndustrialDoorBlock.ACTIVE)) {
             out=buffers.getBuffer(RenderType.entityCutoutNoCull(texture(block.style,"frame")));
-            box(pose,out,.125f,.125f,1f,.875f,.875f,1.0625f,.328125f,.515625f,light);
+            box(pose,out,.125f,.125f,1f,.875f,.875f,1.0625f,.328125f,.515625f,lighting);
             out=buffers.getBuffer(RenderType.entityCutoutNoCull(texture(block.style,"controller")));
-            quad(pose,out,new float[][]{{.15625f,.15625f,1.0703125f},{.84375f,.15625f,1.0703125f},{.84375f,.84375f,1.0703125f},{.15625f,.84375f,1.0703125f}},0,0,1,1,light,0,0,1);
+            quad(pose,out,new float[][]{{.15625f,.15625f,1.0703125f},{.84375f,.15625f,1.0703125f},{.84375f,.84375f,1.0703125f},{.15625f,.84375f,1.0703125f}},0,0,1,1,lighting,0,0,1);
         }
         if(be.size>0) {
             out=buffers.getBuffer(block.style==IndustrialDoorStyle.GLASS?RenderType.entityTranslucent(texture(block.style,"panel")):RenderType.entityCutoutNoCull(texture(block.style,"panel")));
@@ -56,8 +53,9 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             pose.translate((origin.getX()-controller.getX())*right.getStepX()+(origin.getZ()-controller.getZ())*right.getStepZ(),origin.getY()-controller.getY(),0);
             float p=be.previousProgress+(be.progress-be.previousProgress)*partial;
             double h=be.size-2,half=h/2,travel=half*p;
-            segment(pose,out,0,half,-travel,h,light);
-            segment(pose,out,half,h,travel,h,light);
+            lighting=new IndustrialDoorLighting(be.getLevel(),origin,f,true);
+            segment(pose,out,0,half,-travel,h,lighting);
+            segment(pose,out,half,h,travel,h,lighting);
         }
         pose.popPose();
     }
@@ -86,7 +84,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         if(be.size>0)return be;
         return be.owner!=null&&be.getLevel().getBlockEntity(be.owner) instanceof IndustrialDoorEntity d&&d.size>0?d:null;
     }
-    private static void frame(IndustrialDoorEntity be,Direction f,PoseStack pose,MultiBufferSource buffers,int light) {
+    private static void frame(IndustrialDoorEntity be,Direction f,PoseStack pose,MultiBufferSource buffers,IndustrialDoorLighting light) {
         renderFrameBody(be,f,pose,buffers,light);
         if(!be.getBlockState().getValue(IndustrialDoorBlock.ACTIVE)||!be.getBlockState().getValue(IndustrialDoorBlock.RAIL))return;
         IndustrialDoorEntity d=root(be);
@@ -109,7 +107,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             if(color!=IndustrialDoorVisualState.OFF&&lens1>lens0)lens(pose,out,.4375f,.5625f,lens0,lens1,backSide?-.125f:1.125f,color);
         }
     }
-    private static void renderFrameBody(IndustrialDoorEntity be,Direction f,PoseStack pose,MultiBufferSource buffers,int light) {
+    private static void renderFrameBody(IndustrialDoorEntity be,Direction f,PoseStack pose,MultiBufferSource buffers,IndustrialDoorLighting light) {
         int mask=frameMask(be,f);
         var style=((IndustrialDoorBlock)be.getBlockState().getBlock()).style;
         // Front and back follow the same physical XY path. Each corner has two mitered rails.
@@ -123,7 +121,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         if((mask&8)==0)frameFace(pose,buffers,style,new float[][]{{0,0,0},{0,0,1},{0,1,1},{0,1,0}},mask&5,light,-1,0,0);
         if((mask&2)==0)frameFace(pose,buffers,style,new float[][]{{1,0,1},{1,0,0},{1,1,0},{1,1,1}},mask&5,light,1,0,0);
     }
-    private static void frameFace(PoseStack pose,MultiBufferSource buffers,IndustrialDoorStyle style,float[][] points,int mask,int light,float nx,float ny,float nz) {
+    private static void frameFace(PoseStack pose,MultiBufferSource buffers,IndustrialDoorStyle style,float[][] points,int mask,IndustrialDoorLighting light,float nx,float ny,float nz) {
         var tile=IndustrialDoorFrameLayout.tile(mask);
         boolean corner=tile.part().equals("frame_corner");
         VertexConsumer out=buffers.getBuffer(RenderType.entityCutoutNoCull(texture(style,corner?"frame_middle":tile.part())));
@@ -143,12 +141,12 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             textured(pose,out,vertices,coords,light,nx,ny,nz);
         }
     }
-    private static void material(PoseStack pose,VertexConsumer out,float[][] p,IndustrialDoorFrameLayout.Tile tile,int light,float nx,float ny,float nz) {
+    private static void material(PoseStack pose,VertexConsumer out,float[][] p,IndustrialDoorFrameLayout.Tile tile,IndustrialDoorLighting light,float nx,float ny,float nz) {
         float[][] coords={{0,1},{1,1},{1,0},{0,0}};
         for(int i=0;i<4;i++)coords[i]=IndustrialDoorFrameLayout.uv(coords[i][0],coords[i][1],tile.turns());
         textured(pose,out,p,coords,light,nx,ny,nz);
     }
-    private static void box(PoseStack pose,VertexConsumer out,float x0,float y0,float z0,float x1,float y1,float z1,float u,float v,int light) {
+    private static void box(PoseStack pose,VertexConsumer out,float x0,float y0,float z0,float x1,float y1,float z1,float u,float v,IndustrialDoorLighting light) {
         quad(pose,out,new float[][]{{x0,y0,z1},{x1,y0,z1},{x1,y1,z1},{x0,y1,z1}},u,v,u,v,light,0,0,1);
         quad(pose,out,new float[][]{{x1,y0,z0},{x0,y0,z0},{x0,y1,z0},{x1,y1,z0}},u,v,u,v,light,0,0,-1);
         quad(pose,out,new float[][]{{x0,y1,z1},{x1,y1,z1},{x1,y1,z0},{x0,y1,z0}},u,v,u,v,light,0,1,0);
@@ -161,24 +159,46 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         for(float[] p:points)out.addVertex(pose.last(),p[0],p[1],p[2]).setColor(color>>16&255,color>>8&255,color&255,255)
             .setUv(.171875f,.515625f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose.last(),0,0,z<0?-1:1);
     }
-    private static void segment(PoseStack pose,VertexConsumer out,double start,double end,double offset,double height,int light) {
+    private static void segment(PoseStack pose,VertexConsumer out,double start,double end,double offset,double height,IndustrialDoorLighting light) {
         double a=Math.max(0,start+offset),b=Math.min(height,end+offset);
         if(b<=a)return;
         float y0=(float)(1+a),y1=(float)(1+b),x0=1,x1=(float)height+1;
         // Both halves reference the same original door image, including while clipped by the frame.
         float v0=IndustrialDoorVisualState.panelV(height,b-offset),v1=IndustrialDoorVisualState.panelV(height,a-offset);
-        quad(pose,out,new float[][]{{x0,y0,.625f},{x1,y0,.625f},{x1,y1,.625f},{x0,y1,.625f}},0,v0,1,v1,light,0,0,1);
-        quad(pose,out,new float[][]{{x1,y0,.375f},{x0,y0,.375f},{x0,y1,.375f},{x1,y1,.375f}},0,v0,1,v1,light,0,0,-1);
-        quad(pose,out,new float[][]{{x0,y1,.625f},{x1,y1,.625f},{x1,y1,.375f},{x0,y1,.375f}},0,0,.5f,.5f,light,0,1,0);
-        quad(pose,out,new float[][]{{x0,y0,.375f},{x1,y0,.375f},{x1,y0,.625f},{x0,y0,.625f}},0,0,.5f,.5f,light,0,-1,0);
-        quad(pose,out,new float[][]{{x0,y0,.375f},{x0,y0,.625f},{x0,y1,.625f},{x0,y1,.375f}},0,0,.5f,.5f,light,-1,0,0);
-        quad(pose,out,new float[][]{{x1,y0,.625f},{x1,y0,.375f},{x1,y1,.375f},{x1,y1,.625f}},0,0,.5f,.5f,light,1,0,0);
+        panelQuad(pose,out,new float[][]{{x0,y0,.625f},{x1,y0,.625f},{x1,y1,.625f},{x0,y1,.625f}},0,v0,1,v1,light,0,0,1);
+        panelQuad(pose,out,new float[][]{{x1,y0,.375f},{x0,y0,.375f},{x0,y1,.375f},{x1,y1,.375f}},0,v0,1,v1,light,0,0,-1);
+        panelQuad(pose,out,new float[][]{{x0,y1,.625f},{x1,y1,.625f},{x1,y1,.375f},{x0,y1,.375f}},0,0,.5f,.5f,light,0,1,0);
+        panelQuad(pose,out,new float[][]{{x0,y0,.375f},{x1,y0,.375f},{x1,y0,.625f},{x0,y0,.625f}},0,0,.5f,.5f,light,0,-1,0);
+        panelQuad(pose,out,new float[][]{{x0,y0,.375f},{x0,y0,.625f},{x0,y1,.625f},{x0,y1,.375f}},0,0,.5f,.5f,light,-1,0,0);
+        panelQuad(pose,out,new float[][]{{x1,y0,.625f},{x1,y0,.375f},{x1,y1,.375f},{x1,y1,.625f}},0,0,.5f,.5f,light,1,0,0);
     }
-    private static void quad(PoseStack pose,VertexConsumer out,float[][] p,float u0,float v0,float u1,float v1,int light,float nx,float ny,float nz) {
+    private static void panelQuad(PoseStack pose,VertexConsumer out,float[][] points,float u0,float v0,float u1,float v1,IndustrialDoorLighting light,float nx,float ny,float nz) {
+        // Break only the geometry into block-sized light samples. UVs still refer
+        // to the single full panel image, including the two clipped moving halves.
+        float[] columns=lightCuts(points[0],points[1]),rows=lightCuts(points[0],points[3]);
+        for(int row=0;row<rows.length-1;row++)for(int column=0;column<columns.length-1;column++){
+            float a=columns[column],b=columns[column+1],c=rows[row],d=rows[row+1];
+            float[][] p=new float[4][3];float[][] st={{a,c},{b,c},{b,d},{a,d}};
+            for(int i=0;i<4;i++)for(int axis=0;axis<3;axis++)p[i][axis]=points[0][axis]+st[i][0]*(points[1][axis]-points[0][axis])+st[i][1]*(points[3][axis]-points[0][axis]);
+            quad(pose,out,p,u0+(u1-u0)*a,v1+(v0-v1)*d,u0+(u1-u0)*b,v1+(v0-v1)*c,light,nx,ny,nz);
+        }
+    }
+    private static float[] lightCuts(float[] start,float[] end) {
+        int axis=0;
+        for(int i=1;i<3;i++)if(Math.abs(end[i]-start[i])>Math.abs(end[axis]-start[axis]))axis=i;
+        float delta=end[axis]-start[axis];
+        java.util.List<Float> cuts=new java.util.ArrayList<>();cuts.add(0f);cuts.add(1f);
+        for(int cell=(int)Math.floor(Math.min(start[axis],end[axis]))+1;cell<Math.max(start[axis],end[axis]);cell++)cuts.add((cell-start[axis])/delta);
+        cuts.sort(Float::compare);float[] result=new float[cuts.size()];
+        for(int i=0;i<result.length;i++)result[i]=cuts.get(i);
+        return result;
+    }
+    private static void quad(PoseStack pose,VertexConsumer out,float[][] p,float u0,float v0,float u1,float v1,IndustrialDoorLighting light,float nx,float ny,float nz) {
         textured(pose,out,p,new float[][]{{u0,v1},{u1,v1},{u1,v0},{u0,v0}},light,nx,ny,nz);
     }
-    private static void textured(PoseStack pose,VertexConsumer out,float[][] p,float[][] uv,int light,float nx,float ny,float nz) {
+    private static void textured(PoseStack pose,VertexConsumer out,float[][] p,float[][] uv,IndustrialDoorLighting light,float nx,float ny,float nz) {
+        int packedLight=light.face(p,nx,ny,nz);
         for(int i=0;i<4;i++)out.addVertex(pose.last(),p[i][0],p[i][1],p[i][2]).setColor(255,255,255,255)
-            .setUv(uv[i][0],uv[i][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose.last(),nx,ny,nz);
+            .setUv(uv[i][0],uv[i][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light.vertex(p[i],nz,packedLight)).setNormal(pose.last(),nx,ny,nz);
     }
 }

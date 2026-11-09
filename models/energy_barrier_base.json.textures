@@ -1,0 +1,12 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "side": "energy_barrier_base_ct_single_side",
+        "top": "energy_barrier_base_ct_single_top",
+        "cap": "energy_barrier_cap",
+        "particle": "energy_barrier_base_ct_single_side"
+      }
+    }
+  }
+}

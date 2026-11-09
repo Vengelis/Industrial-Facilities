@@ -24,7 +24,7 @@ public class ForbiddenSignBlock extends Block {
 	private final ImmutableMap<BlockState, VoxelShape> shapes = this.makeShapes();
 
 	public ForbiddenSignBlock() {
-		super(BlockBehaviour.Properties.of().sound(SoundType.LANTERN).strength(1f, 10f).noOcclusion().isRedstoneConductor((bs, br, bp) -> false));
+		super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().sound(SoundType.LANTERN).strength(1f, 10f).noOcclusion().isRedstoneConductor((bs, br, bp) -> false));
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 

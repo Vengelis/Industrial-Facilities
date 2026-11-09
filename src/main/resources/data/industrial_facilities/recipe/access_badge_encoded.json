@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "industrial_facilities:access_badge_blank",
+      "count": 1
+    },
+    {
+      "item": "minecraft:cyan_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:access_badge_encoded",
+    "count": 1
+  }
+}

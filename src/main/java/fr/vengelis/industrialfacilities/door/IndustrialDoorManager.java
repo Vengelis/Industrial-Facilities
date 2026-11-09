@@ -34,6 +34,7 @@ public final class IndustrialDoorManager {
             BlockPos origin=at(controller,facing,-cx,-cy);
             if(!valid(level,controller,origin,facing,n))continue;
             door.origin=origin.immutable();door.size=n;door.owner=controller.immutable();
+            door.doorInstanceId=java.util.UUID.randomUUID();door.allowLinkedRedstone=false;door.accessOpenUntil=0;
             door.progress=0;door.previousProgress=0;door.targetOpen=false;door.paused=false;
             for(int x=0;x<n;x++)for(int y=0;y<n;y++) {
                 BlockPos p=at(origin,facing,x,y);
@@ -62,7 +63,7 @@ public final class IndustrialDoorManager {
             }
             updateAppearance(level,door);
         }
-        boolean powered=level.hasNeighborSignal(door.getBlockPos());
+        boolean powered=fr.vengelis.industrialfacilities.access.AccessDoorService.shouldOpen(level,door);
         if(powered!=door.targetOpen){
             door.targetOpen=powered;door.sync();
         }
@@ -102,6 +103,7 @@ public final class IndustrialDoorManager {
     }
     public static void dismantle(ServerLevel level,IndustrialDoorEntity door) {
         if(door.tearingDown||door.size==0)return;
+        fr.vengelis.industrialfacilities.access.AccessDoorService.dismantle(level,door);
         door.tearingDown=true;int n=door.size;
         Direction f=door.getBlockState().getValue(IndustrialDoorBlock.FACING);BlockPos origin=door.doorOrigin();
         for(int x=0;x<n;x++)for(int y=0;y<n;y++) {

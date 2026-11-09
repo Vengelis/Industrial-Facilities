@@ -1,0 +1,644 @@
+{
+  "variants": {
+    "facing=north,ceiling=false,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,ceiling=false,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 270,
+      "y": 180
+    },
+    "facing=north,ceiling=true,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,ceiling=false,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,ceiling=false,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 270,
+      "y": 0
+    },
+    "facing=south,ceiling=true,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 90,
+      "y": 0
+    },
+    "facing=east,ceiling=false,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,ceiling=false,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 270,
+      "y": 270
+    },
+    "facing=east,ceiling=true,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,ceiling=false,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=0": {
+      "model": "industrial_facilities:block/luminous_panel_surface_00",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=1": {
+      "model": "industrial_facilities:block/luminous_panel_surface_01",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=2": {
+      "model": "industrial_facilities:block/luminous_panel_surface_02",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=3": {
+      "model": "industrial_facilities:block/luminous_panel_surface_03",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=4": {
+      "model": "industrial_facilities:block/luminous_panel_surface_04",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=5": {
+      "model": "industrial_facilities:block/luminous_panel_surface_05",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=6": {
+      "model": "industrial_facilities:block/luminous_panel_surface_06",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=7": {
+      "model": "industrial_facilities:block/luminous_panel_surface_07",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=8": {
+      "model": "industrial_facilities:block/luminous_panel_surface_08",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=9": {
+      "model": "industrial_facilities:block/luminous_panel_surface_09",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=10": {
+      "model": "industrial_facilities:block/luminous_panel_surface_10",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=11": {
+      "model": "industrial_facilities:block/luminous_panel_surface_11",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=12": {
+      "model": "industrial_facilities:block/luminous_panel_surface_12",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=13": {
+      "model": "industrial_facilities:block/luminous_panel_surface_13",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=14": {
+      "model": "industrial_facilities:block/luminous_panel_surface_14",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,ceiling=false,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 270,
+      "y": 90
+    },
+    "facing=west,ceiling=true,edges=15": {
+      "model": "industrial_facilities:block/luminous_panel_surface_15",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

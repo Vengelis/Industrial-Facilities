@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "industrial_facilities:block/luminous_panel_surface_side",
+    "front": "industrial_facilities:block/luminous_panel_surface_front_03",
+    "back": "industrial_facilities:block/luminous_panel_surface_back",
+    "side": "industrial_facilities:block/luminous_panel_surface_side"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        8
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#side",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#side",
+          "cullface": "down"
+        },
+        "east": {
+          "texture": "#side",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "cullface": "west"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#back",
+          "cullface": "south"
+        }
+      }
+    }
+  ]
+}

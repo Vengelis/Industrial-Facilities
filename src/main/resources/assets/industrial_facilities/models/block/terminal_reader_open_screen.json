@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "industrial_facilities:block/terminal_reader_open_screen_32"
+  }
+}

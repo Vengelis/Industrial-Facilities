@@ -16,6 +16,9 @@ public class IndustrialDoorEntity extends BlockEntity {
     public BlockPos origin;
     public BlockPos doorOrigin() { return origin!=null ? origin : getBlockPos(); }
     public int size;
+    public java.util.UUID doorInstanceId;
+    public boolean allowLinkedRedstone;
+    public long accessOpenUntil;
     public float progress, previousProgress;
     public boolean targetOpen, tearingDown, paused;
     public IndustrialDoorEntity(BlockPos p,BlockState s) { super(IndustrialDoorContent.TYPE,p,s); }
@@ -48,12 +51,16 @@ public class IndustrialDoorEntity extends BlockEntity {
     }
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider) {
         super.saveAdditional(tag,provider);
+        if(doorInstanceId!=null)tag.putUUID("DoorInstanceId",doorInstanceId);
+        tag.putBoolean("AllowLinkedRedstone",allowLinkedRedstone);tag.putLong("AccessOpenUntil",accessOpenUntil);
         if(owner!=null)tag.putLong("Owner",owner.asLong());
         if(size>0)tag.putLong("Origin",doorOrigin().asLong());
         tag.putInt("Size",size);tag.putFloat("Progress",progress);tag.putBoolean("TargetOpen",targetOpen);tag.putBoolean("Paused",paused);
     }
     @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider) {
         super.loadAdditional(tag,provider);
+        doorInstanceId=tag.hasUUID("DoorInstanceId")?tag.getUUID("DoorInstanceId"):null;
+        allowLinkedRedstone=tag.getBoolean("AllowLinkedRedstone");accessOpenUntil=tag.getLong("AccessOpenUntil");
         owner=tag.contains("Owner")?BlockPos.of(tag.getLong("Owner")):null;
         origin=tag.contains("Origin")?BlockPos.of(tag.getLong("Origin")):null;
         size=tag.getInt("Size");if(size<5 || size>15)size=0;

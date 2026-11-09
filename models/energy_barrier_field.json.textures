@@ -1,0 +1,10 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "field": "energy_barrier_field",
+        "particle": "energy_barrier_field"
+      }
+    }
+  }
+}

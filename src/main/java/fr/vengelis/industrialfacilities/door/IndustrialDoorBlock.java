@@ -1,6 +1,8 @@
 package fr.vengelis.industrialfacilities.door;
 
 import com.mojang.serialization.MapCodec;
+import fr.vengelis.industrialfacilities.access.AccessDoorService;
+import fr.vengelis.industrialfacilities.access.ui.AccessMenus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -51,6 +53,11 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
     }
     @Override protected InteractionResult useWithoutItem(BlockState s,Level l,BlockPos p,Player player,BlockHitResult hit) {
         if (controller && !l.isClientSide && l.getBlockEntity(p) instanceof IndustrialDoorEntity door) {
+            if(door.size>0&&player.isShiftKeyDown()){
+                if(AccessDoorService.canConfigure(player,door))AccessMenus.openDoor(player,door);
+                else player.displayClientMessage(Component.literal("Seul le créateur des terminaux liés peut configurer cette porte."),true);
+                return InteractionResult.CONSUME;
+            }
             int size = door.size;
             boolean ok = size>0 || IndustrialDoorManager.assemble((ServerLevel)l,p);
             player.displayClientMessage(Component.translatable(size>0 ? "door.industrial_facilities.busy" : ok ? "door.industrial_facilities.assembled" : "door.industrial_facilities.invalid",door.size,door.size),true);

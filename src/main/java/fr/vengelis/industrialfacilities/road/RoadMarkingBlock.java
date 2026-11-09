@@ -16,7 +16,7 @@ public class RoadMarkingBlock extends Block {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     private static final VoxelShape OUTLINE = box(0, 0, 0, 16, 0.125, 16);
     public RoadMarkingBlock() {
-        super(BlockBehaviour.Properties.of().strength(0.1F).sound(SoundType.WOOL)
+        super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().strength(0.1F).sound(SoundType.WOOL)
             .noCollission().noOcclusion().isRedstoneConductor((s, w, p) -> false));
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }

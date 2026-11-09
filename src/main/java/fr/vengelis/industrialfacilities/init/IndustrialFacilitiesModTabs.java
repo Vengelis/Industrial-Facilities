@@ -87,6 +87,7 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_BARRIER_WHITE.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_BARRIER_DARK_GRAY.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_BARRIER_YELLOW_HAZARD.get().asItem());
+				tabData.accept(IndustrialFacilitiesModItems.BARRIER_PLIERS.get());
 				tabData.accept(IndustrialFacilitiesModBlocks.ROAD_LINE_RED.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ROAD_DASHED_RED.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ROAD_DOUBLE_LINE_RED.get().asItem());
@@ -121,5 +122,18 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ALARM.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL_THIN.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL_SURFACE.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_BASE.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_PILLAR.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_READER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_ENCODER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModItems.TERMINAL_LINK_CARD.get());
+				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_BLANK.get());
+				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_ENCODED.get());
+				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_MASTER.get());
+				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_LIMITED.get());
+				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get().asItem());
 			}).build());
 }

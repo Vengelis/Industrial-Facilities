@@ -26,4 +26,8 @@ public class IndustrialFacilitiesModSounds {
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_open_stop")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_CLOSE_STOP = REGISTRY.register("industrial_door_close_stop",
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_close_stop")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> TERMINAL_ACCESS_GRANTED = REGISTRY.register("terminal_access_granted",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "terminal_access_granted")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> TERMINAL_ACCESS_DENIED = REGISTRY.register("terminal_access_denied",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "terminal_access_denied")));
 }

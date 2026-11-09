@@ -13,10 +13,12 @@ import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModItems;
 
 public class ExtinguisherPlacedBlockDestroyedByPlayerProcedure {
 	public static void execute(LevelAccessor world, double x, double y, double z) {
-		double savedTank = 0;
+		execute(world, x, y, z, getBlockNBTNumber(world, BlockPos.containing(x, y, z), "tank"));
+	}
+
+	public static void execute(LevelAccessor world, double x, double y, double z, double savedTank) {
 		ItemStack newExtinguisher = ItemStack.EMPTY;
 		if (!world.isClientSide()) {
-			savedTank = getBlockNBTNumber(world, BlockPos.containing(x, y, z), "tank");
 			newExtinguisher = new ItemStack(IndustrialFacilitiesModItems.EXTINGUISHER.get()).copy();
 			{
 				final String _tagName = "tank";

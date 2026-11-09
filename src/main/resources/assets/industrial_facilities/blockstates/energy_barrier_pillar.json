@@ -1,0 +1,353 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_caps"
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "north": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single"
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "north": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single_emit"
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "north": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top"
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "north": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top_emit"
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "north": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle"
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "north": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle_emit"
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "north": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom"
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "north": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom_emit"
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "east": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single_emit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "east": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "east": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top_emit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "east": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "east": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle_emit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "east": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom_emit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "south": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "south": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single_emit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "south": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "south": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top_emit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "south": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "south": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle_emit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "south": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "south": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom_emit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "west": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "false",
+        "west": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_single_emit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "west": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "false",
+        "down": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_top_emit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "west": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_middle_emit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "west": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "down": "false",
+        "west": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/energy_barrier_pillar_ct_bottom_emit",
+        "y": 270
+      }
+    }
+  ]
+}

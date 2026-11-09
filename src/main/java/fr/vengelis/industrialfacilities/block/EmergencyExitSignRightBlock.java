@@ -41,7 +41,7 @@ public class EmergencyExitSignRightBlock extends Block implements SimpleWaterlog
 	public static final DirectionProperty HORIZONTAL_FACING = DirectionProperty.create("horizontal_facing", Direction.Plane.HORIZONTAL);
 
 	public EmergencyExitSignRightBlock() {
-	    super(BlockBehaviour.Properties.of()
+	    super(BlockBehaviour.Properties.of().requiresCorrectToolForDrops()
 	        .sound(SoundType.LANTERN)
 	        .strength(1f, 10f)
 	        .noOcclusion()
