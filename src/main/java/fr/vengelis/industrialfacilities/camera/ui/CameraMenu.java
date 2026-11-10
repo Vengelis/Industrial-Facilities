@@ -22,7 +22,9 @@ public class CameraMenu extends AbstractContainerMenu {
     public final int mode;
     public CompoundTag program=emptyProgram();
     public List<CameraMessages.Link> links=List.of();
-    public boolean editable,running,sweepEnabled=true;
+    public boolean editable,running,sweepEnabled=true,stagesEnabled,haloEnabled=true;
+    public int alertTicks=60,resetTicks=40,stage=1,occupiedTicks,quietTicks;
+    public long stageRevision;
     public int revision,responseVersion,actionSerial,lastRequestId,range=16,sweepPeriodTicks=160;
     public float yaw,pitch,sweepAngle=30;
     public String status="",runtimeStatus="";
@@ -49,16 +51,16 @@ public class CameraMenu extends AbstractContainerMenu {
             editable=terminal.isOwner(inventory.player);running=terminal.isRunning();runtimeStatus=terminal.status();program=terminal.program();
             if(!program.equals(observed)){observed=program.copy();revision++;}
             links=terminal.linkViews().stream().limit(CameraMessages.MAX_LINKS).map(link->new CameraMessages.Link(link.id(),link.kind(),link.pos(),link.name().length()>64?link.name().substring(0,64):link.name(),link.available())).toList();
-        }else if(camera!=null){editable=Objects.equals(camera.creator,inventory.player.getUUID());range=camera.range;yaw=camera.yaw;pitch=camera.pitch;sweepEnabled=camera.sweepEnabled;sweepAngle=camera.sweepAngle;sweepPeriodTicks=camera.sweepPeriodTicks;}
+        }else if(camera!=null){editable=Objects.equals(camera.creator,inventory.player.getUUID());range=camera.range;yaw=camera.yaw;pitch=camera.pitch;sweepEnabled=camera.sweepEnabled;sweepAngle=camera.sweepAngle;sweepPeriodTicks=camera.sweepPeriodTicks;stagesEnabled=camera.stagesEnabled;alertTicks=camera.alertTicks;resetTicks=camera.resetTicks;haloEnabled=camera.haloEnabled;stage=camera.stage;stageRevision=camera.stageRevision;occupiedTicks=camera.occupiedTicks()/5*5;quietTicks=camera.quietTicks()/5*5;}
     }
     @Override public void broadcastChanges(){
         super.broadcastChanges();if(!(inventory.player instanceof ServerPlayer server))return;refresh();
-        var state=new CameraMessages.State(containerId,revision,editable,running,program,links,range,yaw,pitch,status,runtimeStatus,actionSerial,lastRequestId,sweepEnabled,sweepAngle,sweepPeriodTicks);
+        var state=new CameraMessages.State(containerId,revision,editable,running,program,links,range,yaw,pitch,status,runtimeStatus,actionSerial,lastRequestId,sweepEnabled,sweepAngle,sweepPeriodTicks,stagesEnabled,alertTicks,resetTicks,haloEnabled,stage,stageRevision,occupiedTicks,quietTicks);
         if(!state.equals(lastState)){lastState=state;PacketDistributor.sendToPlayer(server,state);}
     }
     public void receive(CameraMessages.State state){
         if(state.menuId()!=containerId)return;revision=state.revision();editable=state.editable();running=state.running();program=state.program();links=state.links();
-        range=Math.clamp(state.range(),1,16);yaw=state.yaw();pitch=state.pitch();sweepEnabled=state.sweepEnabled();sweepAngle=state.sweepAngle();sweepPeriodTicks=state.sweepPeriodTicks();status=state.status();runtimeStatus=state.runtimeStatus();actionSerial=state.actionSerial();lastRequestId=state.requestId();responseVersion++;
+        range=Math.clamp(state.range(),1,16);yaw=state.yaw();pitch=state.pitch();sweepEnabled=state.sweepEnabled();sweepAngle=state.sweepAngle();sweepPeriodTicks=state.sweepPeriodTicks();stagesEnabled=state.stagesEnabled();alertTicks=state.alertTicks();resetTicks=state.resetTicks();haloEnabled=state.haloEnabled();stage=Math.clamp(state.stage(),1,3);stageRevision=state.stageRevision();occupiedTicks=Math.clamp(state.occupiedTicks(),0,72000);quietTicks=Math.clamp(state.quietTicks(),0,72000);status=state.status();runtimeStatus=state.runtimeStatus();actionSerial=state.actionSerial();lastRequestId=state.requestId();responseVersion++;
     }
     public void apply(Player player,CameraMessages.Action action){
         if(!(player instanceof ServerPlayer server)||player.containerMenu!=this||action.menuId()!=containerId||action.requestId()<0||!stillValid(player))return;
@@ -71,8 +73,8 @@ public class CameraMenu extends AbstractContainerMenu {
             }
         }else{
             if(action.action()!=CONFIGURE||action.range()<1||action.range()>16||!Float.isFinite(action.yaw())||!Float.isFinite(action.pitch())||action.yaw()<-180||action.yaw()>180||action.pitch()<-80||action.pitch()>80
-                ||!Float.isFinite(action.sweepAngle())||action.sweepAngle()<0||action.sweepAngle()>90||action.sweepPeriodTicks()<40||action.sweepPeriodTicks()>2400)return;
-            status=camera.configure(server,action.range(),action.yaw(),action.pitch(),action.sweepEnabled(),action.sweepAngle(),action.sweepPeriodTicks()).message();
+                ||!Float.isFinite(action.sweepAngle())||action.sweepAngle()<0||action.sweepAngle()>90||action.sweepPeriodTicks()<40||action.sweepPeriodTicks()>2400||action.alertTicks()<1||action.alertTicks()>72000||action.resetTicks()<0||action.resetTicks()>72000)return;
+            status=camera.configure(server,action.range(),action.yaw(),action.pitch(),action.sweepEnabled(),action.sweepAngle(),action.sweepPeriodTicks(),action.stagesEnabled(),action.alertTicks(),action.resetTicks(),action.haloEnabled()).message();
         }
         actionSerial++;lastRequestId=action.requestId();lastState=null;broadcastChanges();
     }

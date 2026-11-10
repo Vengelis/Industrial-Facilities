@@ -22,6 +22,7 @@ public class SecurityCameraBlock extends Block implements EntityBlock {
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING,FACE);}
     @Override public BlockState getStateForPlacement(BlockPlaceContext context){Direction face=context.getClickedFace();return defaultBlockState().setValue(FACING,face.getAxis().isHorizontal()?face:context.getHorizontalDirection().getOpposite()).setValue(FACE,face==Direction.UP?AttachFace.FLOOR:face==Direction.DOWN?AttachFace.CEILING:AttachFace.WALL);}
     @Override public BlockEntity newBlockEntity(BlockPos pos,BlockState state){return new SecurityCameraEntity(pos,state);}
+    @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level,BlockState state,BlockEntityType<T> type){return level.isClientSide?null:(world,pos,blockState,entity)->{if(entity instanceof SecurityCameraEntity camera)camera.tickServer();};}
     @Override protected BlockState rotate(BlockState state,Rotation rotation){return state.setValue(FACING,rotation.rotate(state.getValue(FACING)));}
     @Override protected BlockState mirror(BlockState state,Mirror mirror){return rotate(state,mirror.getRotation(state.getValue(FACING)));}
     @Override protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return Block.box(2.9,2.9,2.9,13.1,13.1,13.1);}

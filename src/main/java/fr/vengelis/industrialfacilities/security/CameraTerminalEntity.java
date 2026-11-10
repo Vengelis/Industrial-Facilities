@@ -14,6 +14,8 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     private final Map<UUID,Boolean> outputs=new HashMap<>();
     private final Map<UUID,Map<UUID,Integer>> visible=new HashMap<>();
     private final List<CameraProgram.Job> jobs=new ArrayList<>();
+    private final Map<UUID,Long> stageSeen=new HashMap<>();
+    private final Map<UUID,UUID> stageResetSeen=new HashMap<>();
     private CompoundTag program=CameraProgram.empty();
     private CameraProgram.Program compiled;
     private boolean running;
@@ -26,12 +28,16 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     private boolean canOwn(ServerPlayer player){return isOwner(player)&&player.isAlive()&&player.level()==level&&AccessTerminalEntity.resolve(level,worldPosition)==this&&!isRemoved();}
     private boolean canEdit(ServerPlayer player){return canOwn(player)&&player.distanceToSqr(worldPosition.getCenter())<=64;}
     public AccessBadges.Result setProgram(ServerPlayer player,CompoundTag data){if(!canEdit(player))return fail("not_owner");var result=CameraProgram.validate(data,linkViews());if(!result.ok())return AccessBadges.Result.fail(result.error());pause("stopped");program=result.program().copy();compiled=CameraProgram.compile(program,linkViews());sync();return success("saved");}
-    public AccessBadges.Result setRunning(ServerPlayer player,boolean value){if(!canEdit(player))return fail("not_owner");if(!value){pause("stopped");return success("stopped");}try{compiled=CameraProgram.compile(program,linkViews());if(compiled.cameras().isEmpty())return fail("empty_program");for(UUID camera:compiled.cameras())if(links.stream().noneMatch(l->l.id.equals(camera)&&l.kind.equals("camera")&&available(l)))return fail("camera_offline");}catch(IllegalArgumentException e){return fail("invalid_program");}release();visible.clear();running=true;status="gui.industrial_facilities.camera.running";sync();return success("running");}
+    public AccessBadges.Result setRunning(ServerPlayer player,boolean value){if(!canEdit(player))return fail("not_owner");if(!value){pause("stopped");return success("stopped");}try{compiled=CameraProgram.compile(program,linkViews());if(compiled.cameras().isEmpty())return fail("empty_program");for(UUID camera:compiled.cameras()){Link link=find(camera);if(link==null||!link.kind.equals("camera")||!available(link))return fail("camera_offline");if(compiled.requiresStages(camera)&&level.getBlockEntity(link.pos) instanceof SecurityCameraEntity c&&!c.stagesEnabled)return fail("stages_disabled");}}catch(IllegalArgumentException e){return fail("invalid_program");}release();visible.clear();primeStages();running=true;status="gui.industrial_facilities.camera.running";sync();return success("running");}
+    private void primeStages(){
+        stageSeen.clear();stageResetSeen.clear();if(compiled==null)return;
+        for(UUID id:compiled.cameras()){Link link=find(id);if(link!=null&&level.getBlockEntity(link.pos) instanceof SecurityCameraEntity camera){stageSeen.put(id,camera.stageRevision);stageResetSeen.put(id,camera.stageResetToken());}}
+    }
     private static AccessBadges.Result fail(String key){return AccessBadges.Result.fail("gui.industrial_facilities.camera."+key);}
     private static AccessBadges.Result success(String key){return AccessBadges.Result.success("gui.industrial_facilities.camera."+key);}
     private Link find(UUID id){for(Link link:links)if(link.id.equals(id))return link;return null;}
     private boolean available(Link link){
-        if(!(level instanceof ServerLevel server)||!server.hasChunkAt(link.pos)||worldPosition.distSqr(link.pos)>64*64)return false;
+        if(!(level instanceof ServerLevel server)||!TerminalLinks.loaded(server,link.pos)||!TerminalLinks.inRange(worldPosition,link.pos))return false;
         var target=server.getBlockEntity(link.pos);return switch(link.kind){
             case "camera"->target instanceof SecurityCameraEntity c&&link.id.equals(c.instanceId)&&Objects.equals(creator,c.creator)&&c.fieldLoaded();
             case "door"->target instanceof IndustrialDoorEntity d&&d.size>0&&link.id.equals(d.doorInstanceId)&&Objects.equals(creator,d.automationOwner)&&AccessDoorService.canConfigureOwner(creator,d);
@@ -40,7 +46,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             default->false;};
     }
     public AccessBadges.Result link(ServerPlayer player,BlockPos pos,boolean remove){
-        if(!canOwn(player)||player.distanceToSqr(pos.getCenter())>64||!level.hasChunkAt(pos)||worldPosition.distSqr(pos)>64*64)return fail("link_denied");
+        if(!canOwn(player)||player.distanceToSqr(pos.getCenter())>64||!(level instanceof ServerLevel server)||!TerminalLinks.loaded(server,pos))return fail("link_denied");
         if(remove){
             var door=AccessDoorService.resolveDoor(level,pos);BlockPos remembered=door==null?pos:door.getBlockPos();Link old=null;
             for(Link link:links)if(link.pos.equals(remembered)||link.pos.equals(pos)){old=link;break;}
@@ -50,7 +56,8 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         if(target instanceof SecurityCameraEntity camera){id=camera.instanceId;kind="camera";if(!Objects.equals(camera.creator,creator))return fail("not_owner");}
         else if(target instanceof SignalEmitterEntity emitter){id=emitter.instanceId;kind="emitter";if(!Objects.equals(emitter.creator,creator))return fail("not_owner");}
         else if(target instanceof AlarmBlockEntity alarm){id=alarm.automationInstanceId;kind="alarm";if(alarm.automationOwner!=null&&!Objects.equals(alarm.automationOwner,creator))return fail("not_owner");}
-        else {IndustrialDoorEntity door=AccessDoorService.resolveDoor(level,pos);if(door==null||!AccessDoorService.canConfigure(player,door))return fail("link_denied");id=AccessDoorService.ensureId(door);kind="door";at=door.getBlockPos();if(worldPosition.distSqr(at)>64*64)return fail("link_denied");}
+        else {IndustrialDoorEntity door=AccessDoorService.resolveDoor(level,pos);if(door==null||!AccessDoorService.canConfigure(player,door))return fail("link_denied");at=door.getBlockPos();if(!TerminalLinks.inRange(worldPosition,at))return fail("link_denied");id=AccessDoorService.ensureId(door);kind="door";}
+        if(!TerminalLinks.inRange(worldPosition,at))return fail("link_denied");
         Link existing=find(id);
         if(existing!=null)return fail("already_linked");long cameras=links.stream().filter(l->l.kind.equals("camera")).count();if(kind.equals("camera")?cameras>=8:links.size()-cameras>=16)return fail("link_limit");
         if(kind.equals("door")&&level.getBlockEntity(at) instanceof IndustrialDoorEntity door){door.automationOwner=creator;door.sync();}
@@ -64,10 +71,16 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     public void tickServer(){
         if(!(level instanceof ServerLevel server)||!running)return;
         if(AccessTerminalEntity.resolve(level,worldPosition)!=this){pause("stopped");return;}
-        if(compiled==null)try{compiled=CameraProgram.compile(program,linkViews());}catch(IllegalArgumentException e){pause("invalid_program");return;}
+        if(compiled==null)try{compiled=CameraProgram.compile(program,linkViews());primeStages();}catch(IllegalArgumentException e){pause("invalid_program");return;}
         if(compiled.cameras().isEmpty()){pause("empty_program");return;}
-        for(UUID id:compiled.cameras()){Link link=find(id);if(link==null||!available(link)){pause("camera_offline");return;}}
+        for(UUID id:compiled.cameras()){Link link=find(id);if(link==null||!available(link)){pause("camera_offline");return;}if(compiled.requiresStages(id)&&server.getBlockEntity(link.pos) instanceof SecurityCameraEntity c){if(!c.stagesEnabled){pause("stages_disabled");return;}if(!Objects.equals(stageResetSeen.get(id),c.stageResetToken())){pause("camera_reconfigured");return;}}}
         long tick=server.getGameTime();boolean scan=tick%5==0;
+        for(UUID id:compiled.cameras()){
+            SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(find(id).pos);
+            long revision=stageSeen.getOrDefault(id,camera.stageRevision);
+            if(camera.stagesEnabled)for(var transition:camera.stageTransitionsAfter(revision))if(!enqueue(compiled.stageJobs(id,transition.stage(),tick)))return;
+            stageSeen.put(id,camera.stageRevision);
+        }
         if(scan){
             for(UUID id:compiled.cameras()){
                 Link link=find(id);SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(link.pos);Map<UUID,Integer> seen=visible.computeIfAbsent(id,k->new HashMap<>());boolean occupied=!seen.isEmpty();Set<UUID> now=new HashSet<>();
@@ -94,12 +107,12 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         boolean other=false;var iterator=outputs.entrySet().iterator();while(iterator.hasNext()){var output=iterator.next();Link link=find(output.getKey());if(link==null||!available(link)||link.kind.equals("door")&&server.getBlockEntity(link.pos) instanceof IndustrialDoorEntity door&&!door.allowCameraAutomation){if(link!=null)AutomationOutputs.request(server,link.pos,link.kind,link.id,instanceId,false);iterator.remove();continue;}AutomationOutputs.request(server,link.pos,link.kind,link.id,instanceId,output.getValue());if(!output.getValue()&&otherSource(link))other=true;}
         if(other)status="gui.industrial_facilities.camera.other_source";else if(status.equals("gui.industrial_facilities.camera.other_source"))status="gui.industrial_facilities.camera.running";
     }
-    private void release(){if(level instanceof ServerLevel server)AutomationOutputs.release(server,instanceId);outputs.clear();jobs.clear();}
+    private void release(){if(level instanceof ServerLevel server)AutomationOutputs.release(server,instanceId);outputs.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();}
     private void pause(String reason){release();visible.clear();running=false;status="gui.industrial_facilities.camera."+reason;sync();}
     @Override public void invalidate(){pause("stopped");links.clear();program=CameraProgram.empty();compiled=null;super.invalidate();}
     @Override public void setRemoved(){release();visible.clear();compiled=null;super.setRemoved();}
-    @Override public void onLoad(){super.onLoad();visible.clear();jobs.clear();compiled=null;}
+    @Override public void onLoad(){super.onLoad();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();compiled=null;}
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider provider){CompoundTag tag=new CompoundTag();if(creator!=null)tag.putUUID("Creator",creator);tag.putUUID("InstanceId",instanceId);tag.putBoolean("CameraRunning",running);return tag;}
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider){super.saveAdditional(tag,provider);tag.put("CameraProgram",program.copy());tag.putBoolean("CameraRunning",running);ListTag list=new ListTag();for(Link link:links){CompoundTag row=new CompoundTag();row.putUUID("Id",link.id);row.putString("Kind",link.kind);row.putLong("Position",link.pos.asLong());list.add(row);}tag.put("CameraLinks",list);}
-    @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);links.clear();int cameras=0,targets=0;Set<UUID> ids=new HashSet<>();for(Tag raw:tag.getList("CameraLinks",Tag.TAG_COMPOUND)){CompoundTag row=(CompoundTag)raw;String kind=row.getString("Kind");if(!row.hasUUID("Id")||!Set.of("camera","door","alarm","emitter").contains(kind)||!ids.add(row.getUUID("Id")))continue;if(kind.equals("camera")){if(cameras++>=8)continue;}else if(targets++>=16)continue;links.add(new Link(row.getUUID("Id"),kind,BlockPos.of(row.getLong("Position"))));}program=tag.contains("CameraProgram",Tag.TAG_COMPOUND)?tag.getCompound("CameraProgram").copy():CameraProgram.empty();compiled=null;running=tag.getBoolean("CameraRunning");status="gui.industrial_facilities.camera."+(running?"running":"stopped");outputs.clear();visible.clear();jobs.clear();}
+    @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);links.clear();int cameras=0,targets=0;Set<UUID> ids=new HashSet<>();for(Tag raw:tag.getList("CameraLinks",Tag.TAG_COMPOUND)){CompoundTag row=(CompoundTag)raw;String kind=row.getString("Kind");if(!row.hasUUID("Id")||!Set.of("camera","door","alarm","emitter").contains(kind)||!ids.add(row.getUUID("Id")))continue;if(kind.equals("camera")){if(cameras++>=8)continue;}else if(targets++>=16)continue;links.add(new Link(row.getUUID("Id"),kind,BlockPos.of(row.getLong("Position"))));}program=tag.contains("CameraProgram",Tag.TAG_COMPOUND)?tag.getCompound("CameraProgram").copy():CameraProgram.empty();compiled=null;running=tag.getBoolean("CameraRunning");status="gui.industrial_facilities.camera."+(running?"running":"stopped");outputs.clear();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();}
 }

@@ -138,5 +138,6 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.SECURITY_CAMERA.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.SIGNAL_EMITTER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModItems.NETWORK_TABLET.get());
 			}).build());
 }

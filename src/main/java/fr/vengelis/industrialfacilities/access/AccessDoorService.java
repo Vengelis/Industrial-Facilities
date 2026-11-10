@@ -3,8 +3,6 @@ package fr.vengelis.industrialfacilities.access;
 import java.util.*;
 import fr.vengelis.industrialfacilities.door.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.*;
 import net.minecraft.server.level.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -12,10 +10,11 @@ import net.minecraft.world.level.Level;
 
 public final class AccessDoorService {
     public static IndustrialDoorEntity resolveDoor(Level level,BlockPos pos){
-        if(!level.hasChunkAt(pos)||!(level.getBlockEntity(pos) instanceof IndustrialDoorEntity part))return null;
+        if(!loaded(level,pos)||!(level.getBlockEntity(pos) instanceof IndustrialDoorEntity part))return null;
         if(part.size>0)return part;
-        return part.owner!=null&&level.hasChunkAt(part.owner)&&level.getBlockEntity(part.owner) instanceof IndustrialDoorEntity root&&root.size>0?root:null;
+        return part.owner!=null&&loaded(level,part.owner)&&level.getBlockEntity(part.owner) instanceof IndustrialDoorEntity root&&root.size>0?root:null;
     }
+    private static boolean loaded(Level level,BlockPos pos){return level instanceof ServerLevel server?TerminalLinks.loaded(server,pos):level.hasChunkAt(pos);}
     public static UUID ensureId(IndustrialDoorEntity door){if(door.doorInstanceId==null){door.doorInstanceId=UUID.randomUUID();door.sync();}return door.doorInstanceId;}
     public static boolean isSecured(IndustrialDoorEntity door){return door.getLevel() instanceof ServerLevel level&&door.doorInstanceId!=null&&!AccessRegistry.get(level.getServer()).readers(door.doorInstanceId).isEmpty();}
     public static boolean canConfigure(Player player,IndustrialDoorEntity door){
@@ -35,16 +34,13 @@ public final class AccessDoorService {
         if(!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal.terminalId==null
             ||AccessTerminalEntity.resolve(source,terminal.getBlockPos())!=terminal)return false;
         var entry=AccessRegistry.get(source.getServer()).find(terminal.terminalId);
-        if(entry==null||!entry.owner.equals(terminal.creator)||!entry.position.equals(terminal.getBlockPos())
-            ||!entry.dimension.equals(source.dimension().location().toString())||entry.doors.isEmpty())return false;
+        if(TerminalLinks.loadedReader(source,entry)!=terminal||entry.doors.isEmpty())return false;
         boolean unknown=false;
         for(var link:entry.doors){
-            ResourceLocation dimension=ResourceLocation.tryParse(link.dimension());if(dimension==null)continue;
-            var level=source.getServer().getLevel(ResourceKey.create(Registries.DIMENSION,dimension));
-            if(level==null||!level.hasChunkAt(link.position())){unknown=true;continue;}
-            var door=resolveDoor(level,link.position());
-            if(door==null||!link.instance().equals(door.doorInstanceId))continue;
-            if(door.accessOpenUntil>level.getGameTime()||door.targetOpen||door.progress>0)return true;
+            if(!TerminalLinks.admissible(source,terminal.getBlockPos(),link))continue;
+            if(!TerminalLinks.loaded(source,link.position())){unknown=true;continue;}
+            var door=TerminalLinks.loadedDoor(source,link);if(door==null)continue;
+            if(door.accessOpenUntil>source.getGameTime()||door.targetOpen||door.progress>0)return true;
         }
         // An unloaded door is not evidence that it closed. Retain the last
         // observed state until its chunk returns, without forcing it to load.
@@ -55,6 +51,9 @@ public final class AccessDoorService {
         if(!(player instanceof ServerPlayer serverPlayer)||!(door.getLevel() instanceof ServerLevel level))return AccessBadges.Result.fail("Liaison impossible.");
         AccessRegistry registry=AccessRegistry.get(level.getServer());AccessRegistry.Entry reader=registry.find(source);
         if(reader==null||!reader.owner.equals(player.getUUID()))return AccessBadges.Result.fail("Vous n'êtes pas le créateur de ce terminal.");
+        if(!player.isAlive()||player.level()!=level||TerminalLinks.loadedReader(level,reader)==null)return AccessBadges.Result.fail("Le terminal lecteur doit être assemblé et chargé dans cette dimension.");
+        if(!TerminalLinks.loaded(level,door.getBlockPos())||resolveDoor(level,door.getBlockPos())!=door)return AccessBadges.Result.fail("La porte doit être assemblée et chargée.");
+        if(!TerminalLinks.inRange(reader.position,door.getBlockPos()))return AccessBadges.Result.fail("La porte doit se trouver à 64 blocs maximum du terminal lecteur.");
         if(!canConfigure(player,door))return AccessBadges.Result.fail("Cette porte appartient déjà à un autre réseau d'accès.");
         UUID id=ensureId(door);
         var link=new AccessRegistry.DoorLink(level.dimension().location().toString(),door.getBlockPos(),id);
@@ -67,15 +66,14 @@ public final class AccessDoorService {
     public static AccessBadges.Result activate(Player player,AccessTerminalEntity terminal,ItemStack badge){
         if(!(player instanceof ServerPlayer serverPlayer)||!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal.terminalId==null)return AccessBadges.Result.fail("Ce lecteur n'est pas configuré.");
         if(!player.isAlive()||player.level()!=source||player.distanceToSqr(terminal.getBlockPos().getCenter())>64||AccessTerminalEntity.resolve(source,terminal.getBlockPos())!=terminal)return AccessBadges.Result.fail("Le terminal est hors de portée.");
-        if(!AccessBadges.canUse(badge,terminal))return AccessBadges.Result.fail(AccessBadges.remaining(badge)==0?"Ce badge est épuisé.":"Accès refusé : badge ou niveau insuffisant.");
         var registry=AccessRegistry.get(source.getServer());var entry=registry.find(terminal.terminalId);
-        if(entry==null)return AccessBadges.Result.fail("Ce lecteur n'est plus enregistré.");
+        if(TerminalLinks.loadedReader(source,entry)!=terminal)return AccessBadges.Result.fail("Ce lecteur n'est plus enregistré.");
+        if(!AccessBadges.canUse(badge,terminal))return AccessBadges.Result.fail(AccessBadges.remaining(badge)==0?"Ce badge est épuisé.":"Accès refusé : badge ou niveau insuffisant.");
         List<IndustrialDoorEntity> usable=new ArrayList<>();
         for(var link:entry.doors){
-            var key=ResourceKey.create(Registries.DIMENSION,ResourceLocation.parse(link.dimension()));var level=source.getServer().getLevel(key);
-            if(level==null||!level.hasChunkAt(link.position()))continue;
-            var door=resolveDoor(level,link.position());
-            if(door!=null&&link.instance().equals(door.doorInstanceId)&&door.accessOpenUntil<=level.getGameTime()&&!door.targetOpen)usable.add(door);
+            if(!TerminalLinks.admissible(source,terminal.getBlockPos(),link))continue;
+            var door=TerminalLinks.loadedDoor(source,link);
+            if(door!=null&&door.accessOpenUntil<=source.getGameTime()&&!door.targetOpen)usable.add(door);
         }
         if(usable.isEmpty())return AccessBadges.Result.fail("Aucune porte liée disponible à ouvrir.");
         if(!AccessBadges.consume(serverPlayer,badge))return AccessBadges.Result.fail("Ce badge est épuisé.");

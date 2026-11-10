@@ -30,19 +30,21 @@ public final class CameraMessages {
             if(tag==null||input.available()!=0)throw new IllegalArgumentException("Invalid camera program");return tag;
         }catch(IOException e){throw new IllegalArgumentException("Cannot decode camera program",e);}
     }
-    public record Action(int menuId,int action,int value,int range,float yaw,float pitch,CompoundTag program,int requestId,boolean sweepEnabled,float sweepAngle,int sweepPeriodTicks) implements CustomPacketPayload {
+    public record Action(int menuId,int action,int value,int range,float yaw,float pitch,CompoundTag program,int requestId,boolean sweepEnabled,float sweepAngle,int sweepPeriodTicks,boolean stagesEnabled,int alertTicks,int resetTicks,boolean haloEnabled) implements CustomPacketPayload {
         public Action {program=program.copy();}
+        public Action(int menuId,int action,int value,int range,float yaw,float pitch,CompoundTag program,int requestId,boolean sweepEnabled,float sweepAngle,int sweepPeriodTicks){this(menuId,action,value,range,yaw,pitch,program,requestId,sweepEnabled,sweepAngle,sweepPeriodTicks,false,60,40,true);}
         public Action(int menuId,int action,int value,int range,float yaw,float pitch,CompoundTag program,int requestId){this(menuId,action,value,range,yaw,pitch,program,requestId,false,30,160);}
         public Action(int menuId,int action,int value,int range,float yaw,float pitch,CompoundTag program){this(menuId,action,value,range,yaw,pitch,program,0,false,30,160);}
         @Override public CompoundTag program(){return program.copy();}
         public static final Type<Action> TYPE=new Type<>(CameraMenus.id("camera_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf,Action> CODEC=StreamCodec.of((b,d)->{
-            b.writeVarInt(d.menuId);b.writeVarInt(d.action);b.writeVarInt(d.value);b.writeVarInt(d.range);b.writeFloat(d.yaw);b.writeFloat(d.pitch);writeProgram(b,d.program);b.writeVarInt(d.requestId);b.writeBoolean(d.sweepEnabled);b.writeFloat(d.sweepAngle);b.writeVarInt(d.sweepPeriodTicks);
-        },b->new Action(b.readVarInt(),b.readVarInt(),b.readVarInt(),b.readVarInt(),b.readFloat(),b.readFloat(),readProgram(b),b.readVarInt(),b.readBoolean(),b.readFloat(),b.readVarInt()));
+            b.writeVarInt(d.menuId);b.writeVarInt(d.action);b.writeVarInt(d.value);b.writeVarInt(d.range);b.writeFloat(d.yaw);b.writeFloat(d.pitch);writeProgram(b,d.program);b.writeVarInt(d.requestId);b.writeBoolean(d.sweepEnabled);b.writeFloat(d.sweepAngle);b.writeVarInt(d.sweepPeriodTicks);b.writeBoolean(d.stagesEnabled);b.writeVarInt(d.alertTicks);b.writeVarInt(d.resetTicks);b.writeBoolean(d.haloEnabled);
+        },b->new Action(b.readVarInt(),b.readVarInt(),b.readVarInt(),b.readVarInt(),b.readFloat(),b.readFloat(),readProgram(b),b.readVarInt(),b.readBoolean(),b.readFloat(),b.readVarInt(),b.readBoolean(),b.readVarInt(),b.readVarInt(),b.readBoolean()));
         @Override public Type<Action> type(){return TYPE;}
     }
-    public record State(int menuId,int revision,boolean editable,boolean running,CompoundTag program,List<Link> links,int range,float yaw,float pitch,String status,String runtimeStatus,int actionSerial,int requestId,boolean sweepEnabled,float sweepAngle,int sweepPeriodTicks) implements CustomPacketPayload {
+    public record State(int menuId,int revision,boolean editable,boolean running,CompoundTag program,List<Link> links,int range,float yaw,float pitch,String status,String runtimeStatus,int actionSerial,int requestId,boolean sweepEnabled,float sweepAngle,int sweepPeriodTicks,boolean stagesEnabled,int alertTicks,int resetTicks,boolean haloEnabled,int stage,long stageRevision,int occupiedTicks,int quietTicks) implements CustomPacketPayload {
         public State {program=program.copy();links=List.copyOf(links);}
+        public State(int menuId,int revision,boolean editable,boolean running,CompoundTag program,List<Link> links,int range,float yaw,float pitch,String status,String runtimeStatus,int actionSerial,int requestId,boolean sweepEnabled,float sweepAngle,int sweepPeriodTicks){this(menuId,revision,editable,running,program,links,range,yaw,pitch,status,runtimeStatus,actionSerial,requestId,sweepEnabled,sweepAngle,sweepPeriodTicks,false,60,40,true,1,0,0,0);}
         public State(int menuId,int revision,boolean editable,boolean running,CompoundTag program,List<Link> links,int range,float yaw,float pitch,String status,String runtimeStatus,int actionSerial,int requestId){this(menuId,revision,editable,running,program,links,range,yaw,pitch,status,runtimeStatus,actionSerial,requestId,false,30,160);}
         public State(int menuId,int revision,boolean editable,boolean running,CompoundTag program,List<Link> links,int range,float yaw,float pitch,String status,String runtimeStatus){this(menuId,revision,editable,running,program,links,range,yaw,pitch,status,runtimeStatus,0,0,false,30,160);}
         @Override public CompoundTag program(){return program.copy();}
@@ -51,18 +53,18 @@ public final class CameraMessages {
             b.writeVarInt(d.menuId);b.writeVarInt(d.revision);b.writeBoolean(d.editable);b.writeBoolean(d.running);writeProgram(b,d.program);
             if(d.links.size()>MAX_LINKS)throw new IllegalArgumentException("Too many camera links");b.writeVarInt(d.links.size());
             for(var link:d.links){b.writeUUID(link.id);b.writeUtf(link.kind,16);b.writeBlockPos(link.position);b.writeUtf(link.name,64);b.writeBoolean(link.available);}
-            b.writeVarInt(d.range);b.writeFloat(d.yaw);b.writeFloat(d.pitch);b.writeUtf(d.status,512);b.writeUtf(d.runtimeStatus,512);b.writeVarInt(d.actionSerial);b.writeVarInt(d.requestId);b.writeBoolean(d.sweepEnabled);b.writeFloat(d.sweepAngle);b.writeVarInt(d.sweepPeriodTicks);
+            b.writeVarInt(d.range);b.writeFloat(d.yaw);b.writeFloat(d.pitch);b.writeUtf(d.status,512);b.writeUtf(d.runtimeStatus,512);b.writeVarInt(d.actionSerial);b.writeVarInt(d.requestId);b.writeBoolean(d.sweepEnabled);b.writeFloat(d.sweepAngle);b.writeVarInt(d.sweepPeriodTicks);b.writeBoolean(d.stagesEnabled);b.writeVarInt(d.alertTicks);b.writeVarInt(d.resetTicks);b.writeBoolean(d.haloEnabled);b.writeVarInt(d.stage);b.writeVarLong(d.stageRevision);b.writeVarInt(d.occupiedTicks);b.writeVarInt(d.quietTicks);
         },b->{
             int id=b.readVarInt(),revision=b.readVarInt();boolean editable=b.readBoolean(),running=b.readBoolean();CompoundTag program=readProgram(b);
             int count=b.readVarInt();if(count<0||count>MAX_LINKS)throw new IllegalArgumentException("Invalid camera link count");List<Link> links=new ArrayList<>(count);
             for(int i=0;i<count;i++)links.add(new Link(b.readUUID(),b.readUtf(16),b.readBlockPos(),b.readUtf(64),b.readBoolean()));
-            return new State(id,revision,editable,running,program,links,b.readVarInt(),b.readFloat(),b.readFloat(),b.readUtf(512),b.readUtf(512),b.readVarInt(),b.readVarInt(),b.readBoolean(),b.readFloat(),b.readVarInt());
+            return new State(id,revision,editable,running,program,links,b.readVarInt(),b.readFloat(),b.readFloat(),b.readUtf(512),b.readUtf(512),b.readVarInt(),b.readVarInt(),b.readBoolean(),b.readFloat(),b.readVarInt(),b.readBoolean(),b.readVarInt(),b.readVarInt(),b.readBoolean(),b.readVarInt(),b.readVarLong(),b.readVarInt(),b.readVarInt());
         });
         @Override public Type<State> type(){return TYPE;}
     }
     public static java.util.function.Consumer<State> receiver=data->{};
     @SubscribeEvent public static void network(RegisterPayloadHandlersEvent event){
-        var registrar=event.registrar("camera_native_v4");
+        var registrar=event.registrar("camera_native_v5");
         registrar.playToServer(Action.TYPE,Action.CODEC,(data,context)->context.enqueueWork(()->{
             if(context.player().containerMenu instanceof CameraMenu menu&&menu.containerId==data.menuId&&menu.stillValid(context.player()))menu.apply(context.player(),data);
         }));

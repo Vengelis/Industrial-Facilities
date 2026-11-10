@@ -1,6 +1,7 @@
 package fr.vengelis.industrialfacilities.camera.client;
 
 import java.util.*;
+import java.text.Normalizer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import fr.vengelis.industrialfacilities.camera.ui.*;
@@ -12,6 +13,11 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.nbt.*;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -25,14 +31,17 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private record Row(String path,String type,String label,int depth,String insertion) {}
     public record EditorRow(String path,String type,String label,int x,int y,int width,int height) {}
     public record PaletteRow(String token,String label,int x,int y,int width,int height,boolean enabled) {}
+    public record ItemPickerRow(String id,String name,int x,int y,int width,int height) {}
+    private record ItemChoice(Item item,String id,String name,String search) {}
     private static final List<Palette> PALETTE=List.of(
         new Palette("","section_events",0,true),new Palette("event","event",0xFF69527F,false),
         new Palette("event_empty","event_empty",0xFF69527F,false),
+        new Palette("event_stage1","event_stage1",0xFF64616D,false),new Palette("event_stage2","event_stage2",0xFF8A5B31,false),new Palette("event_stage3","event_stage3",0xFF874246,false),
         new Palette("","section_logic",0,true),new Palette("if","if",0xFF69527F,false),
         new Palette("and","and",0xFF385B6D,false),new Palette("or","or",0xFF385B6D,false),new Palette("not","not",0xFF385B6D,false),
         new Palette("","section_get",0,true),new Palette("get:type","get_type",0xFF385B6D,false),new Palette("get:category","get_category",0xFF385B6D,false),
         new Palette("get:name","get_name",0xFF385B6D,false),new Palette("get:uuid","get_uuid",0xFF385B6D,false),new Palette("get:team","get_team",0xFF385B6D,false),
-        new Palette("get:distance","get_distance",0xFF385B6D,false),new Palette("get:health","get_health",0xFF385B6D,false),
+        new Palette("get:distance","get_distance",0xFF385B6D,false),new Palette("get:health","get_health",0xFF385B6D,false),new Palette("get:inventory_item","get_inventory_item",0xFF385B6D,false),
         new Palette("","section_actions",0,true),new Palette("door_open","door_open",0xFF4D4B5C,false),new Palette("door_close","door_close",0xFF4D4B5C,false),
         new Palette("alarm_on","alarm_on",0xFF4D4B5C,false),new Palette("alarm_off","alarm_off",0xFF4D4B5C,false),
         new Palette("emitter_on","emitter_on",0xFF4D4B5C,false),new Palette("emitter_off","emitter_off",0xFF4D4B5C,false),
@@ -44,10 +53,12 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private int paletteScroll,canvasScroll,seenRevision=-1,pendingSaveRequest,nextRequest=1,actionTicks,observedActionSerial=-1;
     private boolean loaded,dirty,waitingSave,invalidNumber;
     private int paneX,paneY,paletteWidth,canvasX,canvasWidth,paneHeight;
-    private Button save,test,run,devices,preview,undo,up,down,remove,durationUnitButton,sweepToggleButton;
-    private EditBox valueInput,durationInput,rangeInput,yawInput,pitchInput,sweepAngleInput,sweepPeriodInput;
+    private Button save,test,run,devices,preview,undo,up,down,remove,durationUnitButton,sweepToggleButton,stagesToggleButton,haloToggleButton,alertUnitButton,resetUnitButton,applyConfigButton,fieldPreviewButton;
+    private EditBox valueInput,durationInput,rangeInput,yawInput,pitchInput,sweepAngleInput,sweepPeriodInput,alertInput,resetInput;
     private String rangeDraft="16",yawDraft="0",pitchDraft="0",sweepAngleDraft="30",sweepPeriodDraft="8";
-    private boolean sweepDraft=true;
+    private boolean sweepDraft=true,stagesDraft,haloDraft=true,configWaiting;
+    private String alertDraft="3",resetDraft="2",alertUnit="seconds",resetUnit="seconds";
+    private int pendingConfigRequest;
     private boolean cameraLoaded,configDirty,showField,updatingConfig;
     private int lastCameraResponse=-1;
     private String dragToken,dragPath;
@@ -56,6 +67,12 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private List<CameraMessages.Link> popup=List.of();
     private String popupMode="",popupPath="";
     private int popupScroll,popupSelected,popupX,popupY,popupWidth,popupHeight;
+    private boolean itemPickerOpen;
+    private Button inventoryItemButton;
+    private EditBox itemSearchInput;
+    private String itemSearchDraft="",itemPickerPath="";
+    private List<ItemChoice> itemCatalog=List.of(),itemResults=List.of();
+    private int itemPickerX,itemPickerY,itemPickerWidth,itemPickerHeight,itemScroll,itemSelected;
 
     public CameraScreen(CameraMenu menu,Inventory inventory,Component title){super(menu,inventory,title);}
     private static Component tr(String key,Object... args){return Component.translatable("gui.industrial_facilities.camera."+key,args);}
@@ -64,6 +81,10 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     public int[] canvasBounds(){return new int[]{canvasX,paneY,canvasWidth,paneHeight};}
     public int[] paletteBounds(){return new int[]{paneX,paneY,paletteWidth,paneHeight};}
     public String selectedPath(){return selected;}
+    public int[] itemPickerBounds(){return new int[]{itemPickerX,itemPickerY,itemPickerWidth,itemPickerHeight};}
+    public List<ItemPickerRow> itemPickerRows(){
+        if(!itemPickerOpen)return List.of();List<ItemPickerRow> result=new ArrayList<>();for(int i=itemScroll;i<Math.min(itemResults.size(),itemScroll+itemVisibleRows());i++){var choice=itemResults.get(i);result.add(new ItemPickerRow(choice.id,choice.name,itemPickerX+4,itemPickerY+47+(i-itemScroll)*ROW,itemPickerWidth-8,ROW));}return List.copyOf(result);
+    }
     public List<PaletteRow> paletteEntries(){
         List<PaletteRow> result=new ArrayList<>();for(int i=0;i<PALETTE.size();i++){Palette item=PALETTE.get(i);if(!item.heading)result.add(new PaletteRow(item.token,tr(item.label).getString(),paneX+3,paneY+i*ROW-paletteScroll,paletteWidth-8,ROW-2,paletteEnabled(item.token)));}return List.copyOf(result);
     }
@@ -76,19 +97,20 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private Button commandButton(int x,int width,String fullKey,String shortKey,Button.OnPress action){Button control=button(x,26,width,20,fittedLabel(fullKey,shortKey,width),action);control.setTooltip(Tooltip.create(tr(fullKey)));return control;}
     private int send(int action,int value,CompoundTag program){int request=nextRequest++;PacketDistributor.sendToServer(new CameraMessages.Action(menu.containerId,action,value,1,0,0,program,request));return request;}
     @Override protected void init(){
-        imageWidth=Math.min(980,width-12);imageHeight=Math.min(menu.mode==CameraMenu.PROGRAM?620:320,height-12);super.init();
+        imageWidth=Math.min(980,width-12);imageHeight=Math.min(menu.mode==CameraMenu.PROGRAM?620:390,height-12);super.init();
         paneX=leftPos+8;paneY=topPos+52;paletteWidth=Math.max(78,(imageWidth-20)/4);canvasX=paneX+paletteWidth+6;canvasWidth=imageWidth-16-paletteWidth-6;paneHeight=Math.max(40,imageHeight-142);
         sync();rebuildRows();rebuildControls();
     }
     private void sync(){
         if(menu.actionSerial!=observedActionSerial){observedActionSerial=menu.actionSerial;actionTicks=menu.status.isEmpty()?0:100;}
         if(menu.mode==CameraMenu.CAMERA){
-            if(!cameraLoaded||(!configDirty&&lastCameraResponse!=menu.responseVersion)){
-                rangeDraft=Integer.toString(menu.range);yawDraft=Float.toString(menu.yaw);pitchDraft=Float.toString(menu.pitch);sweepDraft=menu.sweepEnabled;sweepAngleDraft=Float.toString(menu.sweepAngle);sweepPeriodDraft=formatTicks(menu.sweepPeriodTicks,"seconds");cameraLoaded=true;
-                if(rangeInput!=null){updatingConfig=true;rangeInput.setValue(rangeDraft);yawInput.setValue(yawDraft);pitchInput.setValue(pitchDraft);sweepAngleInput.setValue(sweepAngleDraft);sweepPeriodInput.setValue(sweepPeriodDraft);updatingConfig=false;}
-                if(sweepToggleButton!=null)sweepToggleButton.setMessage(tr(sweepDraft?"sweep_on":"sweep_off"));
+            if(configWaiting&&menu.lastRequestId==pendingConfigRequest){configWaiting=false;configDirty=false;}
+            if(!cameraLoaded||(!configDirty&&!configWaiting&&lastCameraResponse!=menu.responseVersion)){
+                rangeDraft=Integer.toString(menu.range);yawDraft=Float.toString(menu.yaw);pitchDraft=Float.toString(menu.pitch);sweepDraft=menu.sweepEnabled;sweepAngleDraft=Float.toString(menu.sweepAngle);sweepPeriodDraft=formatTicks(menu.sweepPeriodTicks,"seconds");
+                stagesDraft=menu.stagesEnabled;haloDraft=menu.haloEnabled;alertDraft=formatTicks(menu.alertTicks,alertUnit);resetDraft=formatTicks(menu.resetTicks,resetUnit);cameraLoaded=true;
+                if(rangeInput!=null){updatingConfig=true;rangeInput.setValue(rangeDraft);yawInput.setValue(yawDraft);pitchInput.setValue(pitchDraft);sweepAngleInput.setValue(sweepAngleDraft);sweepPeriodInput.setValue(sweepPeriodDraft);alertInput.setValue(alertDraft);resetInput.setValue(resetDraft);updatingConfig=false;}
             }
-            lastCameraResponse=menu.responseVersion;return;
+            lastCameraResponse=menu.responseVersion;updateCameraControls();return;
         }
         if(waitingSave&&menu.lastRequestId==pendingSaveRequest){
             waitingSave=false;
@@ -102,7 +124,8 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private void rebuildControls(){
         if(getFocused()!=null)getFocused().setFocused(false);
         setFocused(null);
-        clearWidgets();valueInput=null;durationInput=null;durationUnitButton=null;rangeInput=null;yawInput=null;pitchInput=null;sweepAngleInput=null;sweepPeriodInput=null;sweepToggleButton=null;
+        if(itemSearchInput!=null)itemSearchDraft=itemSearchInput.getValue();
+        clearWidgets();inventoryItemButton=null;itemSearchInput=null;valueInput=null;durationInput=null;durationUnitButton=null;rangeInput=null;yawInput=null;pitchInput=null;sweepAngleInput=null;sweepPeriodInput=null;sweepToggleButton=null;alertInput=null;resetInput=null;stagesToggleButton=null;haloToggleButton=null;alertUnitButton=null;resetUnitButton=null;applyConfigButton=null;fieldPreviewButton=null;
         if(menu.mode==CameraMenu.CAMERA){cameraControls();return;}
         int w=Math.min(94,(imageWidth-40)/6),x=10;
         save=commandButton(x,w,"save","save_short",b->saveDraft());x+=w+4;
@@ -138,22 +161,29 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
                 button(118,y+23,52,18,tr("test_"+node.getString("Test")),b->cycleTest(node));
                 if(getter.equals("category"))button(174,y+23,imageWidth-184,18,tr("category_"+node.getString("Text")),b->cycleCategory(node));
                 else{
-                    valueInput=new EditBox(font,leftPos+174,topPos+y+23,imageWidth-184,18,tr("comparison_value"));valueInput.setMaxLength(getter.equals("distance")||getter.equals("health")?12:64);
-                    boolean numeric=numeric(getter);valueInput.setValue(numeric?Double.toString(node.getDouble("Number")):node.getString("Text"));
-                    if(numeric)valueInput.setFilter(s->s.matches("[+-]?[0-9]*([.,][0-9]*)?"));
+                    boolean quantity=getter.equals("inventory_item"),numeric=numeric(getter);int inputX=174,inputWidth=imageWidth-184;
+                    if(quantity){
+                        int pickerWidth=Math.max(60,inputWidth-72);inventoryItemButton=button(inputX,y+23,pickerWidth,18,Component.empty(),b->openItemPicker());
+                        inventoryItemButton.setTooltip(Tooltip.create(tr("inventory_selected",inventoryItemName(node))));inputX+=pickerWidth+4;inputWidth-=pickerWidth+4;
+                    }
+                    valueInput=new EditBox(font,leftPos+inputX,topPos+y+23,inputWidth,18,tr(quantity?"inventory_quantity":"comparison_value"));valueInput.setMaxLength(numeric?12:64);
+                    valueInput.setValue(numeric?(quantity?Long.toString(Math.round(node.getDouble("Number"))):Double.toString(node.getDouble("Number"))):node.getString("Text"));
+                    if(numeric)valueInput.setFilter(value->value.matches("[+-]?[0-9]*([.,][0-9]*)?"));
                     valueInput.setResponder(value->{
                         if(!menu.editable||waitingSave)return;
-                        if(numeric){try{double parsed=Double.parseDouble(value.replace(',','.'));if(!Double.isFinite(parsed)){invalidNumber=true;return;}if(parsed!=node.getDouble("Number")){remember();node.putDouble("Number",parsed);dirty=!draft.equals(menu.program);rebuildRows();}invalidNumber=false;}catch(NumberFormatException e){invalidNumber=true;}}
+                        if(numeric){try{double parsed=Double.parseDouble(value.replace(',','.'));if(!Double.isFinite(parsed)||quantity&&(parsed<0||parsed>1_000_000||parsed!=Math.rint(parsed))){invalidNumber=true;localStatus=quantity?"gui.industrial_facilities.camera.invalid_quantity":"";updateControls();return;}if(parsed!=node.getDouble("Number")){remember();node.putDouble("Number",parsed);dirty=!draft.equals(menu.program);rebuildRows();}invalidNumber=false;}catch(NumberFormatException e){invalidNumber=true;}}
                         else if(!value.equals(node.getString("Text"))){remember();node.putString("Text",value);dirty=!draft.equals(menu.program);rebuildRows();}
-                        localStatus="";updateControls();
+                        localStatus=invalidNumber&&quantity?"gui.industrial_facilities.camera.invalid_quantity":"";updateControls();
                     });addRenderableWidget(valueInput);
+                    if(quantity)valueInput.setTooltip(Tooltip.create(tr("inventory_quantity_hint")));
                 }
+
             }else if(List.of("and","or","not").contains(node.getString("Op"))){
                 if(node.getString("Op").equals("not"))button(10,y+23,imageWidth-20,18,tr("operand"),b->{selected+="/Value";rebuildControls();});
                 else{int bw=(imageWidth-24)/2;button(10,y+23,bw,18,tr("operand_left"),b->{selected+="/Left";rebuildControls();});button(14+bw,y+23,bw,18,tr("operand_right"),b->{selected+="/Right";rebuildControls();});}
             }
         }
-        updateControls();
+        updateControls();if(itemPickerOpen)buildItemPicker();
     }
     private void updateControls(){
         if(menu.mode!=CameraMenu.PROGRAM)return;
@@ -184,10 +214,10 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         try{int index=Integer.parseInt(path.substring(split+1));return parent instanceof ListTag list&&index>=0&&index<list.size()?new ListRef(list,index,path.substring(0,split)):null;}catch(NumberFormatException ignored){return null;}
     }
     private static CompoundTag expression(String getter){
-        CompoundTag node=new CompoundTag();node.putString("Op","compare");node.putString("Getter",getter);node.putString("Test",numeric(getter)?"le":"eq");
-        if(numeric(getter))node.putDouble("Number",getter.equals("distance")?4:10);else node.putString("Text",getter.equals("category")?"player":getter.equals("type")?"minecraft:player":"");return node;
+        CompoundTag node=new CompoundTag();node.putString("Op","compare");node.putString("Getter",getter);node.putString("Test",getter.equals("inventory_item")?"ge":numeric(getter)?"le":"eq");
+        if(getter.equals("inventory_item")){node.putString("Item","minecraft:iron_ingot");node.putDouble("Number",1);}else if(numeric(getter))node.putDouble("Number",getter.equals("distance")?4:10);else node.putString("Text",getter.equals("category")?"player":getter.equals("type")?"minecraft:player":"");return node;
     }
-    private static boolean numeric(String getter){return getter.equals("distance")||getter.equals("health");}
+    private static boolean numeric(String getter){return getter.equals("distance")||getter.equals("health")||getter.equals("inventory_item");}
     private static String timeUnit(CompoundTag node){return node.getString("Unit").equals("minutes")?"minutes":"seconds";}
     private static String formatTicks(int ticks,String unit){return BigDecimal.valueOf(ticks).divide(BigDecimal.valueOf(unit.equals("minutes")?1200:20),6,RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();}
     private String durationLabel(CompoundTag node){return formatTicks(node.getInt("Ticks"),timeUnit(node))+" "+tr(timeUnit(node).equals("minutes")?"unit_minutes_short":"unit_seconds_short").getString();}
@@ -213,12 +243,12 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private String opposite(String action){return switch(action){case "door_open"->"door_close";case "door_close"->"door_open";case "alarm_on"->"alarm_off";case "alarm_off"->"alarm_on";case "emitter_on"->"emitter_off";default->"emitter_on";};}
     private UUID firstLink(String kind){return menu.links.stream().filter(l->l.kind().equals(kind)).map(CameraMessages.Link::id).findFirst().orElse(null);}
     private String linkName(UUID id){return menu.links.stream().filter(l->l.id().equals(id)).map(CameraMessages.Link::name).findFirst().orElse(tr("unlinked").getString());}
-    private static boolean eventToken(String token){return "event".equals(token)||"event_empty".equals(token);}
+    private static boolean eventToken(String token){return "event".equals(token)||"event_empty".equals(token)||"event_stage1".equals(token)||"event_stage2".equals(token)||"event_stage3".equals(token);}
     private static boolean conditionToken(String token){return token.startsWith("get:")||List.of("and","or","not").contains(token);}
     private static boolean entityToken(String token){return token.equals("if")||conditionToken(token);}
     private boolean emptyEvent(String path){
         if(path==null||!path.startsWith("Events/"))return false;String[] parts=path.split("/");
-        return parts.length>=2&&at("Events/"+parts[1]) instanceof CompoundTag event&&event.getString("Trigger").equals("empty");
+        return parts.length>=2&&at("Events/"+parts[1]) instanceof CompoundTag event&&List.of("empty","stage1","stage2","stage3").contains(event.getString("Trigger"));
     }
     private boolean entityUnavailable(String token){
         if(token.equals("if"))return emptyEvent(insertPath)||emptyEvent(selected);
@@ -228,6 +258,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         if(!menu.editable||waitingSave)return false;
         if(eventToken(token))return firstLink("camera")!=null;
         if(entityUnavailable(token))return false;
+        if(conditionToken(token))return true;
         if(token.contains("_"))return firstLink(actionKind(token))!=null;
         return true;
     }
@@ -248,7 +279,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     /** Called by the same click/drag paths as the visible palette; useful for deterministic UI checks. */
     public void editorAdd(String token){
         if(PALETTE.stream().noneMatch(item->!item.heading&&item.token.equals(token)))return;
-        if(entityUnavailable(token)){localStatus="gui.industrial_facilities.camera.empty_actions_only";return;}
+        if(entityUnavailable(token)){localStatus="gui.industrial_facilities.camera.entity_context_required";return;}
         if(!paletteEnabled(token))return;
         if(conditionToken(token)){
             String path=selected;Tag current=at(path);
@@ -262,7 +293,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         CompoundTag node=new CompoundTag();
         if(eventToken(token)){
             ListTag events=draft.getList("Events",Tag.TAG_COMPOUND);if(events.size()>=CameraProgram.MAX_EVENTS){localStatus="gui.industrial_facilities.camera.editor_limit";return;}
-            node.putUUID("Camera",firstLink("camera"));if(token.equals("event_empty"))node.putString("Trigger","empty");node.put("Body",new ListTag());remember();events.add(node);selected="Events/"+(events.size()-1);insertPath=selected+"/Body";changed();return;
+            node.putUUID("Camera",firstLink("camera"));if(!token.equals("event"))node.putString("Trigger",token.substring(6));node.put("Body",new ListTag());remember();events.add(node);selected="Events/"+(events.size()-1);insertPath=selected+"/Body";changed();return;
         }
         if(!(at(insertPath) instanceof ListTag destination)||insertPath.equals("Events")){localStatus="gui.industrial_facilities.camera.select_branch";return;}
         if(token.equals("if")){node.putString("Op","if");node.put("Condition",expression("category"));node.put("Then",new ListTag());node.put("Else",new ListTag());}
@@ -290,7 +321,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     }
     private void cycleGetter(CompoundTag node){
         if(!menu.editable||waitingSave)return;
-        List<String> choices=List.of("type","category","name","uuid","team","distance","health");String getter=choices.get((choices.indexOf(node.getString("Getter"))+1)%choices.size());
+        List<String> choices=List.of("type","category","name","uuid","team","distance","health","inventory_item");String getter=choices.get((choices.indexOf(node.getString("Getter"))+1)%choices.size());
         remember();replace(selected,expression(getter));changed();
     }
     private void cycleTest(CompoundTag node){
@@ -301,7 +332,11 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private void cycleCategory(CompoundTag node){if(!menu.editable||waitingSave)return;List<String> values=List.of("player","animal","hostile","other");remember();node.putString("Text",values.get((values.indexOf(node.getString("Text"))+1)%values.size()));changed();}
     private void rebuildRows(){
         rows.clear();ListTag events=draft.getList("Events",Tag.TAG_COMPOUND);
-        for(int i=0;i<events.size();i++){String path="Events/"+i;CompoundTag event=events.getCompound(i);boolean empty=event.getString("Trigger").equals("empty");String label=empty?tr("event_empty_delay_target",linkName(event.hasUUID("Camera")?event.getUUID("Camera"):NONE),durationLabel(event)).getString():tr("event_target",linkName(event.hasUUID("Camera")?event.getUUID("Camera"):NONE)).getString();rows.add(new Row(path,"event",label,0,path+"/Body"));statements(event.getList("Body",Tag.TAG_COMPOUND),path+"/Body",1);rows.add(new Row(path+"/Body","insert",tr(empty?"add_action_here":"add_here").getString(),1,path+"/Body"));}
+        for(int i=0;i<events.size();i++){
+            String path="Events/"+i;CompoundTag event=events.getCompound(i);String trigger=event.getString("Trigger"),target=linkName(event.hasUUID("Camera")?event.getUUID("Camera"):NONE);
+            String label=trigger.equals("empty")?tr("event_empty_delay_target",target,durationLabel(event)).getString():tr(trigger.startsWith("stage")?"event_"+trigger+"_target":"event_target",target).getString();
+            rows.add(new Row(path,"event",label,0,path+"/Body"));statements(event.getList("Body",Tag.TAG_COMPOUND),path+"/Body",1);rows.add(new Row(path+"/Body","insert",tr(emptyEvent(path)?"add_action_here":"add_here").getString(),1,path+"/Body"));
+        }
         canvasScroll=Math.clamp(canvasScroll,0,Math.max(0,rows.size()*ROW-paneHeight));paletteScroll=Math.clamp(paletteScroll,0,Math.max(0,PALETTE.size()*ROW-paneHeight));
     }
     private void statements(ListTag list,String base,int depth){
@@ -319,8 +354,8 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private void condition(CompoundTag node,String path,int depth){
         String op=node.getString("Op"),label;
         if(op.equals("compare")){
-            String getter=node.getString("Getter");String value=numeric(getter)?Double.toString(node.getDouble("Number")):getter.equals("category")?tr("category_"+node.getString("Text")).getString():node.getString("Text");
-            label="GET "+tr("get_"+getter).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]";
+            String getter=node.getString("Getter");String value=getter.equals("inventory_item")?Long.toString(Math.round(node.getDouble("Number"))):numeric(getter)?Double.toString(node.getDouble("Number")):getter.equals("category")?tr("category_"+node.getString("Text")).getString():node.getString("Text");
+            label=getter.equals("inventory_item")?"GET "+tr("inventory_count_for",inventoryItemName(node)).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]":"GET "+tr("get_"+getter).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]";
         }else label=tr(op).getString();
         rows.add(new Row(path,"expr",label,depth,""));
         if(op.equals("and")||op.equals("or")){condition(node.getCompound("Left"),path+"/Left",depth+1);condition(node.getCompound("Right"),path+"/Right",depth+1);}
@@ -337,7 +372,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private void drop(String token,String path,Row row){
         if(row==null||!menu.editable||waitingSave)return;
         if(token!=null){
-            if(entityToken(token)&&emptyEvent(row.insertion.isEmpty()?row.path:row.insertion)){localStatus="gui.industrial_facilities.camera.empty_actions_only";return;}
+            if(entityToken(token)&&emptyEvent(row.insertion.isEmpty()?row.path:row.insertion)){localStatus="gui.industrial_facilities.camera.entity_context_required";return;}
             if(conditionToken(token)){
                 if(!row.type.equals("expr")&&!row.type.equals("if")){localStatus="gui.industrial_facilities.camera.select_condition";return;}selected=row.path;
             }else if(!row.insertion.isEmpty())insertPath=row.insertion;
@@ -345,9 +380,62 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             editorAdd(token);return;
         }
         if(path==null||row.insertion.isEmpty()||row.insertion.startsWith(path+"/"))return;
-        if(emptyEvent(row.insertion)&&at(path) instanceof CompoundTag source&&source.getString("Op").equals("if")){localStatus="gui.industrial_facilities.camera.empty_actions_only";return;}
+        if(emptyEvent(row.insertion)&&at(path) instanceof CompoundTag source&&source.getString("Op").equals("if")){localStatus="gui.industrial_facilities.camera.entity_context_required";return;}
         ListRef ref=listRef(path);Tag target=at(row.insertion);if(ref==null||!(target instanceof ListTag destination)||path.matches("Events/[0-9]+"))return;
         remember();Tag node=ref.list.remove(ref.index);destination.add(node);selected="";insertPath="Events";changed();
+    }
+    private static Item inventoryItem(CompoundTag node){ResourceLocation id=ResourceLocation.tryParse(node.getString("Item"));return id!=null&&BuiltInRegistries.ITEM.containsKey(id)?BuiltInRegistries.ITEM.get(id):Items.BARRIER;}
+    private static String inventoryItemName(CompoundTag node){return new ItemStack(inventoryItem(node)).getHoverName().getString();}
+    private static String itemSearchKey(String text){return Normalizer.normalize(text,Normalizer.Form.NFD).replaceAll("\\p{M}+","").toLowerCase(Locale.ROOT);}
+    private int itemVisibleRows(){return Math.max(1,(itemPickerHeight-65)/ROW);}
+    private void openItemPicker(){
+        if(!menu.editable||waitingSave||!(at(selected) instanceof CompoundTag node)||!node.getString("Getter").equals("inventory_item"))return;
+        itemPickerOpen=true;itemPickerPath=selected;popup=List.of();dragToken=null;dragPath=null;dragging=false;
+        if(itemCatalog.isEmpty()){
+            List<ItemChoice> catalog=new ArrayList<>();for(Item item:BuiltInRegistries.ITEM){if(item==Items.AIR||minecraft.level!=null&&!item.isEnabled(minecraft.level.enabledFeatures()))continue;String id=BuiltInRegistries.ITEM.getKey(item).toString(),name=new ItemStack(item).getHoverName().getString();if(id.length()>256)continue;catalog.add(new ItemChoice(item,id,name,itemSearchKey(name+" "+id)));}
+            catalog.sort(Comparator.comparing((ItemChoice item)->itemSearchKey(item.name)).thenComparing(ItemChoice::id));itemCatalog=List.copyOf(catalog);
+        }
+        itemSelected=0;itemScroll=0;buildItemPicker();
+    }
+    private void buildItemPicker(){
+        if(!itemPickerOpen)return;
+        if(!(at(itemPickerPath) instanceof CompoundTag node)||!node.getString("Getter").equals("inventory_item")){closeItemPicker();return;}
+        if(itemSearchInput!=null){itemSearchDraft=itemSearchInput.getValue();removeWidget(itemSearchInput);}
+        itemPickerWidth=Math.min(310,imageWidth-20);itemPickerHeight=Math.min(208,imageHeight-36);itemPickerX=leftPos+imageWidth-itemPickerWidth-10;itemPickerY=topPos+28;
+        itemSearchInput=new EditBox(font,itemPickerX+6,itemPickerY+25,itemPickerWidth-12,18,tr("inventory_search"));itemSearchInput.setMaxLength(64);itemSearchInput.setHint(tr("inventory_search"));itemSearchInput.setValue(itemSearchDraft);itemSearchInput.setResponder(value->{itemSearchDraft=value;itemSelected=0;itemScroll=0;filterItems();});addWidget(itemSearchInput);filterItems();setFocused(itemSearchInput);itemSearchInput.setFocused(true);
+    }
+    private void filterItems(){String search=itemSearchKey(itemSearchDraft).strip();itemResults=search.isEmpty()?itemCatalog:itemCatalog.stream().filter(item->item.search.contains(search)).toList();itemSelected=Math.clamp(itemSelected,0,Math.max(0,itemResults.size()-1));itemScroll=Math.clamp(itemScroll,0,Math.max(0,itemResults.size()-itemVisibleRows()));}
+    private void closeItemPicker(){
+        itemPickerOpen=false;if(itemSearchInput!=null){itemSearchDraft=itemSearchInput.getValue();itemSearchInput.setFocused(false);removeWidget(itemSearchInput);itemSearchInput=null;}setFocused(null);
+    }
+    private void chooseItem(int index){
+        if(index<0||index>=itemResults.size()||!menu.editable||waitingSave)return;
+        if(!(at(itemPickerPath) instanceof CompoundTag node)||!node.getString("Getter").equals("inventory_item")){closeItemPicker();return;}
+        String id=itemResults.get(index).id;selected=itemPickerPath;
+        if(!id.equals(node.getString("Item"))){remember();node.putString("Item",id);closeItemPicker();changed();}else closeItemPicker();
+    }
+    private boolean itemPickerClick(double x,double y,int button){
+        if(button!=0)return true;
+        if(x>=itemPickerX+itemPickerWidth-23&&x<itemPickerX+itemPickerWidth-3&&y>=itemPickerY+3&&y<itemPickerY+22){closeItemPicker();return true;}
+        if(itemSearchInput!=null&&itemSearchInput.isMouseOver(x,y)){setFocused(itemSearchInput);itemSearchInput.setFocused(true);itemSearchInput.mouseClicked(x,y,button);return true;}
+        if(x>=itemPickerX+4&&x<itemPickerX+itemPickerWidth-4&&y>=itemPickerY+47&&y<itemPickerY+47+itemVisibleRows()*ROW){chooseItem(itemScroll+(int)((y-itemPickerY-47)/ROW));return true;}
+        if(x<itemPickerX||x>=itemPickerX+itemPickerWidth||y<itemPickerY||y>=itemPickerY+itemPickerHeight)closeItemPicker();return true;
+    }
+    private void renderInventoryItemButton(GuiGraphics g){
+        if(inventoryItemButton==null||!(at(selected) instanceof CompoundTag node)||!node.getString("Getter").equals("inventory_item"))return;
+        int x=inventoryItemButton.getX(),y=inventoryItemButton.getY();g.renderItem(new ItemStack(inventoryItem(node)),x+2,y+1);fit(g,Component.literal(inventoryItemName(node)),x+22,y+5,inventoryItemButton.getWidth()-26,TEXT);
+    }
+    private void renderItemPicker(GuiGraphics g,int mx,int my){
+        g.fill(leftPos,topPos,leftPos+imageWidth,topPos+imageHeight,0x99000000);g.fill(itemPickerX-1,itemPickerY-1,itemPickerX+itemPickerWidth+1,itemPickerY+itemPickerHeight+1,0xFFD5B0EF);g.fill(itemPickerX,itemPickerY,itemPickerX+itemPickerWidth,itemPickerY+itemPickerHeight,0xFF282631);
+        fit(g,tr("inventory_choose"),itemPickerX+7,itemPickerY+8,itemPickerWidth-36,TEXT);g.drawString(font,"X",itemPickerX+itemPickerWidth-17,itemPickerY+8,PURPLE,false);itemSearchInput.render(g,mx,my,0);
+        int hovered=-1;for(int i=itemScroll;i<Math.min(itemResults.size(),itemScroll+itemVisibleRows());i++){
+            var item=itemResults.get(i);int y=itemPickerY+47+(i-itemScroll)*ROW;boolean hover=mx>=itemPickerX+4&&mx<itemPickerX+itemPickerWidth-4&&my>=y&&my<y+ROW;if(hover)hovered=i;
+            if(i==itemSelected||hover)g.fill(itemPickerX+3,y,itemPickerX+itemPickerWidth-3,y+ROW,0xFF51425F);g.renderItem(new ItemStack(item.item),itemPickerX+6,y+2);fit(g,Component.literal(item.name),itemPickerX+27,y+6,itemPickerWidth-34,TEXT);
+        }
+        if(itemResults.isEmpty())fit(g,tr("inventory_no_results"),itemPickerX+8,itemPickerY+57,itemPickerWidth-16,MUTED);
+        fit(g,tr("inventory_results",itemResults.size()),itemPickerX+7,itemPickerY+itemPickerHeight-12,itemPickerWidth-14,MUTED);
+        scrollbar(g,itemPickerX+itemPickerWidth-3,itemPickerY+47,itemVisibleRows()*ROW,itemResults.size()*ROW,itemScroll*ROW);
+        if(hovered>=0)g.renderTooltip(font,new ItemStack(itemResults.get(hovered).item),mx,my);
     }
     private void openPopup(String mode,String kind){
         popup=menu.links.stream().filter(l->kind.isEmpty()||l.kind().equals(kind)).toList();popupMode=mode;popupPath=selected;popupScroll=0;popupSelected=0;
@@ -365,22 +453,26 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         else localStatus="gui.industrial_facilities.camera.offline";
     }
     @Override public boolean mouseClicked(double x,double y,int button){
+        if(itemPickerOpen)return itemPickerClick(x,y,button);
         if(button==0&&!popup.isEmpty()){
             if(x>=popupX&&x<popupX+popupWidth&&y>=popupY&&y<popupY+popupHeight){int index=(int)(y-popupY+popupScroll)/ROW;if(index<popup.size())chooseLink(popup.get(index));return true;}popup=List.of();return true;
         }
         if(menu.mode==CameraMenu.PROGRAM&&button==0){
-            if(x>=paneX&&x<paneX+paletteWidth&&y>=paneY&&y<paneY+paneHeight){int index=(int)(y-paneY+paletteScroll)/ROW;if(index<PALETTE.size()){Palette item=PALETTE.get(index);if(!item.heading&&paletteEnabled(item.token)){dragToken=item.token;dragPath=null;pressX=x;pressY=y;dragging=false;}else if(!item.heading&&entityUnavailable(item.token))localStatus="gui.industrial_facilities.camera.empty_actions_only";}return true;}
+            if(x>=paneX&&x<paneX+paletteWidth&&y>=paneY&&y<paneY+paneHeight){int index=(int)(y-paneY+paletteScroll)/ROW;if(index<PALETTE.size()){Palette item=PALETTE.get(index);if(!item.heading&&paletteEnabled(item.token)){dragToken=item.token;dragPath=null;pressX=x;pressY=y;dragging=false;}else if(!item.heading&&entityUnavailable(item.token))localStatus="gui.industrial_facilities.camera.entity_context_required";}return true;}
             Row row=rowAt(x,y);if(row!=null){select(row);dragToken=null;dragPath=row.type.equals("event")||row.type.equals("if")||row.type.equals("action")||row.type.equals("wait")?row.path:null;pressX=x;pressY=y;dragging=false;return true;}
         }
-        return super.mouseClicked(x,y,button);
+        boolean consumed=super.mouseClicked(x,y,button);if(itemPickerOpen&&itemSearchInput!=null)setFocused(itemSearchInput);return consumed;
     }
     @Override public boolean mouseDragged(double x,double y,int button,double dx,double dy){
+        if(itemPickerOpen)return true;
         if(button==0&&(dragToken!=null||dragPath!=null)){if(Math.hypot(x-pressX,y-pressY)>4)dragging=true;return true;}return super.mouseDragged(x,y,button,dx,dy);
     }
     @Override public boolean mouseReleased(double x,double y,int button){
+        if(itemPickerOpen)return true;
         if(button==0&&(dragToken!=null||dragPath!=null)){String token=dragToken,path=dragPath;boolean moved=dragging;dragToken=null;dragPath=null;dragging=false;if(moved){Row row=rowAt(x,y);if(row==null&&eventToken(token)&&x>=canvasX&&x<canvasX+canvasWidth&&y>=paneY&&y<paneY+paneHeight)editorAdd(token);else drop(token,path,row);}else if(token!=null)editorAdd(token);return true;}return super.mouseReleased(x,y,button);
     }
     @Override public boolean mouseScrolled(double x,double y,double horizontal,double vertical){
+        if(itemPickerOpen){itemScroll=Math.clamp(itemScroll-(int)(vertical*3),0,Math.max(0,itemResults.size()-itemVisibleRows()));return true;}
         if(!popup.isEmpty()){popupScroll=Math.clamp(popupScroll-(int)(vertical*ROW),0,Math.max(0,popup.size()*ROW-popupHeight));return true;}
         if(menu.mode==CameraMenu.PROGRAM&&y>=paneY&&y<paneY+paneHeight){
             if(x<canvasX)paletteScroll=Math.clamp(paletteScroll-(int)(vertical*ROW*2),0,Math.max(0,PALETTE.size()*ROW-paneHeight));
@@ -389,11 +481,16 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         return super.mouseScrolled(x,y,horizontal,vertical);
     }
     @Override public boolean keyPressed(int key,int scan,int modifiers){
+        if(itemPickerOpen){
+            if(key==256){closeItemPicker();return true;}if(key==257||key==335){chooseItem(itemSelected);return true;}
+            if(key==264||key==265){itemSelected=Math.clamp(itemSelected+(key==264?1:-1),0,Math.max(0,itemResults.size()-1));if(itemSelected<itemScroll)itemScroll=itemSelected;else if(itemSelected>=itemScroll+itemVisibleRows())itemScroll=itemSelected-itemVisibleRows()+1;return true;}
+            return itemSearchInput!=null&&itemSearchInput.keyPressed(key,scan,modifiers);
+        }
         if(!popup.isEmpty()){
             if(key==256){popup=List.of();return true;}if(key==264||key==265){popupSelected=Math.clamp(popupSelected+(key==264?1:-1),0,popup.size()-1);popupScroll=Math.clamp(popupSelected*ROW,0,Math.max(0,popup.size()*ROW-popupHeight));return true;}if(key==257){chooseLink(popup.get(popupSelected));return true;}
         }
         if(key==256){onClose();return true;}
-        for(EditBox input:new EditBox[]{valueInput,durationInput,rangeInput,yawInput,pitchInput,sweepAngleInput,sweepPeriodInput})if(input!=null&&input.isFocused())return input.keyPressed(key,scan,modifiers);
+        for(EditBox input:new EditBox[]{valueInput,durationInput,rangeInput,yawInput,pitchInput,sweepAngleInput,sweepPeriodInput,alertInput,resetInput})if(input!=null&&input.isFocused())return input.keyPressed(key,scan,modifiers);
         if(menu.mode==CameraMenu.PROGRAM){
             if(key==261){deleteSelected();return true;}if(key==90&&hasControlDown()){undo();return true;}
             if(key==266||key==267){canvasScroll=Math.clamp(canvasScroll+(key==267?paneHeight:-paneHeight),0,Math.max(0,rows.size()*ROW-paneHeight));return true;}
@@ -422,7 +519,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         if(rows.isEmpty())fit(g,tr(menu.links.stream().anyMatch(l->l.kind().equals("camera"))?"empty_program":"link_camera_first"),canvasX+10,paneY+16,canvasWidth-20,MUTED);
         for(int i=0;i<rows.size();i++){
             Row row=rows.get(i);int ry=paneY+i*ROW-canvasScroll,rx=canvasX+4+Math.min(row.depth,6)*11,rw=Math.max(20,canvasX+canvasWidth-rx-7);if(ry+ROW<paneY||ry>paneY+paneHeight)continue;
-            int color=row.type.equals("event")||row.type.equals("if")||row.type.equals("end")?0xFF654C7F:row.type.equals("expr")?0xFF345363:row.type.equals("insert")?0xFF25242F:0xFF494753;
+            int color=row.type.equals("event")?eventColor(row.path):row.type.equals("if")||row.type.equals("end")?0xFF654C7F:row.type.equals("expr")?0xFF345363:row.type.equals("insert")?0xFF25242F:0xFF494753;
             g.fill(rx,ry+1,rx+rw,ry+ROW-1,color);
             if(row.type.equals("if")||row.type.equals("event")){g.fill(rx+10,ry,rx+26,ry+4,0xFF17181D);g.fill(rx,ry+3,rx+3,ry+ROW,color);}
             if(row.type.equals("expr")){g.fill(rx,ry+1,rx+4,ry+4,0xFF17181D);g.fill(rx+rw-4,ry+ROW-4,rx+rw,ry+ROW-1,0xFF17181D);}
@@ -433,11 +530,14 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         scrollbar(g,paneX+paletteWidth-3,paneY,paneHeight,PALETTE.size()*ROW,paletteScroll);scrollbar(g,canvasX+canvasWidth-3,paneY,paneHeight,rows.size()*ROW,canvasScroll);
         g.fill(leftPos+8,topPos+imageHeight-87,leftPos+imageWidth-8,topPos+imageHeight-27,0xFF2C2B34);
     }
+    private int eventColor(String path){
+        if(at(path) instanceof CompoundTag event)return switch(event.getString("Trigger")){case "stage1"->0xFF64616D;case "stage2"->0xFF8A5B31;case "stage3"->0xFF874246;default->0xFF654C7F;};return 0xFF654C7F;
+    }
     private static void scrollbar(GuiGraphics g,int x,int y,int height,int full,int scroll){if(full<=height)return;int thumb=Math.max(12,height*height/full),offset=(height-thumb)*scroll/Math.max(1,full-height);g.fill(x,y+offset,x+2,y+offset+thumb,0xFF8C809F);}
     private String runtimeWarning(){String value=menu.runtimeStatus;return value.isEmpty()||value.endsWith(".running")||value.endsWith(".stopped")||value.endsWith(".paused")?"":value;}
     private String visibleStatus(){
-        if(invalidNumber)return localStatus.equals("gui.industrial_facilities.camera.invalid_duration_input")?localStatus:"gui.industrial_facilities.camera.invalid_number";
-        if(localStatus.equals("gui.industrial_facilities.camera.empty_actions_only"))return localStatus;
+        if(invalidNumber)return localStatus.equals("gui.industrial_facilities.camera.invalid_duration_input")||localStatus.equals("gui.industrial_facilities.camera.invalid_quantity")?localStatus:"gui.industrial_facilities.camera.invalid_number";
+        if(localStatus.equals("gui.industrial_facilities.camera.entity_context_required"))return localStatus;
         String warning=runtimeWarning();
         if(!warning.isEmpty())return text(warning).getString()+(actionTicks>0&&!menu.status.isEmpty()?" · "+text(menu.status).getString():"");
         if(waitingSave)return "gui.industrial_facilities.camera.saving";
@@ -456,12 +556,18 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         fit(g,text(status),10,imageHeight-17,imageWidth-20,invalidNumber?0xEDB795:MUTED);
     }
     @Override public void render(GuiGraphics g,int mx,int my,float partial){
-        super.render(g,mx,my,partial);
+        super.render(g,itemPickerOpen?-10000:mx,itemPickerOpen?-10000:my,partial);
+        if(itemPickerOpen){
+            g.flush();g.pose().pushPose();
+            try{g.pose().translate(0,0,400);renderItemPicker(g,mx,my);g.flush();}finally{g.pose().popPose();}
+            return;
+        }
         if(menu.mode==CameraMenu.PROGRAM){
             Row row=rowAt(mx,my);if(row!=null&&!dragging)g.renderTooltip(font,Component.literal(row.label),mx,my);
-            if(mx>=paneX&&mx<paneX+paletteWidth&&my>=paneY&&my<paneY+paneHeight){int index=(my-paneY+paletteScroll)/ROW;if(index<PALETTE.size()&&!PALETTE.get(index).heading){Palette item=PALETTE.get(index);g.renderTooltip(font,entityUnavailable(item.token)?font.split(tr("empty_actions_only"),Math.min(300,imageWidth-20)):List.of(tr(item.label).getVisualOrderText()),mx,my);}}
+            if(mx>=paneX&&mx<paneX+paletteWidth&&my>=paneY&&my<paneY+paneHeight){int index=(my-paneY+paletteScroll)/ROW;if(index<PALETTE.size()&&!PALETTE.get(index).heading){Palette item=PALETTE.get(index);g.renderTooltip(font,entityUnavailable(item.token)?font.split(tr("entity_context_required"),Math.min(300,imageWidth-20)):List.of(tr(item.label).getVisualOrderText()),mx,my);}}
             if(dragging){String label=dragToken!=null?PALETTE.stream().filter(p->p.token.equals(dragToken)).map(p->tr(p.label).getString()).findFirst().orElse(""):tr("move").getString();g.fill(mx+8,my+8,mx+18+font.width(label),my+27,0xEE58436F);g.drawString(font,label,mx+13,my+14,TEXT,false);}
         }
+        renderInventoryItemButton(g);
         if(!popup.isEmpty())renderPopup(g,mx,my);
         if(durationInput!=null&&durationInput.isMouseOver(mx,my))g.renderTooltip(font,font.split(tr(at(selected) instanceof CompoundTag node&&node.hasUUID("Camera")?"empty_delay":"wait_duration"),Math.min(300,imageWidth-20)),mx,my);
         if(mx>=leftPos+8&&mx<leftPos+imageWidth-8&&my>=topPos+imageHeight-23&&my<topPos+imageHeight-5){String status=menu.mode==CameraMenu.PROGRAM?visibleStatus():localStatus.isEmpty()?menu.status:localStatus;if(!status.isEmpty())g.renderTooltip(font,font.split(text(status),Math.min(360,imageWidth-20)),mx,my);}
@@ -475,31 +581,65 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         }g.disableScissor();
     }
     private void cameraControls(){
-        int y=48,w=Math.max(48,(imageWidth-40)/3);
-        rangeInput=configField(10,y,w,rangeDraft,tr("range"),s->rangeDraft=s);
-        yawInput=configField(20+w,y,w,yawDraft,tr("yaw"),s->yawDraft=s);
-        pitchInput=configField(30+w*2,y,w,pitchDraft,tr("pitch"),s->pitchDraft=s);
-        sweepToggleButton=button(10,88,w,18,tr(sweepDraft?"sweep_on":"sweep_off"),b->{sweepDraft=!sweepDraft;configDirty=true;sweepToggleButton.setMessage(tr(sweepDraft?"sweep_on":"sweep_off"));if(showField)updateField();});
+        int w=Math.max(48,(imageWidth-40)/3);
+        rangeInput=configField(10,43,w,rangeDraft,tr("range"),s->rangeDraft=s);
+        yawInput=configField(20+w,43,w,yawDraft,tr("yaw"),s->yawDraft=s);
+        pitchInput=configField(30+w*2,43,w,pitchDraft,tr("pitch"),s->pitchDraft=s);
+        sweepToggleButton=button(10,82,w,18,tr(sweepDraft?"sweep_on":"sweep_off"),b->{if(configWaiting)return;sweepDraft=!sweepDraft;configDirty=true;updateCameraControls();if(showField)updateField();});
         sweepToggleButton.setTooltip(Tooltip.create(tr("sweep_hint")));
-        sweepAngleInput=configField(20+w,88,w,sweepAngleDraft,tr("sweep_angle"),s->sweepAngleDraft=s);
-        sweepPeriodInput=configField(30+w*2,88,w,sweepPeriodDraft,tr("sweep_period"),s->sweepPeriodDraft=s);
-        button(10,imageHeight-52,(imageWidth-24)/2,20,tr("apply"),b->applyCamera());
-        button(14+(imageWidth-24)/2,imageHeight-52,(imageWidth-24)/2,20,tr("field_preview"),b->{showField=!showField;if(!showField)CameraUiClient.fieldPreview=null;else updateField();});
+        sweepAngleInput=configField(20+w,82,w,sweepAngleDraft,tr("sweep_angle"),s->sweepAngleDraft=s);
+        sweepPeriodInput=configField(30+w*2,82,w,sweepPeriodDraft,tr("sweep_period"),s->sweepPeriodDraft=s);
+        stagesToggleButton=button(10,121,w,18,tr(stagesDraft?"stages_on":"stages_off"),b->{if(configWaiting)return;stagesDraft=!stagesDraft;configDirty=true;updateCameraControls();});
+        stagesToggleButton.setTooltip(Tooltip.create(tr("stages_hint")));
+        int unitWidth=Math.min(36,w/3),valueWidth=w-unitWidth-3;
+        alertInput=configField(20+w,121,valueWidth,alertDraft,tr("alert_delay"),s->alertDraft=s);
+        alertUnitButton=button(23+w+valueWidth,121,unitWidth,18,tr(alertUnit.equals("minutes")?"unit_minutes_short":"unit_seconds_short"),b->switchConfigUnit(true));
+        resetInput=configField(30+w*2,121,valueWidth,resetDraft,tr("reset_delay"),s->resetDraft=s);
+        resetUnitButton=button(33+w*2+valueWidth,121,unitWidth,18,tr(resetUnit.equals("minutes")?"unit_minutes_short":"unit_seconds_short"),b->switchConfigUnit(false));
+        alertInput.setTooltip(Tooltip.create(tr("alert_delay_hint")));resetInput.setTooltip(Tooltip.create(tr("reset_delay_hint")));
+        haloToggleButton=button(10,149,w,18,tr(haloDraft?"halo_on":"halo_off"),b->{if(configWaiting)return;haloDraft=!haloDraft;configDirty=true;updateCameraControls();});
+        haloToggleButton.setTooltip(Tooltip.create(tr("halo_hint")));
+        int bw=(imageWidth-24)/2;
+        applyConfigButton=button(10,imageHeight-49,bw,20,fittedLabel("apply","apply_short",bw),b->applyCamera());applyConfigButton.setTooltip(Tooltip.create(tr("apply")));
+        fieldPreviewButton=button(14+bw,imageHeight-49,bw,20,fittedLabel("field_preview","preview_short",bw),b->{showField=!showField;if(!showField)CameraUiClient.fieldPreview=null;else updateField();});fieldPreviewButton.setTooltip(Tooltip.create(tr("field_preview")));
+        updateCameraControls();
+    }
+    private void updateCameraControls(){
+        if(menu.mode!=CameraMenu.CAMERA||stagesToggleButton==null)return;
+        boolean edit=menu.editable&&!configWaiting;
+        sweepToggleButton.setMessage(tr(sweepDraft?"sweep_on":"sweep_off"));stagesToggleButton.setMessage(tr(stagesDraft?"stages_on":"stages_off"));haloToggleButton.setMessage(tr(haloDraft?"halo_on":"halo_off"));
+        for(EditBox input:new EditBox[]{rangeInput,yawInput,pitchInput,sweepAngleInput,sweepPeriodInput,alertInput,resetInput})if(input!=null)input.setEditable(edit);
+        for(Button button:new Button[]{sweepToggleButton,stagesToggleButton,haloToggleButton,alertUnitButton,resetUnitButton})button.active=edit;
+        alertUnitButton.setMessage(tr(alertUnit.equals("minutes")?"unit_minutes_short":"unit_seconds_short"));resetUnitButton.setMessage(tr(resetUnit.equals("minutes")?"unit_minutes_short":"unit_seconds_short"));
+        applyConfigButton.active=edit&&configDirty&&parsedCamera()!=null&&parsedTicks(alertDraft,alertUnit,1)!=null&&parsedTicks(resetDraft,resetUnit,0)!=null;
+    }
+    private static Integer parsedTicks(String value,String unit,int minimum){
+        try{BigDecimal ticks=new BigDecimal(value.replace(',','.')).multiply(BigDecimal.valueOf(unit.equals("minutes")?1200:20)).setScale(0,RoundingMode.HALF_UP);return ticks.compareTo(BigDecimal.valueOf(minimum))>=0&&ticks.compareTo(BigDecimal.valueOf(CameraProgram.MAX_DURATION_TICKS))<=0?ticks.intValueExact():null;}catch(ArithmeticException|NumberFormatException e){return null;}
+    }
+    private void switchConfigUnit(boolean alert){
+        if(configWaiting)return;String unit=alert?alertUnit:resetUnit;Integer ticks=parsedTicks(alert?alertDraft:resetDraft,unit,alert?1:0);if(ticks==null){localStatus="gui.industrial_facilities.camera.invalid_settings";return;}
+        String next=unit.equals("seconds")?"minutes":"seconds";updatingConfig=true;
+        if(alert){alertUnit=next;alertDraft=formatTicks(ticks,next);alertInput.setValue(alertDraft);}else{resetUnit=next;resetDraft=formatTicks(ticks,next);resetInput.setValue(resetDraft);}updatingConfig=false;updateCameraControls();
     }
     private EditBox configField(int x,int y,int width,String value,Component label,java.util.function.Consumer<String> setter){
         EditBox input=new EditBox(font,leftPos+x,topPos+y,width,18,label);input.setMaxLength(8);input.setValue(value);input.setFilter(s->s.matches("[+-]?[0-9]*([.,][0-9]*)?"));
-        input.setResponder(s->{setter.accept(s);if(!updatingConfig)configDirty=true;if(showField)updateField();});addRenderableWidget(input);return input;
+        input.setResponder(s->{if(configWaiting&&!updatingConfig)return;setter.accept(s);if(!updatingConfig)configDirty=true;updateCameraControls();if(showField)updateField();});addRenderableWidget(input);return input;
     }
     private float[] parsedCamera(){
         try{int range=Integer.parseInt(rangeDraft);float yaw=Float.parseFloat(yawDraft.replace(',','.')),pitch=Float.parseFloat(pitchDraft.replace(',','.')),angle=Float.parseFloat(sweepAngleDraft.replace(',','.'));double period=Double.parseDouble(sweepPeriodDraft.replace(',','.'));
             return range>=1&&range<=16&&Float.isFinite(yaw)&&Float.isFinite(pitch)&&yaw>=-180&&yaw<=180&&pitch>=-80&&pitch<=80&&Float.isFinite(angle)&&angle>=0&&angle<=90&&Double.isFinite(period)&&period>=2&&period<=120?new float[]{range,yaw,pitch,angle,(int)Math.round(period*20)}:null;
         }catch(NumberFormatException e){return null;}
     }
-    private void applyCamera(){float[] values=parsedCamera();if(values==null){localStatus="gui.industrial_facilities.camera.invalid_settings";return;}localStatus="";PacketDistributor.sendToServer(new CameraMessages.Action(menu.containerId,CameraMenu.CONFIGURE,0,(int)values[0],values[1],values[2],CameraMenu.emptyProgram(),nextRequest++,sweepDraft,values[3],(int)values[4]));configDirty=false;}
+    private void applyCamera(){
+        float[] values=parsedCamera();Integer alert=parsedTicks(alertDraft,alertUnit,1),reset=parsedTicks(resetDraft,resetUnit,0);
+        if(configWaiting||!menu.editable)return;if(values==null||alert==null||reset==null){localStatus="gui.industrial_facilities.camera.invalid_settings";return;}
+        localStatus="";pendingConfigRequest=nextRequest++;configWaiting=true;
+        PacketDistributor.sendToServer(new CameraMessages.Action(menu.containerId,CameraMenu.CONFIGURE,0,(int)values[0],values[1],values[2],CameraMenu.emptyProgram(),pendingConfigRequest,sweepDraft,values[3],(int)values[4],stagesDraft,alert,reset,haloDraft));updateCameraControls();
+    }
     private void updateField(){float[] values=parsedCamera();if(values!=null)CameraUiClient.fieldPreview=new CameraUiClient.FieldPreview(menu.position,(int)values[0],values[1],values[2],sweepDraft,values[3],(int)values[4]);}
     private static void line(GuiGraphics g,int x0,int y0,int x1,int y1,int color){int dx=Math.abs(x1-x0),sx=x0<x1?1:-1,dy=-Math.abs(y1-y0),sy=y0<y1?1:-1,err=dx+dy;while(true){g.fill(x0,y0,x0+1,y0+1,color);if(x0==x1&&y0==y1)break;int twice=2*err;if(twice>=dy){err+=dy;x0+=sx;}if(twice<=dx){err+=dx;y0+=sy;}}}
     private void renderCamera(GuiGraphics g,float partial){
-        int px=leftPos+10,py=topPos+126,pw=imageWidth-20,ph=Math.max(8,imageHeight-209);g.fill(px,py,px+pw,py+ph,0xFF17181D);
+        int px=leftPos+10,py=topPos+183,pw=imageWidth-20,ph=imageHeight-260;if(ph<18)return;g.fill(px,py,px+pw,py+ph,0xFF17181D);
         float[] values=parsedCamera();if(values==null)return;double heading=Math.toRadians(CameraUiClient.previewYaw(new CameraUiClient.FieldPreview(menu.position,(int)values[0],values[1],values[2],sweepDraft,values[3],(int)values[4]),partial)),scale=Math.min(pw,ph)*.43/16;int cx=px+pw/2,cy=py+ph/2;
         for(int range=4;range<=16;range+=4){int rr=(int)(range*scale);g.hLine(cx-rr,cx+rr,cy,0xFF3D364A);g.vLine(cx,cy-rr,cy+rr,0xFF3D364A);}
         if(sweepDraft)for(int side:new int[]{-1,1}){double edge=Math.toRadians(values[1]+side*(values[3]+45));line(g,cx,cy,cx+(int)(Math.sin(edge)*values[0]*scale),cy-(int)(Math.cos(edge)*values[0]*scale),0xFF665276);}
@@ -508,10 +648,15 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         line(g,cx,cy,ax,ay,0xFFC29AEC);line(g,cx,cy,bx,by,0xFFC29AEC);line(g,ax,ay,bx,by,0xFF82639D);g.fill(cx-2,cy-2,cx+3,cy+3,0xFFD9B9FF);
     }
     private void cameraLabels(GuiGraphics g){
-        int w=Math.max(48,(imageWidth-40)/3);fit(g,tr("range"),10,33,w,MUTED);fit(g,tr("yaw"),20+w,33,w,MUTED);fit(g,tr("pitch"),30+w*2,33,w,MUTED);
-        fit(g,tr("sweep"),10,74,w,MUTED);fit(g,tr("sweep_angle"),20+w,74,w,MUTED);fit(g,tr("sweep_period"),30+w*2,74,w,MUTED);
-        fit(g,tr("fov"),14,114,imageWidth-28,PURPLE);fit(g,tr("occlusion"),10,imageHeight-74,imageWidth-20,MUTED);
-        fit(g,text(localStatus.isEmpty()?menu.status:localStatus),10,imageHeight-17,imageWidth-20,MUTED);
+        int w=Math.max(48,(imageWidth-40)/3);fit(g,tr("range"),10,30,w,MUTED);fit(g,tr("yaw"),20+w,30,w,MUTED);fit(g,tr("pitch"),30+w*2,30,w,MUTED);
+        fit(g,tr("sweep"),10,69,w,MUTED);fit(g,tr("sweep_angle"),20+w,69,w,MUTED);fit(g,tr("sweep_period"),30+w*2,69,w,MUTED);
+        fit(g,tr("stages"),10,108,w,MUTED);fit(g,tr("alert_delay"),20+w,108,w,MUTED);fit(g,tr("reset_delay"),30+w*2,108,w,MUTED);
+        int color=menu.stage==3?0xF08083:menu.stage==2?0xF0BA72:0xE7E3DA;
+        fit(g,tr("stage_live",tr("stage"+menu.stage)),20+w,148,imageWidth-30-w,color);
+        String timer=menu.stagesEnabled&&menu.stage==2&&menu.occupiedTicks>0?tr("alert_remaining",formatTicks(Math.max(0,menu.alertTicks-menu.occupiedTicks),"seconds")).getString():menu.stagesEnabled&&menu.stage>1&&menu.quietTicks>0?tr("reset_remaining",formatTicks(Math.max(0,menu.resetTicks-menu.quietTicks),"seconds")).getString():tr(menu.stagesEnabled?"stages_common_timer":"stages_disabled_hint").getString();
+        fit(g,Component.literal(timer),20+w,160,imageWidth-30-w,MUTED);
+        fit(g,tr("fov"),14,174,imageWidth-28,PURPLE);fit(g,tr("occlusion"),10,imageHeight-68,imageWidth-20,MUTED);
+        fit(g,text(configWaiting?"gui.industrial_facilities.camera.saving":localStatus.isEmpty()?menu.status:localStatus),10,imageHeight-17,imageWidth-20,MUTED);
     }
     @Override public void removed(){CameraUiClient.fieldPreview=null;super.removed();}
 }

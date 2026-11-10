@@ -33,7 +33,8 @@ public final class SecurityCameraRenderer implements BlockEntityRenderer<Securit
         if(camera.getLevel()==null)return;
         Direction facing=camera.getBlockState().getValue(SecurityCameraBlock.FACING);
         float base=switch(facing){case EAST->90;case NORTH->180;case WEST->270;default->0;};
-        float yaw=camera.effectiveYaw(partial),pitch=Float.isFinite(camera.pitch)?camera.pitch:0;
+        float yaw=camera.effectiveYaw(partial),pitch=camera.effectivePitch(partial);
+        if(!Float.isFinite(pitch))pitch=0;
         pose.pushPose();pose.translate(.5,.5,.5);pose.mulPose(Axis.YP.rotationDegrees(base-yaw));pose.mulPose(Axis.XP.rotationDegrees(pitch));pose.translate(-.5,-.5,-.5);
         var model=Minecraft.getInstance().getModelManager().getModel(HEAD);
         var out=buffers.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));var random=RandomSource.create(42);

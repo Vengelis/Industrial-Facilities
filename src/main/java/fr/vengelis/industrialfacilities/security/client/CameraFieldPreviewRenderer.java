@@ -30,7 +30,7 @@ public final class CameraFieldPreviewRenderer {
         if(!mc.level.hasChunkAt(pos)||!(mc.level.getBlockEntity(pos) instanceof SecurityCameraEntity camera)||camera.creator==null||!camera.creator.equals(mc.player.getUUID())||mc.player.distanceToSqr(pos.getCenter())>64*64)return;
         float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);
         int range=Math.clamp(draft==null?camera.range:draft.range(),1,16);
-        float yaw=draft==null?camera.effectiveYaw(partial):CameraUiClient.previewYaw(draft,partial),pitch=draft==null?camera.pitch:draft.pitch();
+        float yaw=draft==null?camera.effectiveYaw(partial):CameraUiClient.previewYaw(draft,partial),pitch=draft==null?camera.effectivePitch(partial):draft.pitch();
         if(!Float.isFinite(yaw)||!Float.isFinite(pitch))return;
         var facing=camera.getBlockState().getValue(SecurityCameraBlock.FACING);double a=Math.toRadians(yaw),p=Math.toRadians(pitch),x=facing.getStepX(),z=facing.getStepZ();
         Vec3 forward=new Vec3((x*Math.cos(a)-z*Math.sin(a))*Math.cos(p),-Math.sin(p),(x*Math.sin(a)+z*Math.cos(a))*Math.cos(p)).normalize();
