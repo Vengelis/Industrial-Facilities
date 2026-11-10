@@ -70,5 +70,29 @@
         "stream": false
       }
     ]
+  },
+  "camera_rotate": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:camera_rotate",
+        "stream": false
+      }
+    ]
+  },
+  "camera_tracking_acquire": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:camera_tracking_acquire",
+        "stream": false
+      }
+    ]
+  },
+  "camera_tracking_release": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:camera_tracking_release",
+        "stream": false
+      }
+    ]
   }
 }

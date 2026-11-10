@@ -41,6 +41,7 @@ public final class TerminalLinks {
             case "camera"->target instanceof SecurityCameraEntity camera&&link.id().equals(camera.instanceId)&&owner.equals(camera.creator);
             case "door"->target instanceof IndustrialDoorEntity door&&door.size>0&&link.id().equals(door.doorInstanceId)&&owner.equals(door.automationOwner)&&AccessDoorService.canConfigureOwner(owner,door);
             case "alarm"->target instanceof AlarmBlockEntity alarm&&link.id().equals(alarm.automationInstanceId)&&owner.equals(alarm.automationOwner);
+            case "panel"->link.available()&&target instanceof fr.vengelis.industrialfacilities.panel.PanelBlockEntity panel&&panel.automationGroup(owner,link.id())!=null;
             case "emitter"->target instanceof SignalEmitterEntity emitter&&link.id().equals(emitter.instanceId)&&owner.equals(emitter.creator);
             default->false;
         };

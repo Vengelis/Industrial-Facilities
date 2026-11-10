@@ -16,6 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.*;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModSounds;
 public class SecurityCameraEntity extends BlockEntity {
     public static final double MODEL_SCALE=.85,LENS_DISTANCE=.46*MODEL_SCALE;
     public static final int MIN_SWEEP_TICKS=40,MAX_SWEEP_TICKS=2400;
@@ -36,6 +39,8 @@ public class SecurityCameraEntity extends BlockEntity {
     public long trackingRevision;
     private float headYaw,headPitch;
     private long lastHeadSync=Long.MIN_VALUE;
+    private float audioYaw=Float.NaN,audioPitch=Float.NaN;
+    private long nextMotorSound;
     private boolean headInitialized,headSyncDirty;
     private float sentYaw=Float.NaN,sentPitch=Float.NaN;
     private boolean clientHeadReceived;
@@ -77,12 +82,23 @@ public class SecurityCameraEntity extends BlockEntity {
         if(opticalChanged)sweepEpoch=level.getGameTime();
         this.stagesEnabled=stagesEnabled;this.alertTicks=alertTicks;this.resetTicks=resetTicks;this.haloEnabled=haloEnabled;
         // Visual-only changes must not disarm an acquired alert or move the sweeping head.
-        if(opticalChanged||stagesChanged)resetStageRuntime();sync();return AccessBadges.Result.success("gui.industrial_facilities.camera.saved");
+        if(opticalChanged||stagesChanged){if(trackedEntity!=null)cameraSound(IndustrialFacilitiesModSounds.CAMERA_TRACKING_RELEASE.get(),.18f,1);resetStageRuntime();}sync();return AccessBadges.Result.success("gui.industrial_facilities.camera.saved");
     }
     private void clearStreaks(){occupiedSince=-1;quietSince=-1;occupiedTicks=0;quietTicks=0;}
     private void resetStageRuntime(){clearStreaks();lastStageTick=Long.MIN_VALUE;stage=1;stageTransitions.clear();stageRevision++;stageResetToken=UUID.randomUUID();resetHead();}
-    private void resetHead(){headInitialized=false;trackedEntity=null;headMode=PATROL;trackingRevision++;headSyncDirty=true;lastHeadSync=Long.MIN_VALUE;sentYaw=sentPitch=Float.NaN;}
-    private void headMode(int mode,UUID target){if(headMode!=mode||!Objects.equals(trackedEntity,target)){headMode=mode;trackedEntity=target;trackingRevision++;headSyncDirty=true;}}
+    private void resetHead(){headInitialized=false;trackedEntity=null;headMode=PATROL;trackingRevision++;headSyncDirty=true;lastHeadSync=Long.MIN_VALUE;sentYaw=sentPitch=Float.NaN;audioYaw=audioPitch=Float.NaN;nextMotorSound=0;}
+    private void headMode(int mode,UUID target){if(headMode!=mode||!Objects.equals(trackedEntity,target)){
+        if(trackedEntity==null&&target!=null)cameraSound(IndustrialFacilitiesModSounds.CAMERA_TRACKING_ACQUIRE.get(),.22f,1);
+        else if(trackedEntity!=null&&target==null)cameraSound(IndustrialFacilitiesModSounds.CAMERA_TRACKING_RELEASE.get(),.18f,1);
+        headMode=mode;trackedEntity=target;trackingRevision++;headSyncDirty=true;
+    }}
+    private void cameraSound(SoundEvent sound,float volume,float pitch){if(level instanceof ServerLevel server)server.playSound(null,worldPosition,sound,SoundSource.BLOCKS,volume,pitch);}
+    private void motorAudio(long now,boolean enabled){
+        float currentYaw=effectiveYaw(0),currentPitch=effectivePitch(0);
+        boolean moving=Float.isFinite(audioYaw)&&(Math.abs(currentYaw-audioYaw)>.025f||Math.abs(currentPitch-audioPitch)>.025f);
+        audioYaw=currentYaw;audioPitch=currentPitch;
+        if(enabled&&headMode==TRACK&&moving&&now>=nextMotorSound){cameraSound(IndustrialFacilitiesModSounds.CAMERA_ROTATE.get(),.065f,1.08f);nextMotorSound=now+5;}
+    }
     private void initializeHead(){if(!headInitialized){headYaw=yaw+sweepOffset(0);headPitch=pitch;headInitialized=true;}}
     private void beginReturn(){initializeHead();headMode(RETURN,null);}
     private static float approach(float value,float desired,float step){return value+Math.clamp(desired-value,-step,step);}
@@ -104,9 +120,9 @@ public class SecurityCameraEntity extends BlockEntity {
         long now=server.getGameTime();if(lastStageTick==now)return;
         if(lastStageTick!=Long.MIN_VALUE&&now!=lastStageTick+1)clearStreaks();lastStageTick=now;
         initializeHead();
-        if(!stagesEnabled){clearStreaks();headMode(PATROL,null);patrolHead(now);if(stage!=1){stage=1;stageTransitions.clear();stageRevision++;sync();}syncHead(now);return;}
+        if(!stagesEnabled){clearStreaks();headMode(PATROL,null);patrolHead(now);if(stage!=1){stage=1;stageTransitions.clear();stageRevision++;sync();}syncHead(now);motorAudio(now,true);return;}
         // Unknown chunks freeze orientation and both timers. No target lookup or entity query is allowed.
-        if(!fieldLoaded()){clearStreaks();headMode(HOLD,null);syncHead(now);return;}
+        if(!fieldLoaded()){clearStreaks();headMode(HOLD,null);syncHead(now);motorAudio(now,false);return;}
         if(stage==1){if(headMode!=PATROL&&headMode!=RETURN)beginReturn();patrolHead(now);}
         Entity target=null;
         if(stage>=2&&trackedEntity!=null){Entity old=server.getEntity(trackedEntity);if(validTracked(server,old))target=old;}
@@ -129,6 +145,7 @@ public class SecurityCameraEntity extends BlockEntity {
             if(stage!=1&&quietTicks>=resetTicks)transition(1);
         }
         syncHead(now);
+        motorAudio(now,true);
     }
     private Aim aim(Vec3 point){
         Vec3 delta=point.subtract(worldPosition.getCenter());Direction facing=getBlockState().getValue(SecurityCameraBlock.FACING);

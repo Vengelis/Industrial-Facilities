@@ -41,7 +41,7 @@ public final class NetworkTabletClient {
     }
     public static final int TTL_TICKS=40;
     private static final int MAX_EDGES=TerminalLinks.MAX_LINKS;
-    private static final Set<String> SOURCES=Set.of("reader","automation"),TARGETS=Set.of("door","camera","alarm","emitter");
+    private static final Set<String> SOURCES=Set.of("reader","automation"),TARGETS=Set.of("door","camera","alarm","emitter","panel");
     private static ClientLevel world;
     private static ResourceLocation dimension;
     private static List<TerminalLinks.Link> cached=List.of();
@@ -83,7 +83,7 @@ public final class NetworkTabletClient {
     public static List<NetworkTabletOutlines.Outline> currentOutlines(){var links=currentLinks();return NetworkTabletOutlines.collect(world,links);}
     public static int colorFor(String source,String target){
         if(source.equals("reader"))return 0x62DDE7;
-        return switch(target){case "camera"->0xBE94F0;case "door"->0x81D6A3;case "alarm"->0xF0B064;case "emitter"->0xEE777D;default->0xBE94F0;};
+        return switch(target){case "camera"->0xBE94F0;case "door"->0x81D6A3;case "alarm"->0xF0B064;case "emitter"->0xEE777D;case "panel"->0xF5DB8D;default->0xBE94F0;};
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event){
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_LEVEL)return;
@@ -130,7 +130,7 @@ public final class NetworkTabletClient {
         var g=event.getGuiGraphics();List<TerminalLinks.Link> links=currentLinks();
         Component heading=fresh()?Component.translatable("gui.industrial_facilities.tablet.links",links.size()):Component.translatable("gui.industrial_facilities.tablet.waiting");
         g.drawString(mc.font,heading,8,8,0xDCC7F1,true);
-        int x=8;String[] keys={"access","camera","door","alarm","emitter"};String[] kinds={"door","camera","door","alarm","emitter"};
+        int x=8;String[] keys={"access","camera","door","alarm","emitter","panel"};String[] kinds={"door","camera","door","alarm","emitter","panel"};
         for(int i=0;i<keys.length;i++){int color=colorFor(i==0?"reader":"automation",kinds[i]);String label=Component.translatable("gui.industrial_facilities.tablet."+keys[i]).getString();g.fill(x,23,x+3,26,0xFF000000|color);g.drawString(mc.font,label,x+6,20,0xD6D1DC,true);x+=mc.font.width(label)+14;}
         if(truncated)g.drawString(mc.font,Component.translatable("gui.industrial_facilities.tablet.partial"),8,32,0xE9BD85,true);
     }

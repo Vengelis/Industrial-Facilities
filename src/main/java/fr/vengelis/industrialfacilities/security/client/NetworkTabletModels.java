@@ -40,9 +40,15 @@ public final class NetworkTabletModels {
             // The short-lived server-authorized endpoint and loaded type are the same fallback
             // used by NetworkTabletOutlines.collect; this helper does not invent a new link.
             case "alarm"->entity instanceof AlarmBlockEntity&&staticModel(level,entity.getBlockPos(),pose,buffers);
+            case "panel"->panel(level,entity,partial,pose,buffers);
             case "emitter"->entity instanceof SignalEmitterEntity&&staticModel(level,entity.getBlockPos(),pose,buffers);
             default->false;
         };
+    }
+    private static boolean panel(ClientLevel level,BlockEntity entity,float partial,PoseStack pose,MultiBufferSource buffers){
+        if(!(entity instanceof fr.vengelis.industrialfacilities.panel.PanelBlockEntity))return false;
+        var group=fr.vengelis.industrialfacilities.panel.PanelStructure.find(level,entity.getBlockPos());if(!group.valid())return false;
+        for(BlockPos member:group.blocks()){staticModel(level,member,pose,buffers);var panel=level.getBlockEntity(member);if(panel!=null)blockEntity(panel,partial,pose,buffers);}return true;
     }
     private static boolean terminal(ClientLevel level,BlockEntity entity,NetworkTabletOutlines.Outline endpoint,float partial,PoseStack pose,MultiBufferSource buffers){
         if(!(entity instanceof AccessTerminalEntity terminal)||!endpoint.instance().equals(terminal.instanceId)

@@ -2,6 +2,7 @@ package fr.vengelis.industrialfacilities.security;
 import java.util.*;
 import fr.vengelis.industrialfacilities.access.*;
 import fr.vengelis.industrialfacilities.alarm.AlarmBlockEntity;
+import fr.vengelis.industrialfacilities.panel.*;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorEntity;
 import net.minecraft.core.*;
 import net.minecraft.nbt.*;
@@ -24,7 +25,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     public CompoundTag program(){return program.copy();}
     public boolean isRunning(){return running;}
     public String status(){return status;}
-    public List<LinkView> linkViews(){List<LinkView> result=new ArrayList<>();Map<String,Integer> counts=new HashMap<>();for(Link link:links){int index=counts.merge(link.kind,1,Integer::sum);String prefix=switch(link.kind){case "camera"->"CAM";case "door"->"PORTE";case "alarm"->"AL";default->"RED";};result.add(new LinkView(link.id,link.kind,link.pos,prefix+String.format(java.util.Locale.ROOT,"%02d",index),available(link)));}return List.copyOf(result);}
+    public List<LinkView> linkViews(){List<LinkView> result=new ArrayList<>();Map<String,Integer> counts=new HashMap<>();for(Link link:links){int index=counts.merge(link.kind,1,Integer::sum);String prefix=switch(link.kind){case "camera"->"CAM";case "door"->"PORTE";case "alarm"->"AL";case "panel"->"PAN";default->"RED";};result.add(new LinkView(link.id,link.kind,link.pos,prefix+String.format(java.util.Locale.ROOT,"%02d",index),available(link)));}return List.copyOf(result);}
     private boolean canOwn(ServerPlayer player){return isOwner(player)&&player.isAlive()&&player.level()==level&&AccessTerminalEntity.resolve(level,worldPosition)==this&&!isRemoved();}
     private boolean canEdit(ServerPlayer player){return canOwn(player)&&player.distanceToSqr(worldPosition.getCenter())<=64;}
     public AccessBadges.Result setProgram(ServerPlayer player,CompoundTag data){if(!canEdit(player))return fail("not_owner");var result=CameraProgram.validate(data,linkViews());if(!result.ok())return AccessBadges.Result.fail(result.error());pause("stopped");program=result.program().copy();compiled=CameraProgram.compile(program,linkViews());sync();return success("saved");}
@@ -42,13 +43,20 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             case "camera"->target instanceof SecurityCameraEntity c&&link.id.equals(c.instanceId)&&Objects.equals(creator,c.creator)&&c.fieldLoaded();
             case "door"->target instanceof IndustrialDoorEntity d&&d.size>0&&link.id.equals(d.doorInstanceId)&&Objects.equals(creator,d.automationOwner)&&AccessDoorService.canConfigureOwner(creator,d);
             case "alarm"->target instanceof AlarmBlockEntity a&&link.id.equals(a.automationInstanceId)&&Objects.equals(creator,a.automationOwner);
+            case "panel"->target instanceof PanelBlockEntity p&&panelAvailable(p,link.id);
             case "emitter"->target instanceof SignalEmitterEntity e&&link.id.equals(e.instanceId)&&Objects.equals(creator,e.creator);
             default->false;};
+    }
+    private boolean panelAvailable(PanelBlockEntity panel,UUID id){
+        var group=panel.automationGroup(creator,id);
+        return group!=null&&group.blocks().stream().allMatch(p->TerminalLinks.inRange(worldPosition,p));
     }
     public AccessBadges.Result link(ServerPlayer player,BlockPos pos,boolean remove){
         if(!canOwn(player)||player.distanceToSqr(pos.getCenter())>64||!(level instanceof ServerLevel server)||!TerminalLinks.loaded(server,pos))return fail("link_denied");
         if(remove){
             var door=AccessDoorService.resolveDoor(level,pos);BlockPos remembered=door==null?pos:door.getBlockPos();Link old=null;
+            var panelGroup=level.getBlockEntity(pos) instanceof PanelBlockEntity?PanelStructure.find(level,pos):null;
+            if(panelGroup!=null&&panelGroup.valid())for(Link link:links)if(link.kind.equals("panel")&&panelGroup.blocks().contains(link.pos)){remembered=link.pos;break;}
             for(Link link:links)if(link.pos.equals(remembered)||link.pos.equals(pos)){old=link;break;}
             if(old==null)return fail("not_linked");pause("stopped");links.remove(old);sync();return success("device_unlinked");
         }
@@ -56,15 +64,27 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         if(target instanceof SecurityCameraEntity camera){id=camera.instanceId;kind="camera";if(!Objects.equals(camera.creator,creator))return fail("not_owner");}
         else if(target instanceof SignalEmitterEntity emitter){id=emitter.instanceId;kind="emitter";if(!Objects.equals(emitter.creator,creator))return fail("not_owner");}
         else if(target instanceof AlarmBlockEntity alarm){id=alarm.automationInstanceId;kind="alarm";if(alarm.automationOwner!=null&&!Objects.equals(alarm.automationOwner,creator))return fail("not_owner");}
+        else if(target instanceof PanelBlockEntity){
+            var group=PanelStructure.find(level,pos);if(!group.valid())return fail("panel_unavailable");
+            for(BlockPos member:group.blocks()){
+                if(!TerminalLinks.inRange(worldPosition,member)||!(level.getBlockEntity(member) instanceof PanelBlockEntity panel))return fail("link_denied");
+                for(Direction d:PanelStructure.directions(panel.getBlockState()))if(!TerminalLinks.loaded(server,member.relative(d)))return fail("panel_unavailable");
+                if(panel.automationOwner!=null&&!Objects.equals(panel.automationOwner,creator))return fail("not_owner");
+                for(Link link:links)if(link.kind.equals("panel")&&link.pos.equals(member))return fail("already_linked");
+            }
+            at=group.origin();id=group.controller(level).automationInstanceId;kind="panel";
+        }
         else {IndustrialDoorEntity door=AccessDoorService.resolveDoor(level,pos);if(door==null||!AccessDoorService.canConfigure(player,door))return fail("link_denied");at=door.getBlockPos();if(!TerminalLinks.inRange(worldPosition,at))return fail("link_denied");id=AccessDoorService.ensureId(door);kind="door";}
         if(!TerminalLinks.inRange(worldPosition,at))return fail("link_denied");
         Link existing=find(id);
         if(existing!=null)return fail("already_linked");long cameras=links.stream().filter(l->l.kind.equals("camera")).count();if(kind.equals("camera")?cameras>=8:links.size()-cameras>=16)return fail("link_limit");
         if(kind.equals("door")&&level.getBlockEntity(at) instanceof IndustrialDoorEntity door){door.automationOwner=creator;door.sync();}
         if(kind.equals("alarm")&&target instanceof AlarmBlockEntity alarm){alarm.automationOwner=creator;alarm.setChanged();}
+        if(kind.equals("panel"))for(BlockPos member:PanelStructure.find(level,at).blocks())if(level.getBlockEntity(member) instanceof PanelBlockEntity panel){panel.automationOwner=creator;panel.setChanged();}
         pause("stopped");links.add(new Link(id,kind,at.immutable()));sync();return success("linked");
     }
-    private void action(UUID id,String action){Link link=find(id);if(link==null||!available(link))return;boolean on=action.endsWith("_on")||action.endsWith("_open");if(link.kind.equals("door")&&level.getBlockEntity(link.pos) instanceof IndustrialDoorEntity door&&!door.allowCameraAutomation){status="gui.industrial_facilities.camera.door_opt_in";return;}status="gui.industrial_facilities.camera.running";outputs.put(id,on);AutomationOutputs.request((ServerLevel)level,link.pos,link.kind,id,instanceId,on);if(!on&&otherSource(link))status="gui.industrial_facilities.camera.other_source";}
+    private void action(UUID id,String action,String text){Link link=find(id);if(link==null||!available(link))return;
+        if(link.kind.equals("panel")){if(action.equals("panel_text")&&level.getBlockEntity(link.pos) instanceof PanelBlockEntity panel)panel.setAutomationText(creator,id,text);return;}boolean on=action.endsWith("_on")||action.endsWith("_open");if(link.kind.equals("door")&&level.getBlockEntity(link.pos) instanceof IndustrialDoorEntity door&&!door.allowCameraAutomation){status="gui.industrial_facilities.camera.door_opt_in";return;}status="gui.industrial_facilities.camera.running";outputs.put(id,on);AutomationOutputs.request((ServerLevel)level,link.pos,link.kind,id,instanceId,on);if(!on&&otherSource(link))status="gui.industrial_facilities.camera.other_source";}
     private boolean otherSource(Link link){if(!(level instanceof ServerLevel server))return false;var target=level.getBlockEntity(link.pos);return target instanceof IndustrialDoorEntity door?AccessDoorService.shouldOpen(server,door):target instanceof AlarmBlockEntity alarm?alarm.powered():AutomationOutputs.active(server,link.pos,link.kind,link.id);}
     private boolean enqueue(List<CameraProgram.Job> added){if(jobs.size()+added.size()>CameraProgram.MAX_JOBS){pause("job_limit");return false;}jobs.addAll(added);return true;}
     private void cancelEmpty(UUID camera){jobs.removeIf(job->job.empty()&&job.camera().equals(camera));}
@@ -114,5 +134,5 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     @Override public void onLoad(){super.onLoad();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();compiled=null;}
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider provider){CompoundTag tag=new CompoundTag();if(creator!=null)tag.putUUID("Creator",creator);tag.putUUID("InstanceId",instanceId);tag.putBoolean("CameraRunning",running);return tag;}
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider){super.saveAdditional(tag,provider);tag.put("CameraProgram",program.copy());tag.putBoolean("CameraRunning",running);ListTag list=new ListTag();for(Link link:links){CompoundTag row=new CompoundTag();row.putUUID("Id",link.id);row.putString("Kind",link.kind);row.putLong("Position",link.pos.asLong());list.add(row);}tag.put("CameraLinks",list);}
-    @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);links.clear();int cameras=0,targets=0;Set<UUID> ids=new HashSet<>();for(Tag raw:tag.getList("CameraLinks",Tag.TAG_COMPOUND)){CompoundTag row=(CompoundTag)raw;String kind=row.getString("Kind");if(!row.hasUUID("Id")||!Set.of("camera","door","alarm","emitter").contains(kind)||!ids.add(row.getUUID("Id")))continue;if(kind.equals("camera")){if(cameras++>=8)continue;}else if(targets++>=16)continue;links.add(new Link(row.getUUID("Id"),kind,BlockPos.of(row.getLong("Position"))));}program=tag.contains("CameraProgram",Tag.TAG_COMPOUND)?tag.getCompound("CameraProgram").copy():CameraProgram.empty();compiled=null;running=tag.getBoolean("CameraRunning");status="gui.industrial_facilities.camera."+(running?"running":"stopped");outputs.clear();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();}
+    @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);links.clear();int cameras=0,targets=0;Set<UUID> ids=new HashSet<>();for(Tag raw:tag.getList("CameraLinks",Tag.TAG_COMPOUND)){CompoundTag row=(CompoundTag)raw;String kind=row.getString("Kind");if(!row.hasUUID("Id")||!Set.of("camera","door","alarm","emitter","panel").contains(kind)||!ids.add(row.getUUID("Id")))continue;if(kind.equals("camera")){if(cameras++>=8)continue;}else if(targets++>=16)continue;links.add(new Link(row.getUUID("Id"),kind,BlockPos.of(row.getLong("Position"))));}program=tag.contains("CameraProgram",Tag.TAG_COMPOUND)?tag.getCompound("CameraProgram").copy():CameraProgram.empty();compiled=null;running=tag.getBoolean("CameraRunning");status="gui.industrial_facilities.camera."+(running?"running":"stopped");outputs.clear();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();}
 }

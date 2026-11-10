@@ -510,5 +510,11 @@
   "gui.industrial_facilities.camera.inventory_results": "%s items",
   "gui.industrial_facilities.camera.invalid_quantity": "Enter a whole quantity from 0 to 1,000,000.",
   "gui.industrial_facilities.camera.invalid_inventory_item": "Choose a valid item from the list.",
-  "gui.industrial_facilities.camera.invalid_inventory_count": "Quantity must be a whole number from 0 to 1,000,000, with a valid comparator."
+  "gui.industrial_facilities.camera.invalid_inventory_count": "Quantity must be a whole number from 0 to 1,000,000, with a valid comparator.",
+  "gui.industrial_facilities.camera.panel_text": "Set panel text",
+  "gui.industrial_facilities.camera.panel_text_value": "Panel text",
+  "gui.industrial_facilities.camera.panel_text_hint": "Up to 200 characters. Empty text clears the linked panel. Scroll direction is preserved.",
+  "gui.industrial_facilities.camera.invalid_panel_text": "Invalid panel text (200 characters maximum).",
+  "gui.industrial_facilities.camera.panel_unavailable": "The panel must be a complete, fully loaded rectangle.",
+  "gui.industrial_facilities.tablet.panel": "Panel"
 }

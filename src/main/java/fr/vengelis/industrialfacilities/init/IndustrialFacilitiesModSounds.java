@@ -30,4 +30,9 @@ public class IndustrialFacilitiesModSounds {
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "terminal_access_granted")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> TERMINAL_ACCESS_DENIED = REGISTRY.register("terminal_access_denied",
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "terminal_access_denied")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> CAMERA_ROTATE = REGISTRY.register("camera_rotate", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "camera_rotate")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> CAMERA_TRACKING_ACQUIRE = REGISTRY.register("camera_tracking_acquire",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "camera_tracking_acquire")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> CAMERA_TRACKING_RELEASE = REGISTRY.register("camera_tracking_release",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "camera_tracking_release")));
 }

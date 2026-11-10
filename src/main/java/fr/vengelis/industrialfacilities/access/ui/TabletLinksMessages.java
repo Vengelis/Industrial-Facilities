@@ -31,7 +31,7 @@ public final class TabletLinksMessages {
             List<TerminalLinks.Link> links=new ArrayList<>(count);
             for(int i=0;i<count;i++){
                 var source=buffer.readBlockPos();UUID sourceId=buffer.readUUID();String sourceKind=buffer.readUtf(16);var target=buffer.readBlockPos();UUID targetId=buffer.readUUID();String targetKind=buffer.readUtf(16);
-                if(!Set.of("reader","automation").contains(sourceKind)||!Set.of("door","camera","alarm","emitter").contains(targetKind)||!TerminalLinks.inRange(source,target))throw new IllegalArgumentException("Invalid tablet link");
+                if(!Set.of("reader","automation").contains(sourceKind)||!Set.of("door","camera","alarm","emitter","panel").contains(targetKind)||!TerminalLinks.inRange(source,target))throw new IllegalArgumentException("Invalid tablet link");
                 links.add(new TerminalLinks.Link(source,sourceId,sourceKind,target,targetId,targetKind));
             }return new State(dimension,sequence,links,buffer.readBoolean());
         });

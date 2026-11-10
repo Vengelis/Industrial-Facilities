@@ -20,6 +20,7 @@ public final class CameraProgram {
     public static final int MAX_EVENTS=16,MAX_NODES=64,MAX_DEPTH=6,MAX_DURATION_TICKS=72000,MAX_JOBS=128;
     public static final int MAX_ITEM_ID_LENGTH=256,MAX_INVENTORY_COUNT=1_000_000;
     private static final int MAX_INVENTORY_SLOTS=256,MAX_EQUIPMENT_SLOTS=16,COUNT_OVERFLOW=MAX_INVENTORY_COUNT+1;
+    @FunctionalInterface public interface ActionOutput { void accept(UUID target, String action, String text); }
     public record Validation(boolean ok,String error,CompoundTag program) {}
     private record Duration(int ticks,String unit,boolean explicit) {}
     /** Values are captured once at entry. A sleeping sequence never retains a live entity. */
@@ -63,7 +64,8 @@ public final class CameraProgram {
         public UUID camera(){return camera;}
         public boolean empty(){return empty;}
         public long readyAt(){return readyAt;}
-        public boolean advance(long now,BiConsumer<UUID,String> output){
+        public boolean advance(long now,BiConsumer<UUID,String> output){ return advance(now,(id,action,text)->output.accept(id,action)); }
+        public boolean advance(long now,ActionOutput output){
             if(now<readyAt)return false;int visited=0;
             while(!stack.isEmpty()){
                 Frame frame=stack.peekLast();if(frame.index>=frame.nodes.size()){stack.removeLast();continue;}
@@ -98,9 +100,9 @@ public final class CameraProgram {
     private record Event(UUID camera,String trigger,Duration delay,List<Stmt> body) {}
     private interface Stmt {CompoundTag save();}
     private interface Cond {boolean test(Snapshot snapshot);CompoundTag save();default boolean requiresInventory(){return false;}}
-    private record Action(UUID target,String action) implements Stmt {
-        public void request(BiConsumer<UUID,String> consumer){consumer.accept(target,action);}
-        public CompoundTag save(){CompoundTag tag=op("action");tag.putUUID("Target",target);tag.putString("Action",action);return tag;}
+    private record Action(UUID target,String action,String text) implements Stmt {
+        public void request(ActionOutput consumer){consumer.accept(target,action,text);}
+        public CompoundTag save(){CompoundTag tag=op("action");tag.putUUID("Target",target);tag.putString("Action",action);if(action.equals("panel_text"))tag.putString("Text",text);return tag;}
     }
     private record Wait(Duration duration) implements Stmt {public CompoundTag save(){CompoundTag tag=op("wait");CameraProgram.duration(tag,duration);return tag;}}
     private record If(Cond condition,List<Stmt> yes,List<Stmt> no) implements Stmt {
@@ -152,7 +154,12 @@ public final class CameraProgram {
             if(tag.getString("Op").equals("wait"))return new Wait(time(tag,true));
             if(!tag.getString("Op").equals("action"))throw new IllegalArgumentException("invalid_program");
             UUID target=id(tag,"Target");String action=tag.getString("Action"),kind=links.get(target);
-            if(kind==null||!Set.of("door_open","door_close","alarm_on","alarm_off","emitter_on","emitter_off").contains(action)||!action.startsWith(kind+"_"))throw new IllegalArgumentException("invalid_target");return new Action(target,action);
+            if(kind==null||!Set.of("door_open","door_close","alarm_on","alarm_off","emitter_on","emitter_off","panel_text").contains(action)||!action.startsWith(kind+"_"))throw new IllegalArgumentException("invalid_target");String text="";
+            if(action.equals("panel_text")){
+                text=tag.getString("Text");
+                if(!tag.contains("Text",Tag.TAG_STRING)||text.length()>fr.vengelis.industrialfacilities.panel.PanelBlockEntity.MAX_TEXT||!text.equals(fr.vengelis.industrialfacilities.panel.PanelBlockEntity.sanitize(text)))throw new IllegalArgumentException("invalid_panel_text");
+            }
+            return new Action(target,action,text);
         }
         Cond condition(CompoundTag tag,int depth){
             count(depth);String op=tag.getString("Op");if(op.equals("and")||op.equals("or"))return new BooleanCondition(op,condition(tag.getCompound("Left"),depth+1),condition(tag.getCompound("Right"),depth+1));

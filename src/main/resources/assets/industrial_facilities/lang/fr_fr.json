@@ -510,5 +510,11 @@
   "gui.industrial_facilities.camera.inventory_results": "%s objets",
   "gui.industrial_facilities.camera.invalid_quantity": "Entre une quantité entière de 0 à 1 000 000.",
   "gui.industrial_facilities.camera.invalid_inventory_item": "Choisissez un objet valide dans la liste.",
-  "gui.industrial_facilities.camera.invalid_inventory_count": "La quantité doit être un entier entre 0 et 1 000 000, avec un comparateur valide."
+  "gui.industrial_facilities.camera.invalid_inventory_count": "La quantité doit être un entier entre 0 et 1 000 000, avec un comparateur valide.",
+  "gui.industrial_facilities.camera.panel_text": "Modifier le texte du panneau",
+  "gui.industrial_facilities.camera.panel_text_value": "Texte du panneau",
+  "gui.industrial_facilities.camera.panel_text_hint": "200 caractères maximum. Un texte vide efface le panneau lié. Le sens de défilement est conservé.",
+  "gui.industrial_facilities.camera.invalid_panel_text": "Texte de panneau invalide (200 caractères maximum).",
+  "gui.industrial_facilities.camera.panel_unavailable": "Le panneau doit former un rectangle complet et être entièrement chargé.",
+  "gui.industrial_facilities.tablet.panel": "Panneau"
 }

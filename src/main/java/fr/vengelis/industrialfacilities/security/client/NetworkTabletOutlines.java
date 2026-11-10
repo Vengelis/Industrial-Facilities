@@ -48,6 +48,10 @@ public final class NetworkTabletOutlines {
         if(link.targetKind().equals("door")){
             if(!(entity instanceof IndustrialDoorEntity door)||door.size<5||door.size>15||!link.targetId().equals(door.doorInstanceId))return null;
             box=doorBounds(door.doorOrigin(),door.getBlockState().getValue(IndustrialDoorBlock.FACING),door.size);
+        }else if(link.targetKind().equals("panel")){
+            if(!(entity instanceof fr.vengelis.industrialfacilities.panel.PanelBlockEntity))return null;
+            var group=fr.vengelis.industrialfacilities.panel.PanelStructure.find(level,pos);if(!group.valid())return null;
+            box=new AABB(pos);for(BlockPos member:group.blocks())box=box.minmax(new AABB(member));
         }else{
             boolean matches=switch(link.targetKind()){
                 case "camera"->entity instanceof SecurityCameraEntity camera&&link.targetId().equals(camera.instanceId);

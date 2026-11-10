@@ -19,6 +19,10 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public final class CameraMessages {
     public static final int MAX_PROGRAM_BYTES=32768,MAX_LINKS=24;
     public record Link(UUID id,String kind,BlockPos position,String name,boolean available) {}
+    public static boolean programFits(CompoundTag program){
+        try{var bytes=new ByteArrayOutputStream();NbtIo.write(program,new DataOutputStream(bytes));return bytes.size()<=MAX_PROGRAM_BYTES;}
+        catch(IOException e){return false;}
+    }
     private static void writeProgram(RegistryFriendlyByteBuf buffer,CompoundTag program){
         try{var bytes=new ByteArrayOutputStream();NbtIo.write(program,new DataOutputStream(bytes));
             if(bytes.size()>MAX_PROGRAM_BYTES)throw new IllegalArgumentException("Camera program too large");buffer.writeByteArray(bytes.toByteArray());

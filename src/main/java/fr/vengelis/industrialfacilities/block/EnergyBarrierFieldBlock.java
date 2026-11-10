@@ -20,7 +20,7 @@ public class EnergyBarrierFieldBlock extends Block {
     public static final IntegerProperty ROW=IntegerProperty.create("row",1,4);
     private static final VoxelShape X=Block.box(0,0,4,16,16,12),Z=Block.box(4,0,0,12,16,16);
     public EnergyBarrierFieldBlock(){
-        super(Properties.of().strength(-1,3600000).sound(SoundType.GLASS).noOcclusion().noLootTable().lightLevel(s->9));
+        super(Properties.of().strength(-1,3600000).sound(SoundType.GLASS).noOcclusion().noLootTable().lightLevel(s->10));
         registerDefaultState(stateDefinition.any().setValue(AXIS,Direction.Axis.X).setValue(COLUMN,0).setValue(ROW,1));
     }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(AXIS,COLUMN,ROW);}

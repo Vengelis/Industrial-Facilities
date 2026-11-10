@@ -44,7 +44,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         new Palette("get:distance","get_distance",0xFF385B6D,false),new Palette("get:health","get_health",0xFF385B6D,false),new Palette("get:inventory_item","get_inventory_item",0xFF385B6D,false),
         new Palette("","section_actions",0,true),new Palette("door_open","door_open",0xFF4D4B5C,false),new Palette("door_close","door_close",0xFF4D4B5C,false),
         new Palette("alarm_on","alarm_on",0xFF4D4B5C,false),new Palette("alarm_off","alarm_off",0xFF4D4B5C,false),
-        new Palette("emitter_on","emitter_on",0xFF4D4B5C,false),new Palette("emitter_off","emitter_off",0xFF4D4B5C,false),
+        new Palette("panel_text","panel_text",0xFF4D4B5C,false),new Palette("emitter_on","emitter_on",0xFF4D4B5C,false),new Palette("emitter_off","emitter_off",0xFF4D4B5C,false),
         new Palette("wait","wait",0xFF4D4B5C,false));
     private CompoundTag draft=CameraMenu.emptyProgram(),submitted;
     private final Deque<CompoundTag> undoHistory=new ArrayDeque<>();
@@ -95,7 +95,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private Button button(int x,int y,int w,int h,Component label,Button.OnPress action){return addRenderableWidget(Button.builder(label,action).bounds(leftPos+x,topPos+y,w,h).build());}
     private Component fittedLabel(String fullKey,String shortKey,int width){Component full=tr(fullKey);return font.width(full)>width-8?tr(shortKey):full;}
     private Button commandButton(int x,int width,String fullKey,String shortKey,Button.OnPress action){Button control=button(x,26,width,20,fittedLabel(fullKey,shortKey,width),action);control.setTooltip(Tooltip.create(tr(fullKey)));return control;}
-    private int send(int action,int value,CompoundTag program){int request=nextRequest++;PacketDistributor.sendToServer(new CameraMessages.Action(menu.containerId,action,value,1,0,0,program,request));return request;}
+    private int send(int action,int value,CompoundTag program){if(!CameraMessages.programFits(program)){localStatus="gui.industrial_facilities.camera.program_limits";return 0;}int request=nextRequest++;PacketDistributor.sendToServer(new CameraMessages.Action(menu.containerId,action,value,1,0,0,program,request));return request;}
     @Override protected void init(){
         imageWidth=Math.min(980,width-12);imageHeight=Math.min(menu.mode==CameraMenu.PROGRAM?620:390,height-12);super.init();
         paneX=leftPos+8;paneY=topPos+52;paletteWidth=Math.max(78,(imageWidth-20)/4);canvasX=paneX+paletteWidth+6;canvasWidth=imageWidth-16-paletteWidth-6;paneHeight=Math.max(40,imageHeight-142);
@@ -149,7 +149,13 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             }else if(node.getString("Op").equals("action")){
                 String action=node.getString("Action"),kind=actionKind(action);
                 button(10,y+23,Math.max(100,(imageWidth-28)/2),18,tr("target",linkName(node.getUUID("Target"))),b->openPopup("target",kind));
-                button(14+(imageWidth-28)/2,y+23,(imageWidth-28)/2,18,tr(action),b->{remember();node.putString("Action",opposite(action));changed();});
+                if(kind.equals("panel")){
+                    int inputX=14+(imageWidth-28)/2;
+                    valueInput=new EditBox(font,leftPos+inputX,topPos+y+23,(imageWidth-28)/2,18,tr("panel_text_value"));
+                    valueInput.setMaxLength(fr.vengelis.industrialfacilities.panel.PanelBlockEntity.MAX_TEXT);valueInput.setValue(node.getString("Text"));valueInput.setHint(tr("panel_text_value"));
+                    valueInput.setResponder(value->{if(!menu.editable||waitingSave)return;String clean=fr.vengelis.industrialfacilities.panel.PanelBlockEntity.sanitize(value);if(!clean.equals(node.getString("Text"))){remember();node.putString("Text",clean);dirty=!draft.equals(menu.program);rebuildRows();updateControls();}});
+                    valueInput.setTooltip(Tooltip.create(tr("panel_text_hint")));addRenderableWidget(valueInput);
+                }else button(14+(imageWidth-28)/2,y+23,(imageWidth-28)/2,18,tr(action),b->{remember();node.putString("Action",opposite(action));changed();});
             }else if(node.getString("Op").equals("if")){
                 int bw=(imageWidth-28)/3;
                 button(10,y+23,bw,18,tr("condition"),b->{selected+="/Condition";rebuildControls();});
@@ -197,7 +203,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         if(durationInput!=null)durationInput.setEditable(menu.editable&&!waitingSave);
         if(durationUnitButton!=null)durationUnitButton.active=menu.editable&&!waitingSave&&!invalidNumber;
     }
-    private void saveDraft(){if(!menu.editable||invalidNumber||waitingSave)return;normalizeEntryTriggers(draft);waitingSave=true;submitted=draft.copy();localStatus="";pendingSaveRequest=send(CameraMenu.SAVE,0,draft);updateControls();}
+    private void saveDraft(){if(!menu.editable||invalidNumber||waitingSave)return;if(!CameraMessages.programFits(draft)){localStatus="gui.industrial_facilities.camera.program_limits";return;}normalizeEntryTriggers(draft);waitingSave=true;submitted=draft.copy();localStatus="";pendingSaveRequest=send(CameraMenu.SAVE,0,draft);updateControls();}
     private static void normalizeEntryTriggers(CompoundTag program){for(Tag tag:program.getList("Events",Tag.TAG_COMPOUND))if(tag instanceof CompoundTag event&&event.getString("Trigger").equals("entry"))event.remove("Trigger");}
     private Tag at(String path){
         if(path==null||path.isEmpty())return null;Tag tag=draft;
@@ -239,7 +245,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             if(!menu.editable||waitingSave||invalidNumber)return;remember();node.putInt("Ticks",node.getInt("Ticks"));node.putString("Unit",unit.equals("seconds")?"minutes":"seconds");changed();
         });durationUnitButton.setTooltip(Tooltip.create(tr(wait?"wait_duration":"empty_delay")));
     }
-    private String actionKind(String action){return action.startsWith("door_")?"door":action.startsWith("alarm_")?"alarm":"emitter";}
+    private String actionKind(String action){return action.startsWith("panel_")?"panel":action.startsWith("door_")?"door":action.startsWith("alarm_")?"alarm":"emitter";}
     private String opposite(String action){return switch(action){case "door_open"->"door_close";case "door_close"->"door_open";case "alarm_on"->"alarm_off";case "alarm_off"->"alarm_on";case "emitter_on"->"emitter_off";default->"emitter_on";};}
     private UUID firstLink(String kind){return menu.links.stream().filter(l->l.kind().equals(kind)).map(CameraMessages.Link::id).findFirst().orElse(null);}
     private String linkName(UUID id){return menu.links.stream().filter(l->l.id().equals(id)).map(CameraMessages.Link::name).findFirst().orElse(tr("unlinked").getString());}
@@ -298,7 +304,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         if(!(at(insertPath) instanceof ListTag destination)||insertPath.equals("Events")){localStatus="gui.industrial_facilities.camera.select_branch";return;}
         if(token.equals("if")){node.putString("Op","if");node.put("Condition",expression("category"));node.put("Then",new ListTag());node.put("Else",new ListTag());}
         else if(token.equals("wait")){node.putString("Op","wait");node.putInt("Ticks",20);node.putString("Unit","seconds");}
-        else{UUID target=firstLink(actionKind(token));if(target==null)return;node.putString("Op","action");node.putString("Action",token);node.putUUID("Target",target);}
+        else{UUID target=firstLink(actionKind(token));if(target==null)return;node.putString("Op","action");node.putString("Action",token);node.putUUID("Target",target);if(token.equals("panel_text"))node.putString("Text","");}
         remember();destination.add(node);selected=insertPath+"/"+(destination.size()-1);if(token.equals("if"))insertPath=selected+"/Then";changed();
     }
     private void deleteSelected(){
@@ -348,7 +354,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
                 rows.add(new Row(path+"/Else","insert",tr("else_add").getString(),depth+1,path+"/Else"));statements(node.getList("Else",Tag.TAG_COMPOUND),path+"/Else",depth+1);
                 rows.add(new Row(path,"end",tr("end_if").getString(),depth,""));
             }else if(node.getString("Op").equals("wait"))rows.add(new Row(path,"wait",tr("wait_for",durationLabel(node)).getString(),depth,base));
-            else rows.add(new Row(path,"action",tr(node.getString("Action")).getString()+" ["+linkName(node.hasUUID("Target")?node.getUUID("Target"):NONE)+"]",depth,base));
+            else rows.add(new Row(path,"action",tr(node.getString("Action")).getString()+(node.getString("Action").equals("panel_text")?" « "+node.getString("Text")+" »":"")+" ["+linkName(node.hasUUID("Target")?node.getUUID("Target"):NONE)+"]",depth,base));
         }
     }
     private void condition(CompoundTag node,String path,int depth){
