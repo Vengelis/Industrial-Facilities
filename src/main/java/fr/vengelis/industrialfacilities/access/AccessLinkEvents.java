@@ -3,11 +3,12 @@ package fr.vengelis.industrialfacilities.access;
 import java.util.UUID;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import fr.vengelis.industrialfacilities.item.TerminalLinkCardItem;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,22 +22,28 @@ public final class AccessLinkEvents {
         event.setCanceled(true);
         if(event.getLevel().isClientSide||event.getAction()!=PlayerInteractEvent.LeftClickBlock.Action.START||!(event.getEntity() instanceof ServerPlayer player)||!player.isAlive()
             ||!player.level().hasChunkAt(event.getPos())||player.distanceToSqr(event.getPos().getCenter())>64)return;
-        AccessBadges.Result result;var terminal=AccessTerminalEntity.resolve(player.level(),event.getPos());
         if(TerminalLinkCardItem.automationMode(stack)){
-            result=fr.vengelis.industrialfacilities.security.CameraLinking.click(player,event.getPos(),stack);
+            var result=fr.vengelis.industrialfacilities.security.CameraLinking.click(player,event.getPos(),stack);
             player.displayClientMessage(Component.translatable(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();return;
         }
-        if(terminal!=null){
-            if(terminal.encoder||terminal.bank)result=AccessBadges.Result.fail("La carte de liaison se configure sur un terminal lecteur.");
-            else if(!terminal.isOwner(player))result=AccessBadges.Result.fail("Seul le créateur du terminal peut le lier.");
-            else {UUID id=terminal.ensureCode();CustomData.update(DataComponents.CUSTOM_DATA,stack,tag->tag.putUUID("AccessReader",id));result=AccessBadges.Result.success("Terminal sélectionné : "+id+". Cliquez gauche sur une porte assemblée.");}
-        }else{
-            var door=AccessDoorService.resolveDoor(player.level(),event.getPos());CompoundTag tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();
-            result=door==null?AccessBadges.Result.fail("Cliquez gauche sur un lecteur assemblé, puis sur une porte assemblée.")
-                :!tag.hasUUID("AccessReader")?AccessBadges.Result.fail("Sélectionnez d'abord un terminal lecteur avec la carte.")
-                :AccessDoorService.link(player,tag.getUUID("AccessReader"),door);
-        }
+        var result=accessClick(player,event.getPos(),stack);
         player.displayClientMessage(Component.literal(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();
+    }
+    static AccessBadges.Result accessClick(ServerPlayer player,BlockPos pos,ItemStack stack){
+        var terminal=AccessTerminalEntity.resolve(player.level(),pos);
+        CompoundTag tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();
+        if(terminal!=null){
+            if(terminal.encoder||terminal.bank)return AccessBadges.Result.fail("La carte de liaison se configure sur un terminal lecteur.");
+            if(!terminal.isOwner(player))return AccessBadges.Result.fail("Seul le créateur du terminal peut le lier.");
+            if(player.isShiftKeyDown())return tag.hasUUID("AccessReader")?AccessDoorService.linkReaders(player,tag.getUUID("AccessReader"),terminal)
+                :AccessBadges.Result.fail("Sélectionne d'abord un lecteur avec un clic gauche sans Maj.");
+            UUID id=terminal.ensureCode();CustomData.update(DataComponents.CUSTOM_DATA,stack,data->data.putUUID("AccessReader",id));
+            return AccessBadges.Result.success("Lecteur sélectionné. Clic gauche sur une porte, ou Maj + clic gauche sur un autre lecteur.");
+        }
+        var door=AccessDoorService.resolveDoor(player.level(),pos);
+        return door==null?AccessBadges.Result.fail("Sélectionne un lecteur assemblé, puis une porte ou un autre lecteur avec Maj.")
+            :!tag.hasUUID("AccessReader")?AccessBadges.Result.fail("Sélectionnez d'abord un terminal lecteur avec la carte.")
+            :AccessDoorService.link(player,tag.getUUID("AccessReader"),door);
     }
     private AccessLinkEvents(){}
 }

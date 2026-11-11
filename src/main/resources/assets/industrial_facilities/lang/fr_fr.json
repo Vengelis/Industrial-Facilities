@@ -516,5 +516,7 @@
   "gui.industrial_facilities.camera.panel_text_hint": "200 caractères maximum. Un texte vide efface le panneau lié. Le sens de défilement est conservé.",
   "gui.industrial_facilities.camera.invalid_panel_text": "Texte de panneau invalide (200 caractères maximum).",
   "gui.industrial_facilities.camera.panel_unavailable": "Le panneau doit former un rectangle complet et être entièrement chargé.",
-  "gui.industrial_facilities.tablet.panel": "Panneau"
+  "gui.industrial_facilities.tablet.panel": "Panneau",
+  "gui.industrial_facilities.access.card_peer_hint": "Lier les lecteurs : clic gauche sur le premier, puis Maj + clic gauche sur un autre.",
+  "gui.industrial_facilities.access.clear_links_hint": "Retire ce lecteur de son groupe et efface ses liaisons. Les autres lecteurs conservent les portes."
 }

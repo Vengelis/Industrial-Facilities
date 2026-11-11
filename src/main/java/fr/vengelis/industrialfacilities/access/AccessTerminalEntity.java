@@ -30,8 +30,8 @@ public class AccessTerminalEntity extends BlockEntity {
         return AccessTerminalBlock.validPair(level,base)?be:null;
     }
     public boolean setAccessLevel(Player player,int level){if(!(getLevel() instanceof ServerLevel server)||encoder||bank||!isOwner(player)||level<1||level>5)return false;accessLevel=level;AccessRegistry.get(server.getServer()).put(this);sync();return true;}
-    public int linkedCount(){if(!(getLevel() instanceof ServerLevel server)||terminalId==null)return 0;var e=AccessRegistry.get(server.getServer()).find(terminalId);return e==null?0:e.doors.size();}
-    public boolean clearLinks(Player player){if(!(getLevel() instanceof ServerLevel server)||!isOwner(player)||terminalId==null)return false;AccessRegistry.get(server.getServer()).clearLinks(terminalId);accessGranted=false;sync();return true;}
+    public int linkedCount(){if(!(getLevel() instanceof ServerLevel server)||terminalId==null)return 0;var e=AccessRegistry.get(server.getServer()).find(terminalId);return e==null?0:e.doors().size();}
+    public boolean clearLinks(Player player){if(!(getLevel() instanceof ServerLevel server)||!isOwner(player)||terminalId==null)return false;AccessRegistry.get(server.getServer()).clearLinks(terminalId);grantedUntil=0;accessGranted=false;sync();return true;}
     public UUID ensureCode(){if(terminalId==null){terminalId=UUID.randomUUID();sync();}if(getLevel() instanceof ServerLevel server)AccessRegistry.get(server.getServer()).put(this);return terminalId;}
     public void invalidate(){if(terminalId!=null&&getLevel() instanceof ServerLevel server)AccessRegistry.get(server.getServer()).remove(terminalId);terminalId=null;instanceId=UUID.randomUUID();grantedUntil=0;accessGranted=false;sync();}
     public void updateAccessState(){

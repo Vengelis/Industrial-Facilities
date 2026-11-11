@@ -73,7 +73,7 @@ public final class TerminalLinks {
                 }
             }else{
                 var entry=terminal.terminalId==null?null:registry.find(terminal.terminalId);if(loadedReader(level,entry)!=terminal)continue;int count=0;
-                for(var link:entry.doors){
+                for(var link:entry.doors()){
                     if(++count>64){truncated=true;break;}
                     if(!admissible(level,terminal.getBlockPos(),link)||!near(player,link.position(),TARGET_RADIUS))continue;
                     var door=loadedDoor(level,link);if(door==null||!AccessDoorService.canConfigureOwner(player.getUUID(),door))continue;

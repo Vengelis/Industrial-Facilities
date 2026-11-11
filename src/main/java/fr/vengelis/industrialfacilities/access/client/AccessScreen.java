@@ -7,6 +7,7 @@ import fr.vengelis.industrialfacilities.access.ui.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -47,6 +48,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             if(!confirmClearLinks){confirmClearLinks=true;b.setMessage(tr("confirm_clear_links"));}
             else{send(AccessMenu.CLEAR_LINKS,"",0);confirmClearLinks=false;b.setMessage(tr("clear_links"));}
         });ownerButtons.add(clearLinks);
+        clearLinks.setTooltip(Tooltip.create(tr("clear_links_hint")));
         button(imageWidth-88,162,74,20,tr("close"),b->onClose());
     }
     private void initEncoder(){

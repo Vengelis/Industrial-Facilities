@@ -19,6 +19,7 @@ public class TerminalLinkCardItem extends Item {
     @Override public void appendHoverText(ItemStack stack,TooltipContext context,List<Component> lines,TooltipFlag flag){
         super.appendHoverText(stack,context,lines,flag);
         lines.add(Component.translatable("gui.industrial_facilities.camera."+(automationMode(stack)?"card_automation_hint":"card_access_hint")));
+        if(!automationMode(stack))lines.add(Component.translatable("gui.industrial_facilities.access.card_peer_hint"));
         lines.add(Component.translatable("gui.industrial_facilities.camera.card_mode_hint"));
         var tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();
         if(tag.hasUUID("AccessReader"))lines.add(Component.literal("Terminal : "+tag.getUUID("AccessReader")));

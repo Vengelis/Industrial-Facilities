@@ -3,20 +3,28 @@ package fr.vengelis.industrialfacilities.access;
 import java.util.*;
 import net.minecraft.core.*;
 import net.minecraft.nbt.*;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
 /** Authoritative world-wide directory; looking up a code never loads its chunk. */
 public final class AccessRegistry extends SavedData {
     public record DoorLink(String dimension, BlockPos position, UUID instance) {}
+    public static final int MAX_GROUP_READERS=64,MAX_DOORS=64;
+    public enum GroupResult { LINKED, ALREADY_LINKED, INCOMPATIBLE, TOO_MANY_READERS, TOO_FAR, DIFFERENT_DOORS }
+    private static final class ReaderGroup {
+        final Set<Entry> members=new LinkedHashSet<>();
+        final List<DoorLink> doors=new ArrayList<>();
+        final List<DoorLink> view=Collections.unmodifiableList(doors);
+    }
     public static final class Entry {
         public final UUID id,owner;
         public final String dimension;
         public final BlockPos position;
         public int level;
-        public final List<DoorLink> doors=new ArrayList<>();
-        Entry(UUID id,UUID owner,String dimension,BlockPos position,int level){this.id=id;this.owner=owner;this.dimension=dimension;this.position=position.immutable();this.level=level;}
+        private ReaderGroup group=new ReaderGroup();
+        Entry(UUID id,UUID owner,String dimension,BlockPos position,int level){this.id=id;this.owner=owner;this.dimension=dimension;this.position=position.immutable();this.level=level;group.members.add(this);}
+        public List<DoorLink> doors(){return group.view;}
+        public int readerCount(){return group.members.size();}
     }
     private final Map<UUID,Entry> terminals=new HashMap<>();
     private final Map<UUID,Set<UUID>> doorReaders=new HashMap<>();
@@ -31,23 +39,61 @@ public final class AccessRegistry extends SavedData {
         else if(existing.owner.equals(terminal.creator))existing.level=terminal.accessLevel;
         setDirty();
     }
-    public void remove(UUID id){Entry e=terminals.remove(id);if(e!=null){reindex();setDirty();}}
-    public void clearLinks(UUID id){Entry e=terminals.get(id);if(e!=null){e.doors.clear();reindex();setDirty();}}
-    public boolean link(UUID reader,DoorLink link){Entry e=terminals.get(reader);if(e==null||e.doors.contains(link))return false;if(e.doors.size()>=64)return false;e.doors.add(link);reindex();setDirty();return true;}
-    public void invalidateDoor(UUID instance){boolean changed=false;for(Entry e:terminals.values())changed|=e.doors.removeIf(d->d.instance().equals(instance));if(changed){reindex();setDirty();}}
-    private void reindex(){doorReaders.clear();for(Entry e:terminals.values())for(DoorLink d:e.doors)doorReaders.computeIfAbsent(d.instance(),k->new HashSet<>()).add(e.id);}
+    public void remove(UUID id){Entry e=terminals.remove(id);if(e!=null){e.group.members.remove(e);reindex();setDirty();}}
+    /** Disconnect only this reader; shared doors belong to the remaining group. */
+    public void clearLinks(UUID id){Entry e=terminals.get(id);if(e!=null){e.group.members.remove(e);e.group=new ReaderGroup();e.group.members.add(e);reindex();setDirty();}}
+    public boolean allReadersInRange(Entry reader,DoorLink door){return reader.group.members.stream().allMatch(e->inRange(e,door));}
+    private static boolean inRange(Entry reader,DoorLink door){return reader.dimension.equals(door.dimension())&&TerminalLinks.inRange(reader.position,door.position());}
+    private static boolean nearby(Set<Entry> members){for(Entry a:members)for(Entry b:members)if(!TerminalLinks.inRange(a.position,b.position))return false;return true;}
+    private static void assignGroup(Set<Entry> members,List<DoorLink> doors){ReaderGroup group=new ReaderGroup();group.members.addAll(members);group.doors.addAll(doors);for(Entry e:members)e.group=group;}
+    public GroupResult groupReaders(UUID first,UUID second){
+        Entry a=terminals.get(first),b=terminals.get(second);
+        if(a==null||b==null||!a.owner.equals(b.owner)||!a.dimension.equals(b.dimension))return GroupResult.INCOMPATIBLE;
+        if(a.group==b.group)return GroupResult.ALREADY_LINKED;
+        Set<Entry> members=new LinkedHashSet<>(a.group.members);members.addAll(b.group.members);
+        if(members.size()>MAX_GROUP_READERS)return GroupResult.TOO_MANY_READERS;
+        if(!a.doors().isEmpty()&&!b.doors().isEmpty()&&!new HashSet<>(a.doors()).equals(new HashSet<>(b.doors())))return GroupResult.DIFFERENT_DOORS;
+        List<DoorLink> doors=a.doors().isEmpty()?b.doors():a.doors();
+        if(!nearby(members)||members.stream().anyMatch(e->doors.stream().anyMatch(d->!inRange(e,d))))return GroupResult.TOO_FAR;
+        assignGroup(members,doors);reindex();setDirty();return GroupResult.LINKED;
+    }
+    public boolean link(UUID reader,DoorLink link){Entry e=terminals.get(reader);if(e==null||e.doors().contains(link)||e.doors().size()>=MAX_DOORS)return false;e.group.doors.add(link);reindex();setDirty();return true;}
+    public void invalidateDoor(UUID instance){boolean changed=false;for(ReaderGroup group:groups())changed|=group.doors.removeIf(d->d.instance().equals(instance));if(changed){reindex();setDirty();}}
+    private Set<ReaderGroup> groups(){Set<ReaderGroup> result=new HashSet<>();for(Entry e:terminals.values())result.add(e.group);return result;}
+    private void reindex(){doorReaders.clear();for(Entry e:terminals.values())for(DoorLink d:e.doors())doorReaders.computeIfAbsent(d.instance(),k->new HashSet<>()).add(e.id);}
+    private static ListTag writeDoors(List<DoorLink> doors){
+        ListTag list=new ListTag();for(DoorLink d:doors){CompoundTag q=new CompoundTag();q.putString("Dimension",d.dimension());q.putLong("Position",d.position().asLong());q.putUUID("Instance",d.instance());list.add(q);}return list;
+    }
+    private static List<DoorLink> readDoors(CompoundTag tag){
+        Set<DoorLink> doors=new LinkedHashSet<>();for(Tag raw:tag.getList("Doors",Tag.TAG_COMPOUND)){CompoundTag q=(CompoundTag)raw;if(doors.size()>=MAX_DOORS)break;if(q.hasUUID("Instance"))doors.add(new DoorLink(q.getString("Dimension"),BlockPos.of(q.getLong("Position")),q.getUUID("Instance")));}return List.copyOf(doors);
+    }
     @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider provider){
         ListTag list=new ListTag();for(Entry e:terminals.values()){
             CompoundTag t=new CompoundTag();t.putUUID("Id",e.id);t.putUUID("Owner",e.owner);t.putString("Dimension",e.dimension);t.putLong("Position",e.position.asLong());t.putInt("Level",e.level);
-            ListTag doors=new ListTag();for(DoorLink d:e.doors){CompoundTag q=new CompoundTag();q.putString("Dimension",d.dimension());q.putLong("Position",d.position().asLong());q.putUUID("Instance",d.instance());doors.add(q);}t.put("Doors",doors);list.add(t);
-        }tag.put("Terminals",list);return tag;
+            if(e.readerCount()==1)t.put("Doors",writeDoors(e.doors()));list.add(t);
+        }tag.put("Terminals",list);
+        ListTag grouped=new ListTag();for(ReaderGroup group:groups())if(group.members.size()>1){
+            CompoundTag g=new CompoundTag();ListTag members=new ListTag();for(Entry e:group.members){CompoundTag member=new CompoundTag();member.putUUID("Id",e.id);members.add(member);}
+            g.put("Readers",members);g.put("Doors",writeDoors(group.doors));grouped.add(g);
+        }tag.put("ReaderGroups",grouped);return tag;
     }
     public static AccessRegistry load(CompoundTag tag,HolderLookup.Provider provider){
         AccessRegistry data=new AccessRegistry();for(Tag raw:tag.getList("Terminals",Tag.TAG_COMPOUND)){
             CompoundTag t=(CompoundTag)raw;if(!t.hasUUID("Id")||!t.hasUUID("Owner"))continue;
             Entry e=new Entry(t.getUUID("Id"),t.getUUID("Owner"),t.getString("Dimension"),BlockPos.of(t.getLong("Position")),Math.clamp(t.getInt("Level"),1,5));
-            for(Tag qraw:t.getList("Doors",Tag.TAG_COMPOUND)){CompoundTag q=(CompoundTag)qraw;if(q.hasUUID("Instance")&&e.doors.size()<64)e.doors.add(new DoorLink(q.getString("Dimension"),BlockPos.of(q.getLong("Position")),q.getUUID("Instance")));}
+            e.group.doors.addAll(readDoors(t));
             data.terminals.put(e.id,e);
-        }data.reindex();return data;
+        }
+        for(Tag raw:tag.getList("ReaderGroups",Tag.TAG_COMPOUND)){
+            CompoundTag g=(CompoundTag)raw;ListTag rows=g.getList("Readers",Tag.TAG_COMPOUND);
+            if(rows.size()<2||rows.size()>MAX_GROUP_READERS)continue;
+            Set<Entry> members=new LinkedHashSet<>();
+            for(Tag row:rows){CompoundTag r=(CompoundTag)row;Entry e=r.hasUUID("Id")?data.find(r.getUUID("Id")):null;if(e!=null&&e.readerCount()==1&&e.doors().isEmpty())members.add(e);}
+            if(members.size()!=rows.size()||!nearby(members))continue;
+            Entry first=members.iterator().next();List<DoorLink> doors=readDoors(g);
+            if(members.stream().anyMatch(e->!e.owner.equals(first.owner)||!e.dimension.equals(first.dimension)||doors.stream().anyMatch(d->!inRange(e,d))))continue;
+            assignGroup(members,doors);
+        }
+        data.reindex();return data;
     }
 }

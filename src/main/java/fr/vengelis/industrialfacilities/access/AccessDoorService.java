@@ -34,9 +34,9 @@ public final class AccessDoorService {
         if(!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal.terminalId==null
             ||AccessTerminalEntity.resolve(source,terminal.getBlockPos())!=terminal)return false;
         var entry=AccessRegistry.get(source.getServer()).find(terminal.terminalId);
-        if(TerminalLinks.loadedReader(source,entry)!=terminal||entry.doors.isEmpty())return false;
+        if(TerminalLinks.loadedReader(source,entry)!=terminal||entry.doors().isEmpty())return false;
         boolean unknown=false;
-        for(var link:entry.doors){
+        for(var link:entry.doors()){
             if(!TerminalLinks.admissible(source,terminal.getBlockPos(),link))continue;
             if(!TerminalLinks.loaded(source,link.position())){unknown=true;continue;}
             var door=TerminalLinks.loadedDoor(source,link);if(door==null)continue;
@@ -47,6 +47,25 @@ public final class AccessDoorService {
         return unknown&&terminal.accessGranted;
     }
     public static void dismantle(ServerLevel level,IndustrialDoorEntity door){if(door.doorInstanceId!=null)AccessRegistry.get(level.getServer()).invalidateDoor(door.doorInstanceId);door.doorInstanceId=null;door.accessOpenUntil=0;door.allowLinkedRedstone=false;door.allowCameraAutomation=false;door.automationOwner=null;}
+    public static AccessBadges.Result linkReaders(ServerPlayer player,UUID selected,AccessTerminalEntity target){
+        if(!(target.getLevel() instanceof ServerLevel level)||player.level()!=level||!player.isAlive()||target.encoder||target.bank
+            ||player.distanceToSqr(target.getBlockPos().getCenter())>64||!TerminalLinks.loaded(level,target.getBlockPos())
+            ||AccessTerminalEntity.resolve(level,target.getBlockPos())!=target)return AccessBadges.Result.fail("Le lecteur ciblé doit être assemblé et à portée.");
+        var registry=AccessRegistry.get(level.getServer());var source=registry.find(selected);
+        if(!target.isOwner(player)||source==null||!source.owner.equals(player.getUUID()))return AccessBadges.Result.fail("Les deux lecteurs doivent t'appartenir.");
+        if(TerminalLinks.loadedReader(level,source)==null)return AccessBadges.Result.fail("Le lecteur sélectionné doit être assemblé et chargé dans cette dimension.");
+        if(!TerminalLinks.inRange(source.position,target.getBlockPos()))return AccessBadges.Result.fail("Les lecteurs doivent être à 64 blocs maximum les uns des autres.");
+        UUID id=target.ensureCode();
+        if(TerminalLinks.loadedReader(level,registry.find(id))!=target)return AccessBadges.Result.fail("Le lecteur ciblé n'est pas enregistré à cet emplacement.");
+        return switch(registry.groupReaders(selected,id)){
+            case LINKED->{target.updateAccessState();yield AccessBadges.Result.success("Lecteurs liés : "+registry.find(id).readerCount()+" lecteurs partagent les mêmes portes.");}
+            case ALREADY_LINKED->AccessBadges.Result.fail("Ces lecteurs sont déjà dans le même groupe.");
+            case TOO_MANY_READERS->AccessBadges.Result.fail("Ce groupe a atteint la limite de 64 lecteurs.");
+            case TOO_FAR->AccessBadges.Result.fail("Chaque lecteur doit être à 64 blocs maximum des autres lecteurs et de chaque porte du groupe.");
+            case DIFFERENT_DOORS->AccessBadges.Result.fail("Ces lecteurs commandent des portes différentes. Efface les liaisons du lecteur à déplacer avant de le joindre au groupe.");
+            case INCOMPATIBLE->AccessBadges.Result.fail("Impossible de regrouper ces lecteurs.");
+        };
+    }
     public static AccessBadges.Result link(Player player,UUID source,IndustrialDoorEntity door){
         if(!(player instanceof ServerPlayer serverPlayer)||!(door.getLevel() instanceof ServerLevel level))return AccessBadges.Result.fail("Liaison impossible.");
         AccessRegistry registry=AccessRegistry.get(level.getServer());AccessRegistry.Entry reader=registry.find(source);
@@ -57,11 +76,12 @@ public final class AccessDoorService {
         if(!canConfigure(player,door))return AccessBadges.Result.fail("Cette porte appartient déjà à un autre réseau d'accès.");
         UUID id=ensureId(door);
         var link=new AccessRegistry.DoorLink(level.dimension().location().toString(),door.getBlockPos(),id);
-        if(reader.doors.contains(link))return AccessBadges.Result.fail("Cette porte est déjà liée au terminal.");
+        if(reader.doors().contains(link))return AccessBadges.Result.fail("Cette porte est déjà liée au terminal.");
+        if(!registry.allReadersInRange(reader,link))return AccessBadges.Result.fail("La porte doit être à 64 blocs maximum de chaque lecteur du groupe.");
         boolean firstBinding=!isSecured(door);
         if(!registry.link(source,link))return AccessBadges.Result.fail("Ce terminal a atteint la limite de 64 portes.");
         if(firstBinding)door.allowLinkedRedstone=false;
-        door.sync();return AccessBadges.Result.success("Porte liée au terminal "+source+".");
+        door.sync();return AccessBadges.Result.success(reader.readerCount()>1?"Porte liée aux "+reader.readerCount()+" lecteurs du groupe.":"Porte liée au terminal "+source+".");
     }
     public static AccessBadges.Result activate(Player player,AccessTerminalEntity terminal,ItemStack badge){
         if(!(player instanceof ServerPlayer serverPlayer)||!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal.terminalId==null)return AccessBadges.Result.fail("Ce lecteur n'est pas configuré.");
@@ -70,7 +90,7 @@ public final class AccessDoorService {
         if(TerminalLinks.loadedReader(source,entry)!=terminal)return AccessBadges.Result.fail("Ce lecteur n'est plus enregistré.");
         if(!AccessBadges.canUse(badge,terminal))return AccessBadges.Result.fail(AccessBadges.remaining(badge)==0?"Ce badge est épuisé.":"Accès refusé : badge ou niveau insuffisant.");
         List<IndustrialDoorEntity> usable=new ArrayList<>();
-        for(var link:entry.doors){
+        for(var link:entry.doors()){
             if(!TerminalLinks.admissible(source,terminal.getBlockPos(),link))continue;
             var door=TerminalLinks.loadedDoor(source,link);
             if(door!=null&&door.accessOpenUntil<=source.getGameTime()&&!door.targetOpen)usable.add(door);
@@ -79,6 +99,11 @@ public final class AccessDoorService {
         if(!AccessBadges.consume(serverPlayer,badge))return AccessBadges.Result.fail("Ce badge est épuisé.");
         for(var door:usable){door.accessOpenUntil=door.getLevel().getGameTime()+100;door.sync();}
         terminal.grantedUntil=source.getGameTime()+100;terminal.accessGranted=true;terminal.sync();
+        // All readers of a door, including separately configured legacy readers, turn green on this tick.
+        Set<UUID> refreshed=new HashSet<>();refreshed.add(entry.id);
+        for(var door:usable)for(var linked:registry.readers(door.doorInstanceId))if(refreshed.add(linked.id)){
+            var other=TerminalLinks.loadedReader(source,linked);if(other!=null)other.updateAccessState();
+        }
         return AccessBadges.Result.success("Accès autorisé.");
     }
     private AccessDoorService(){}

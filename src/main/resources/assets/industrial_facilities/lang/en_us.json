@@ -516,5 +516,7 @@
   "gui.industrial_facilities.camera.panel_text_hint": "Up to 200 characters. Empty text clears the linked panel. Scroll direction is preserved.",
   "gui.industrial_facilities.camera.invalid_panel_text": "Invalid panel text (200 characters maximum).",
   "gui.industrial_facilities.camera.panel_unavailable": "The panel must be a complete, fully loaded rectangle.",
-  "gui.industrial_facilities.tablet.panel": "Panel"
+  "gui.industrial_facilities.tablet.panel": "Panel",
+  "gui.industrial_facilities.access.card_peer_hint": "Group readers: left-click the first, then Shift + left-click another.",
+  "gui.industrial_facilities.access.clear_links_hint": "Remove this reader from its group and clear its links. Other readers keep their doors."
 }
