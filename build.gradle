@@ -79,3 +79,18 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 apply from: 'mcreator.gradle'
+
+repositories {
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com/'
+        content { includeGroup 'mezz.jei' }
+    }
+}
+
+// JEI discovers the integration on the client when installed. It is never bundled.
+def localJeiJar = providers.gradleProperty('jeiJar')
+dependencies {
+    compileOnly(localJeiJar.isPresent() ? files(localJeiJar.get()) :
+        'mezz.jei:jei-1.21.1-neoforge-api:19.57.0.446')
+}
