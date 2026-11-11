@@ -190,6 +190,22 @@ public final class CameraProgram {
         }
     }
     public static CompoundTag empty(){CompoundTag tag=new CompoundTag();tag.putInt("Version",1);tag.put("Events",new ListTag());return tag;}
+    static CompoundTag withoutTargets(CompoundTag program,Set<UUID> removed){
+        CompoundTag copy=program.copy();boolean changed=false;
+        for(Tag raw:copy.getList("Events",Tag.TAG_COMPOUND))if(raw instanceof CompoundTag event)
+            changed|=removeTargets(event.getList("Body",Tag.TAG_COMPOUND),removed,2);
+        return changed?copy:program;
+    }
+    private static boolean removeTargets(ListTag body,Set<UUID> removed,int depth){
+        if(depth>MAX_DEPTH)return false;
+        boolean changed=false;for(int i=body.size()-1;i>=0;i--){
+            CompoundTag node=body.getCompound(i);
+            switch(node.getString("Op")){
+                case "action"->{if(node.hasUUID("Target")&&removed.contains(node.getUUID("Target"))){body.remove(i);changed=true;}}
+                case "if"->{changed|=removeTargets(node.getList("Then",Tag.TAG_COMPOUND),removed,depth+1);changed|=removeTargets(node.getList("Else",Tag.TAG_COMPOUND),removed,depth+1);}
+            }
+        }return changed;
+    }
     public static Validation validate(CompoundTag root,List<CameraTerminalEntity.LinkView> links){if(root==null)return new Validation(false,"gui.industrial_facilities.camera.invalid_program",empty());try{Program program=compile(root,links);return new Validation(true,"",program.save());}catch(IllegalArgumentException e){return new Validation(false,"gui.industrial_facilities.camera."+e.getMessage(),empty());}}
     public static Program compile(CompoundTag root,List<CameraTerminalEntity.LinkView> links){return new Parser(links).parse(root);}
     private CameraProgram(){}

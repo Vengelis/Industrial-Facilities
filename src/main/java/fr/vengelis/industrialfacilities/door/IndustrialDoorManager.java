@@ -1,6 +1,7 @@
 package fr.vengelis.industrialfacilities.door;
 
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks;
+import fr.vengelis.industrialfacilities.access.AccessDoorService;
 import net.minecraft.core.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,6 +36,8 @@ public final class IndustrialDoorManager {
             if(!valid(level,controller,origin,facing,n))continue;
             door.origin=origin.immutable();door.size=n;door.owner=controller.immutable();
             door.doorInstanceId=java.util.UUID.randomUUID();door.allowLinkedRedstone=false;door.accessOpenUntil=0;
+            door.allowCameraAutomation=false;door.automationOwner=null;
+            AccessDoorService.registerDoor(level,door);
             door.progress=0;door.previousProgress=0;door.targetOpen=false;door.paused=false;
             for(int x=0;x<n;x++)for(int y=0;y<n;y++) {
                 BlockPos p=at(origin,facing,x,y);

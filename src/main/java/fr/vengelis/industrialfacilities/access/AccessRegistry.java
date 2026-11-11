@@ -28,6 +28,9 @@ public final class AccessRegistry extends SavedData {
     }
     private final Map<UUID,Entry> terminals=new HashMap<>();
     private final Map<UUID,Set<UUID>> doorReaders=new HashMap<>();
+    private record DoorSite(String dimension,BlockPos position) {}
+    /** A null generation means the controller was removed. An absent site is a legacy door. */
+    private final Map<DoorSite,UUID> doorGenerations=new HashMap<>();
     public static AccessRegistry get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(AccessRegistry::new,AccessRegistry::load),"industrial_access");}
     public Entry find(UUID id){return terminals.get(id);}
     public Collection<Entry> entries(){return Collections.unmodifiableCollection(terminals.values());}
@@ -58,7 +61,22 @@ public final class AccessRegistry extends SavedData {
         assignGroup(members,doors);reindex();setDirty();return GroupResult.LINKED;
     }
     public boolean link(UUID reader,DoorLink link){Entry e=terminals.get(reader);if(e==null||e.doors().contains(link)||e.doors().size()>=MAX_DOORS)return false;e.group.doors.add(link);reindex();setDirty();return true;}
-    public void invalidateDoor(UUID instance){boolean changed=false;for(ReaderGroup group:groups())changed|=group.doors.removeIf(d->d.instance().equals(instance));if(changed){reindex();setDirty();}}
+    public boolean obsoleteDoorLink(String dimension,BlockPos pos,UUID instance){
+        DoorSite site=new DoorSite(dimension,pos);return doorGenerations.containsKey(site)&&!Objects.equals(doorGenerations.get(site),instance);
+    }
+    public void registerDoor(String dimension,BlockPos pos,UUID instance){
+        doorGenerations.put(new DoorSite(dimension,pos.immutable()),instance);
+        removeDoorLinks(d->d.dimension().equals(dimension)&&d.position().equals(pos)&&!d.instance().equals(instance));setDirty();
+    }
+    public Set<Entry> invalidateDoor(String dimension,BlockPos pos,UUID instance){
+        doorGenerations.put(new DoorSite(dimension,pos.immutable()),null);
+        Set<Entry> affected=removeDoorLinks(d->d.instance().equals(instance)||d.dimension().equals(dimension)&&d.position().equals(pos));
+        setDirty();return affected;
+    }
+    private Set<Entry> removeDoorLinks(java.util.function.Predicate<DoorLink> remove){
+        Set<Entry> affected=new HashSet<>();for(ReaderGroup group:groups())if(group.doors.removeIf(remove))affected.addAll(group.members);
+        if(!affected.isEmpty())reindex();return affected;
+    }
     private Set<ReaderGroup> groups(){Set<ReaderGroup> result=new HashSet<>();for(Entry e:terminals.values())result.add(e.group);return result;}
     private void reindex(){doorReaders.clear();for(Entry e:terminals.values())for(DoorLink d:e.doors())doorReaders.computeIfAbsent(d.instance(),k->new HashSet<>()).add(e.id);}
     private static ListTag writeDoors(List<DoorLink> doors){
@@ -75,7 +93,11 @@ public final class AccessRegistry extends SavedData {
         ListTag grouped=new ListTag();for(ReaderGroup group:groups())if(group.members.size()>1){
             CompoundTag g=new CompoundTag();ListTag members=new ListTag();for(Entry e:group.members){CompoundTag member=new CompoundTag();member.putUUID("Id",e.id);members.add(member);}
             g.put("Readers",members);g.put("Doors",writeDoors(group.doors));grouped.add(g);
-        }tag.put("ReaderGroups",grouped);return tag;
+        }tag.put("ReaderGroups",grouped);
+        ListTag generations=new ListTag();doorGenerations.forEach((site,id)->{
+            CompoundTag row=new CompoundTag();row.putString("Dimension",site.dimension());row.putLong("Position",site.position().asLong());
+            if(id!=null)row.putUUID("Instance",id);generations.add(row);
+        });tag.put("DoorGenerations",generations);return tag;
     }
     public static AccessRegistry load(CompoundTag tag,HolderLookup.Provider provider){
         AccessRegistry data=new AccessRegistry();for(Tag raw:tag.getList("Terminals",Tag.TAG_COMPOUND)){
@@ -93,6 +115,9 @@ public final class AccessRegistry extends SavedData {
             Entry first=members.iterator().next();List<DoorLink> doors=readDoors(g);
             if(members.stream().anyMatch(e->!e.owner.equals(first.owner)||!e.dimension.equals(first.dimension)||doors.stream().anyMatch(d->!inRange(e,d))))continue;
             assignGroup(members,doors);
+        }
+        for(Tag raw:tag.getList("DoorGenerations",Tag.TAG_COMPOUND)){
+            CompoundTag row=(CompoundTag)raw;data.doorGenerations.put(new DoorSite(row.getString("Dimension"),BlockPos.of(row.getLong("Position"))),row.hasUUID("Instance")?row.getUUID("Instance"):null);
         }
         data.reindex();return data;
     }

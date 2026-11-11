@@ -25,7 +25,33 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     public CompoundTag program(){return program.copy();}
     public boolean isRunning(){return running;}
     public String status(){return status;}
-    public List<LinkView> linkViews(){List<LinkView> result=new ArrayList<>();Map<String,Integer> counts=new HashMap<>();for(Link link:links){int index=counts.merge(link.kind,1,Integer::sum);String prefix=switch(link.kind){case "camera"->"CAM";case "door"->"PORTE";case "alarm"->"AL";case "panel"->"PAN";default->"RED";};result.add(new LinkView(link.id,link.kind,link.pos,prefix+String.format(java.util.Locale.ROOT,"%02d",index),available(link)));}return List.copyOf(result);}
+    public List<LinkView> linkViews(){reconcileDoorLinks(true);List<LinkView> result=new ArrayList<>();Map<String,Integer> counts=new HashMap<>();for(Link link:links){int index=counts.merge(link.kind,1,Integer::sum);String prefix=switch(link.kind){case "camera"->"CAM";case "door"->"PORTE";case "alarm"->"AL";case "panel"->"PAN";default->"RED";};result.add(new LinkView(link.id,link.kind,link.pos,prefix+String.format(java.util.Locale.ROOT,"%02d",index),available(link)));}return List.copyOf(result);}
+    /** Immediate cleanup of loaded terminals; the registry covers terminals that are offline. */
+    public static void doorRemoved(ServerLevel level,BlockPos pos){
+        int radius=TerminalLinks.MAX_DISTANCE;List<CameraTerminalEntity> nearby=new ArrayList<>();
+        for(int x=(pos.getX()-radius)>>4;x<=(pos.getX()+radius)>>4;x++)for(int z=(pos.getZ()-radius)>>4;z<=(pos.getZ()+radius)>>4;z++){
+            var chunk=level.getChunkSource().getChunkNow(x,z);if(chunk==null)continue;
+            for(var entity:chunk.getBlockEntities().values())if(entity instanceof CameraTerminalEntity terminal&&!terminal.isRemoved()
+                &&TerminalLinks.inRange(terminal.getBlockPos(),pos))nearby.add(terminal);
+        }
+        for(var terminal:nearby)terminal.discardDoorLinks(link->link.pos.equals(pos));
+    }
+    private void discardDoorLinks(java.util.function.Predicate<Link> discard){
+        Set<UUID> removed=new HashSet<>();links.removeIf(link->{if(!link.kind.equals("door")||!discard.test(link))return false;removed.add(link.id);return true;});
+        if(removed.isEmpty())return;
+        outputs.keySet().removeAll(removed);
+        CompoundTag pruned=CameraProgram.withoutTargets(program,removed);
+        if(pruned!=program){program=pruned;compiled=null;pause("door_removed");}else sync();
+    }
+    private void reconcileDoorLinks(boolean inspectLoaded){
+        if(!(level instanceof ServerLevel server)||links.stream().noneMatch(link->link.kind.equals("door")))return;
+        var registry=AccessRegistry.get(server.getServer());String dimension=server.dimension().location().toString();
+        discardDoorLinks(link->{
+            if(registry.obsoleteDoorLink(dimension,link.pos,link.id))return true;
+            if(!inspectLoaded||!TerminalLinks.loaded(server,link.pos))return false;
+            return !(server.getBlockEntity(link.pos) instanceof IndustrialDoorEntity door)||door.size==0||!link.id.equals(door.doorInstanceId);
+        });
+    }
     private boolean canOwn(ServerPlayer player){return isOwner(player)&&player.isAlive()&&player.level()==level&&AccessTerminalEntity.resolve(level,worldPosition)==this&&!isRemoved();}
     private boolean canEdit(ServerPlayer player){return canOwn(player)&&player.distanceToSqr(worldPosition.getCenter())<=64;}
     public AccessBadges.Result setProgram(ServerPlayer player,CompoundTag data){if(!canEdit(player))return fail("not_owner");var result=CameraProgram.validate(data,linkViews());if(!result.ok())return AccessBadges.Result.fail(result.error());pause("stopped");program=result.program().copy();compiled=CameraProgram.compile(program,linkViews());sync();return success("saved");}
@@ -53,6 +79,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     }
     public AccessBadges.Result link(ServerPlayer player,BlockPos pos,boolean remove){
         if(!canOwn(player)||player.distanceToSqr(pos.getCenter())>64||!(level instanceof ServerLevel server)||!TerminalLinks.loaded(server,pos))return fail("link_denied");
+        reconcileDoorLinks(true);
         if(remove){
             var door=AccessDoorService.resolveDoor(level,pos);BlockPos remembered=door==null?pos:door.getBlockPos();Link old=null;
             var panelGroup=level.getBlockEntity(pos) instanceof PanelBlockEntity?PanelStructure.find(level,pos):null;
@@ -89,7 +116,9 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     private boolean enqueue(List<CameraProgram.Job> added){if(jobs.size()+added.size()>CameraProgram.MAX_JOBS){pause("job_limit");return false;}jobs.addAll(added);return true;}
     private void cancelEmpty(UUID camera){jobs.removeIf(job->job.empty()&&job.camera().equals(camera));}
     public void tickServer(){
-        if(!(level instanceof ServerLevel server)||!running)return;
+        if(!(level instanceof ServerLevel server))return;
+        if((server.getGameTime()+worldPosition.asLong())%20==0)reconcileDoorLinks(true);
+        if(!running)return;
         if(AccessTerminalEntity.resolve(level,worldPosition)!=this){pause("stopped");return;}
         if(compiled==null)try{compiled=CameraProgram.compile(program,linkViews());primeStages();}catch(IllegalArgumentException e){pause("invalid_program");return;}
         if(compiled.cameras().isEmpty()){pause("empty_program");return;}
@@ -131,7 +160,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     private void pause(String reason){release();visible.clear();running=false;status="gui.industrial_facilities.camera."+reason;sync();}
     @Override public void invalidate(){pause("stopped");links.clear();program=CameraProgram.empty();compiled=null;super.invalidate();}
     @Override public void setRemoved(){release();visible.clear();compiled=null;super.setRemoved();}
-    @Override public void onLoad(){super.onLoad();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();compiled=null;}
+    @Override public void onLoad(){super.onLoad();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();compiled=null;reconcileDoorLinks(false);}
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider provider){CompoundTag tag=new CompoundTag();if(creator!=null)tag.putUUID("Creator",creator);tag.putUUID("InstanceId",instanceId);tag.putBoolean("CameraRunning",running);return tag;}
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider){super.saveAdditional(tag,provider);tag.put("CameraProgram",program.copy());tag.putBoolean("CameraRunning",running);ListTag list=new ListTag();for(Link link:links){CompoundTag row=new CompoundTag();row.putUUID("Id",link.id);row.putString("Kind",link.kind);row.putLong("Position",link.pos.asLong());list.add(row);}tag.put("CameraLinks",list);}
     @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);links.clear();int cameras=0,targets=0;Set<UUID> ids=new HashSet<>();for(Tag raw:tag.getList("CameraLinks",Tag.TAG_COMPOUND)){CompoundTag row=(CompoundTag)raw;String kind=row.getString("Kind");if(!row.hasUUID("Id")||!Set.of("camera","door","alarm","emitter","panel").contains(kind)||!ids.add(row.getUUID("Id")))continue;if(kind.equals("camera")){if(cameras++>=8)continue;}else if(targets++>=16)continue;links.add(new Link(row.getUUID("Id"),kind,BlockPos.of(row.getLong("Position"))));}program=tag.contains("CameraProgram",Tag.TAG_COMPOUND)?tag.getCompound("CameraProgram").copy():CameraProgram.empty();compiled=null;running=tag.getBoolean("CameraRunning");status="gui.industrial_facilities.camera."+(running?"running":"stopped");outputs.clear();visible.clear();jobs.clear();stageSeen.clear();stageResetSeen.clear();}

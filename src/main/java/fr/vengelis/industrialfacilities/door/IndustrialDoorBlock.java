@@ -6,7 +6,9 @@ import fr.vengelis.industrialfacilities.access.ui.AccessMenus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -48,6 +50,12 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
     }
     @Override protected RenderShape getRenderShape(BlockState s) { return RenderShape.INVISIBLE; }
     @Override public BlockEntity newBlockEntity(BlockPos p, BlockState s) { return new IndustrialDoorEntity(p,s); }
+    @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,LivingEntity entity,ItemStack stack) {
+        super.setPlacedBy(level,pos,state,entity,stack);
+        if(!level.isClientSide&&entity instanceof Player player&&level.getBlockEntity(pos) instanceof IndustrialDoorEntity door){
+            door.placedBy=player.getUUID();door.setChanged();
+        }
+    }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level l,BlockState s,BlockEntityType<T> type) {
         return type == IndustrialDoorContent.TYPE ? (world,pos,state,be) -> IndustrialDoorEntity.tick(world,pos,state,(IndustrialDoorEntity)be) : null;
     }
@@ -65,8 +73,12 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
         return controller ? InteractionResult.sidedSuccess(l.isClientSide) : InteractionResult.PASS;
     }
     @Override protected void onRemove(BlockState s,Level l,BlockPos p,BlockState next,boolean moving) {
-        if (!s.is(next.getBlock()) && l instanceof ServerLevel server && l.getBlockEntity(p) instanceof IndustrialDoorEntity be)
-            IndustrialDoorManager.breakMember(server,be);
+        if (!s.is(next.getBlock()) && l instanceof ServerLevel server) {
+            var entity=l.getBlockEntity(p);
+            if(controller&&(!(entity instanceof IndustrialDoorEntity be)||be.size==0))
+                AccessDoorService.clearControllerLinks(server,p,entity instanceof IndustrialDoorEntity old?old.doorInstanceId:null);
+            else if(entity instanceof IndustrialDoorEntity be)IndustrialDoorManager.breakMember(server,be);
+        }
         super.onRemove(s,l,p,next,moving);
     }
     @Override public PushReaction getPistonPushReaction(BlockState s) { return PushReaction.BLOCK; }

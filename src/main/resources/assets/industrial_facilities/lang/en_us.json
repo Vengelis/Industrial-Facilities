@@ -518,5 +518,15 @@
   "gui.industrial_facilities.camera.panel_unavailable": "The panel must be a complete, fully loaded rectangle.",
   "gui.industrial_facilities.tablet.panel": "Panel",
   "gui.industrial_facilities.access.card_peer_hint": "Group readers: left-click the first, then Shift + left-click another.",
-  "gui.industrial_facilities.access.clear_links_hint": "Remove this reader from its group and clear its links. Other readers keep their doors."
+  "gui.industrial_facilities.access.clear_links_hint": "Remove this reader from its group and clear its links. Other readers keep their doors.",
+  "protection.industrial_facilities.owner_only": "Only the player who placed this block can break it.",
+  "protection.industrial_facilities.unowned": "This block has no recorded owner. An admin can remove it with bypass.",
+  "protection.industrial_facilities.bypass_on": "Protection bypass enabled for this login.",
+  "protection.industrial_facilities.bypass_off": "Protection bypass disabled.",
+  "gui.industrial_facilities.camera.door_removed": "Door dismantled: related actions removed, program paused.",
+  "protection.industrial_facilities.owner_target": "Aim at a door controller, frame, terminal, or camera within reach.",
+  "protection.industrial_facilities.owner_exists": "This block already has an owner.",
+  "protection.industrial_facilities.owner_unknown": "Player not found: %s. Check the username.",
+  "protection.industrial_facilities.owner_conflict": "This terminal is already associated with another owner.",
+  "protection.industrial_facilities.owner_assigned": "%1$s (%3$s) is now owned by %2$s."
 }

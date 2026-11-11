@@ -24,6 +24,10 @@ public final class AutomationOutputs {
         var iterator=world.entrySet().iterator();while(iterator.hasNext()){var entry=iterator.next();if(entry.getValue().remove(source)!=null)changed.add(entry.getKey());if(entry.getValue().isEmpty())iterator.remove();}
         for(Target target:changed)if(target.dimension.equals(level.dimension().location().toString()))refresh(level,target);
     }
+    public static void forgetDoor(ServerLevel level,BlockPos position){
+        var world=SERVERS.get(level.getServer());if(world==null)return;String dimension=level.dimension().location().toString();
+        world.keySet().removeIf(t->t.kind.equals("door")&&t.dimension.equals(dimension)&&t.position.equals(position));
+    }
     private static void refresh(ServerLevel level,Target target){
         if(!level.hasChunkAt(target.position))return;var be=level.getBlockEntity(target.position);
         if(be instanceof AlarmBlockEntity alarm)alarm.updatePower();else if(be instanceof SignalEmitterEntity emitter)emitter.updatePower();

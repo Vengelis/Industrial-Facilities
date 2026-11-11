@@ -518,5 +518,15 @@
   "gui.industrial_facilities.camera.panel_unavailable": "Le panneau doit former un rectangle complet et être entièrement chargé.",
   "gui.industrial_facilities.tablet.panel": "Panneau",
   "gui.industrial_facilities.access.card_peer_hint": "Lier les lecteurs : clic gauche sur le premier, puis Maj + clic gauche sur un autre.",
-  "gui.industrial_facilities.access.clear_links_hint": "Retire ce lecteur de son groupe et efface ses liaisons. Les autres lecteurs conservent les portes."
+  "gui.industrial_facilities.access.clear_links_hint": "Retire ce lecteur de son groupe et efface ses liaisons. Les autres lecteurs conservent les portes.",
+  "protection.industrial_facilities.owner_only": "Seul le joueur qui a posé ce bloc peut le casser.",
+  "protection.industrial_facilities.unowned": "Ce bloc n’a pas de propriétaire enregistré. Un admin peut le démonter avec le contournement.",
+  "protection.industrial_facilities.bypass_on": "Contournement de la protection activé pour cette connexion.",
+  "protection.industrial_facilities.bypass_off": "Contournement de la protection désactivé.",
+  "gui.industrial_facilities.camera.door_removed": "Porte démontée : actions associées retirées, programme en pause.",
+  "protection.industrial_facilities.owner_target": "Vise un contrôleur, un cadre, un terminal ou une caméra à portée.",
+  "protection.industrial_facilities.owner_exists": "Ce bloc a déjà un propriétaire.",
+  "protection.industrial_facilities.owner_unknown": "Joueur introuvable : %s. Vérifie son pseudo.",
+  "protection.industrial_facilities.owner_conflict": "Ce terminal est déjà associé à un autre propriétaire.",
+  "protection.industrial_facilities.owner_assigned": "%1$s (%3$s) appartient maintenant à %2$s."
 }

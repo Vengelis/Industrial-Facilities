@@ -2,6 +2,8 @@ package fr.vengelis.industrialfacilities.access;
 
 import java.util.*;
 import fr.vengelis.industrialfacilities.door.*;
+import fr.vengelis.industrialfacilities.security.AutomationOutputs;
+import fr.vengelis.industrialfacilities.security.CameraTerminalEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.*;
 import net.minecraft.world.entity.player.Player;
@@ -15,7 +17,10 @@ public final class AccessDoorService {
         return part.owner!=null&&loaded(level,part.owner)&&level.getBlockEntity(part.owner) instanceof IndustrialDoorEntity root&&root.size>0?root:null;
     }
     private static boolean loaded(Level level,BlockPos pos){return level instanceof ServerLevel server?TerminalLinks.loaded(server,pos):level.hasChunkAt(pos);}
-    public static UUID ensureId(IndustrialDoorEntity door){if(door.doorInstanceId==null){door.doorInstanceId=UUID.randomUUID();door.sync();}return door.doorInstanceId;}
+    public static UUID ensureId(IndustrialDoorEntity door){if(door.doorInstanceId==null){door.doorInstanceId=UUID.randomUUID();if(door.getLevel() instanceof ServerLevel level)registerDoor(level,door);door.sync();}return door.doorInstanceId;}
+    public static void registerDoor(ServerLevel level,IndustrialDoorEntity door){
+        AccessRegistry.get(level.getServer()).registerDoor(level.dimension().location().toString(),door.getBlockPos(),door.doorInstanceId);
+    }
     public static boolean isSecured(IndustrialDoorEntity door){return door.getLevel() instanceof ServerLevel level&&door.doorInstanceId!=null&&!AccessRegistry.get(level.getServer()).readers(door.doorInstanceId).isEmpty();}
     public static boolean canConfigure(Player player,IndustrialDoorEntity door){
         if(!(door.getLevel() instanceof ServerLevel level)||player.level()!=level||door.size==0)return false;
@@ -46,7 +51,16 @@ public final class AccessDoorService {
         // observed state until its chunk returns, without forcing it to load.
         return unknown&&terminal.accessGranted;
     }
-    public static void dismantle(ServerLevel level,IndustrialDoorEntity door){if(door.doorInstanceId!=null)AccessRegistry.get(level.getServer()).invalidateDoor(door.doorInstanceId);door.doorInstanceId=null;door.accessOpenUntil=0;door.allowLinkedRedstone=false;door.allowCameraAutomation=false;door.automationOwner=null;}
+    public static void clearControllerLinks(ServerLevel level,BlockPos position,UUID oldInstance){
+        var readers=AccessRegistry.get(level.getServer()).invalidateDoor(level.dimension().location().toString(),position,oldInstance);
+        for(var entry:readers){var reader=TerminalLinks.loadedReader(level,entry);if(reader!=null)reader.updateAccessState();}
+        AutomationOutputs.forgetDoor(level,position);
+        CameraTerminalEntity.doorRemoved(level,position);
+    }
+    public static void dismantle(ServerLevel level,IndustrialDoorEntity door){
+        clearControllerLinks(level,door.getBlockPos(),door.doorInstanceId);
+        door.doorInstanceId=null;door.accessOpenUntil=0;door.allowLinkedRedstone=false;door.allowCameraAutomation=false;door.automationOwner=null;
+    }
     public static AccessBadges.Result linkReaders(ServerPlayer player,UUID selected,AccessTerminalEntity target){
         if(!(target.getLevel() instanceof ServerLevel level)||player.level()!=level||!player.isAlive()||target.encoder||target.bank
             ||player.distanceToSqr(target.getBlockPos().getCenter())>64||!TerminalLinks.loaded(level,target.getBlockPos())

@@ -17,6 +17,8 @@ public class IndustrialDoorEntity extends BlockEntity {
     public BlockPos doorOrigin() { return origin!=null ? origin : getBlockPos(); }
     public int size;
     public java.util.UUID doorInstanceId;
+    /** Physical block ownership, independent of multiblock coordinates and access permissions. */
+    public java.util.UUID placedBy;
     public boolean allowLinkedRedstone;
     public boolean allowCameraAutomation;
     public java.util.UUID automationOwner;
@@ -54,6 +56,7 @@ public class IndustrialDoorEntity extends BlockEntity {
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider) {
         super.saveAdditional(tag,provider);
         if(doorInstanceId!=null)tag.putUUID("DoorInstanceId",doorInstanceId);
+        if(placedBy!=null)tag.putUUID("PlacedBy",placedBy);
         if(automationOwner!=null)tag.putUUID("AutomationOwner",automationOwner);tag.putBoolean("AllowCameraAutomation",allowCameraAutomation);
         tag.putBoolean("AllowLinkedRedstone",allowLinkedRedstone);tag.putLong("AccessOpenUntil",accessOpenUntil);
         if(owner!=null)tag.putLong("Owner",owner.asLong());
@@ -63,6 +66,7 @@ public class IndustrialDoorEntity extends BlockEntity {
     @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider) {
         super.loadAdditional(tag,provider);
         doorInstanceId=tag.hasUUID("DoorInstanceId")?tag.getUUID("DoorInstanceId"):null;
+        placedBy=tag.hasUUID("PlacedBy")?tag.getUUID("PlacedBy"):null;
         automationOwner=tag.hasUUID("AutomationOwner")?tag.getUUID("AutomationOwner"):null;allowCameraAutomation=tag.getBoolean("AllowCameraAutomation");
         allowLinkedRedstone=tag.getBoolean("AllowLinkedRedstone");accessOpenUntil=tag.getLong("AccessOpenUntil");
         owner=tag.contains("Owner")?BlockPos.of(tag.getLong("Owner")):null;
