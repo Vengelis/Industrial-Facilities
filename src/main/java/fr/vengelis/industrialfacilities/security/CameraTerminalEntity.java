@@ -140,6 +140,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         if(compiled.cameras().isEmpty()){pause("empty_program");return;}
         for(UUID id:compiled.cameras()){Link link=find(id);if(link==null||!available(link)){pause("camera_offline");return;}if(compiled.requiresStages(id)&&server.getBlockEntity(link.pos) instanceof SecurityCameraEntity c){if(!c.stagesEnabled){pause("stages_disabled");return;}if(!Objects.equals(stageResetSeen.get(id),c.stageResetToken())){pause("camera_reconfigured");return;}}}
         long tick=server.getGameTime();boolean scan=tick%5==0;
+        Map<UUID,List<Entity>> detectedThisTick=new HashMap<>();
         for(UUID id:compiled.cameras()){
             SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(find(id).pos);
             long revision=stageSeen.getOrDefault(id,camera.stageRevision);
@@ -149,7 +150,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         if(scan){
             for(UUID id:compiled.cameras()){
                 Link link=find(id);SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(link.pos);Map<UUID,Observation> seen=visible.computeIfAbsent(id,k->new HashMap<>());boolean occupied=!seen.isEmpty();Set<UUID> now=new HashSet<>();
-                var detected=camera.visibleEntities();if(!detected.isEmpty())cancelEmpty(id);
+                var detected=camera.visibleEntities();detectedThisTick.put(id,detected);if(!detected.isEmpty())cancelEmpty(id);
                 for(var entity:detected){now.add(entity.getUUID());if(!observe(id,camera,seen,entity,tick))return;}
                 var iterator=seen.entrySet().iterator();
                 while(iterator.hasNext()){
@@ -169,14 +170,20 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             // before it can close a door. This reads at most the eight linked camera fields.
             Set<UUID> pending=new HashSet<>();for(var job:jobs)if(job.empty())pending.add(job.camera());
             for(UUID id:pending){
-                SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(find(id).pos);var detected=camera.visibleEntities();if(detected.isEmpty())continue;cancelEmpty(id);
+                SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(find(id).pos);var detected=camera.visibleEntities();detectedThisTick.put(id,detected);if(detected.isEmpty())continue;cancelEmpty(id);
                 // Positive observations also arm the next empty transition, even when a
                 // brief return ends before the next normal scan. Absences still count at 4 Hz.
                 Map<UUID,Observation> seen=visible.computeIfAbsent(id,k->new HashMap<>());
                 for(var entity:detected)if(!observe(id,camera,seen,entity,tick))return;
             }
         }
-        var continuation=jobs.iterator();while(continuation.hasNext())if(continuation.next().advance(tick,this::action))continuation.remove();
+        // A condition reached after a wait uses the current field, even between normal scans.
+        java.util.function.Function<UUID,List<Entity>> zone=id->detectedThisTick.computeIfAbsent(id,key->{
+            Link link=find(key);
+            return link!=null&&available(link)&&server.getBlockEntity(link.pos) instanceof SecurityCameraEntity camera
+                ?camera.visibleEntities():null;
+        });
+        var continuation=jobs.iterator();while(continuation.hasNext())if(continuation.next().advance(tick,this::action,zone))continuation.remove();
         if(!scan)return;
         boolean other=false;var iterator=outputs.entrySet().iterator();while(iterator.hasNext()){var output=iterator.next();Link link=find(output.getKey());if(link==null||!available(link)||link.kind.equals("door")&&server.getBlockEntity(link.pos) instanceof IndustrialDoorEntity door&&!door.allowCameraAutomation){if(link!=null)AutomationOutputs.request(server,link.pos,link.kind,link.id,instanceId,false);iterator.remove();continue;}AutomationOutputs.request(server,link.pos,link.kind,link.id,instanceId,output.getValue());if(!output.getValue()&&otherSource(link))other=true;}
         if(other)status="gui.industrial_facilities.camera.other_source";else if(status.equals("gui.industrial_facilities.camera.other_source"))status="gui.industrial_facilities.camera.running";

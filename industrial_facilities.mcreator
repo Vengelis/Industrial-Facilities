@@ -6320,7 +6320,15 @@
       "gui.industrial_facilities.keypass.name_cleared": "Reader name removed.",
       "gui.industrial_facilities.keypass.invalid_name": "The name is limited to 32 characters.",
       "gui.industrial_facilities.camera.event_exit": "Entity Exits",
-      "gui.industrial_facilities.camera.event_exit_target": "When an entity exits [%s]"
+      "gui.industrial_facilities.camera.event_exit_target": "When an entity exits [%s]",
+      "gui.industrial_facilities.camera.get_zone_presence": "Zone presence",
+      "gui.industrial_facilities.camera.zone_eq": "None",
+      "gui.industrial_facilities.camera.zone_ne": "At least one",
+      "gui.industrial_facilities.camera.zone_category": "Category",
+      "gui.industrial_facilities.camera.zone_type": "Exact type",
+      "gui.industrial_facilities.camera.zone_check": "In zone · %s [%s]",
+      "gui.industrial_facilities.camera.zone_type_hint": "Enter an entity ID such as minecraft:zombie.",
+      "gui.industrial_facilities.camera.invalid_zone_filter": "Choose a category or enter a valid entity type ID."
     },
     "fr_fr": {
       "item.industrial_facilities.extinguisher": "Extincteur",
@@ -6900,7 +6908,15 @@
       "gui.industrial_facilities.keypass.name_cleared": "Nom du lecteur retiré.",
       "gui.industrial_facilities.keypass.invalid_name": "Le nom est limité à 32 caractères.",
       "gui.industrial_facilities.camera.event_exit": "Entité sort",
-      "gui.industrial_facilities.camera.event_exit_target": "Quand une entité sort de [%s]"
+      "gui.industrial_facilities.camera.event_exit_target": "Quand une entité sort de [%s]",
+      "gui.industrial_facilities.camera.get_zone_presence": "Présence zone",
+      "gui.industrial_facilities.camera.zone_eq": "Aucun",
+      "gui.industrial_facilities.camera.zone_ne": "Au moins un",
+      "gui.industrial_facilities.camera.zone_category": "Catégorie",
+      "gui.industrial_facilities.camera.zone_type": "Type exact",
+      "gui.industrial_facilities.camera.zone_check": "Dans la zone · %s [%s]",
+      "gui.industrial_facilities.camera.zone_type_hint": "Saisis un identifiant d’entité, par exemple minecraft:zombie.",
+      "gui.industrial_facilities.camera.invalid_zone_filter": "Choisis une catégorie ou saisis un identifiant de type d’entité valide."
     }
   },
   "metadata": {

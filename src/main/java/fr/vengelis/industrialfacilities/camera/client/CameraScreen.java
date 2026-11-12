@@ -43,6 +43,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         new Palette("","section_get",0,true),new Palette("get:type","get_type",0xFF385B6D,false),new Palette("get:category","get_category",0xFF385B6D,false),
         new Palette("get:name","get_name",0xFF385B6D,false),new Palette("get:uuid","get_uuid",0xFF385B6D,false),new Palette("get:team","get_team",0xFF385B6D,false),
         new Palette("get:distance","get_distance",0xFF385B6D,false),new Palette("get:health","get_health",0xFF385B6D,false),new Palette("get:inventory_item","get_inventory_item",0xFF385B6D,false),
+        new Palette("get:zone_presence","get_zone_presence",0xFF385B6D,false),
         new Palette("","section_actions",0,true),new Palette("door_open","door_open",0xFF4D4B5C,false),new Palette("door_close","door_close",0xFF4D4B5C,false),
         new Palette("alarm_on","alarm_on",0xFF4D4B5C,false),new Palette("alarm_off","alarm_off",0xFF4D4B5C,false),
         new Palette("panel_text","panel_text",0xFF4D4B5C,false),new Palette("emitter_on","emitter_on",0xFF4D4B5C,false),new Palette("emitter_off","emitter_off",0xFF4D4B5C,false),
@@ -164,33 +165,67 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
                 button(18+bw*2,y+23,bw,18,tr("else"),b->{insertPath=selected+"/Else";localStatus="gui.industrial_facilities.camera.insertion_selected";});
             }else if(node.getString("Op").equals("compare")){
                 String getter=node.getString("Getter");
-                button(10,y+23,104,18,tr("get_"+getter),b->cycleGetter(node));
-                button(118,y+23,52,18,tr("test_"+node.getString("Test")),b->cycleTest(node));
-                if(getter.equals("category"))button(174,y+23,imageWidth-184,18,tr("category_"+node.getString("Text")),b->cycleCategory(node));
-                else{
-                    boolean quantity=getter.equals("inventory_item"),numeric=numeric(getter);int inputX=174,inputWidth=imageWidth-184;
-                    if(quantity){
-                        int pickerWidth=Math.max(60,inputWidth-72);inventoryItemButton=button(inputX,y+23,pickerWidth,18,Component.empty(),b->openItemPicker());
-                        inventoryItemButton.setTooltip(Tooltip.create(tr("inventory_selected",inventoryItemName(node))));inputX+=pickerWidth+4;inputWidth-=pickerWidth+4;
-                    }
-                    valueInput=new EditBox(font,leftPos+inputX,topPos+y+23,inputWidth,18,tr(quantity?"inventory_quantity":"comparison_value"));valueInput.setMaxLength(numeric?12:64);
-                    valueInput.setValue(numeric?(quantity?Long.toString(Math.round(node.getDouble("Number"))):Double.toString(node.getDouble("Number"))):node.getString("Text"));
-                    if(numeric)valueInput.setFilter(value->value.matches("[+-]?[0-9]*([.,][0-9]*)?"));
-                    valueInput.setResponder(value->{
-                        if(!menu.editable||waitingSave)return;
-                        if(numeric){try{double parsed=Double.parseDouble(value.replace(',','.'));if(!Double.isFinite(parsed)||quantity&&(parsed<0||parsed>1_000_000||parsed!=Math.rint(parsed))){invalidNumber=true;localStatus=quantity?"gui.industrial_facilities.camera.invalid_quantity":"";updateControls();return;}if(parsed!=node.getDouble("Number")){remember();node.putDouble("Number",parsed);dirty=!draft.equals(menu.program);rebuildRows();}invalidNumber=false;}catch(NumberFormatException e){invalidNumber=true;}}
-                        else if(!value.equals(node.getString("Text"))){remember();node.putString("Text",value);dirty=!draft.equals(menu.program);rebuildRows();}
-                        localStatus=invalidNumber&&quantity?"gui.industrial_facilities.camera.invalid_quantity":"";updateControls();
-                    });addRenderableWidget(valueInput);
-                    if(quantity)valueInput.setTooltip(Tooltip.create(tr("inventory_quantity_hint")));
+                boolean zone=getter.equals("zone_presence");
+                button(10,y+23,zone?83:104,18,tr("get_"+getter),b->cycleGetter(node));
+                if(zone)zoneControls(node,y+23);
+                else {
+                    button(118,y+23,52,18,tr("test_"+node.getString("Test")),b->cycleTest(node));
+                    if(getter.equals("category"))button(174,y+23,imageWidth-184,18,tr("category_"+node.getString("Text")),b->cycleCategory(node));
+                    else comparisonInput(node,getter,y+23);
                 }
-
             }else if(List.of("and","or","not").contains(node.getString("Op"))){
                 if(node.getString("Op").equals("not"))button(10,y+23,imageWidth-20,18,tr("operand"),b->{selected+="/Value";rebuildControls();});
                 else{int bw=(imageWidth-24)/2;button(10,y+23,bw,18,tr("operand_left"),b->{selected+="/Left";rebuildControls();});button(14+bw,y+23,bw,18,tr("operand_right"),b->{selected+="/Right";rebuildControls();});}
             }
         }
         updateControls();if(itemPickerOpen)buildItemPicker();
+    }
+    private void comparisonInput(CompoundTag node,String getter,int y){
+        boolean quantity=getter.equals("inventory_item"),numeric=numeric(getter);int inputX=174,inputWidth=imageWidth-184;
+        if(quantity){
+            int pickerWidth=Math.max(60,inputWidth-72);inventoryItemButton=button(inputX,y,pickerWidth,18,Component.empty(),b->openItemPicker());
+            inventoryItemButton.setTooltip(Tooltip.create(tr("inventory_selected",inventoryItemName(node))));inputX+=pickerWidth+4;inputWidth-=pickerWidth+4;
+        }
+        valueInput=new EditBox(font,leftPos+inputX,topPos+y,inputWidth,18,tr(quantity?"inventory_quantity":"comparison_value"));valueInput.setMaxLength(numeric?12:64);
+        valueInput.setValue(numeric?(quantity?Long.toString(Math.round(node.getDouble("Number"))):Double.toString(node.getDouble("Number"))):node.getString("Text"));
+        if(numeric)valueInput.setFilter(value->value.matches("[+-]?[0-9]*([.,][0-9]*)?"));
+        valueInput.setResponder(value->{
+            if(!menu.editable||waitingSave)return;
+            if(numeric){try{double parsed=Double.parseDouble(value.replace(',','.'));if(!Double.isFinite(parsed)||quantity&&(parsed<0||parsed>1_000_000||parsed!=Math.rint(parsed))){invalidNumber=true;localStatus=quantity?"gui.industrial_facilities.camera.invalid_quantity":"";updateControls();return;}if(parsed!=node.getDouble("Number")){remember();node.putDouble("Number",parsed);dirty=!draft.equals(menu.program);rebuildRows();}invalidNumber=false;}catch(NumberFormatException e){invalidNumber=true;}}
+            else if(!value.equals(node.getString("Text"))){remember();node.putString("Text",value);dirty=!draft.equals(menu.program);rebuildRows();}
+            localStatus=invalidNumber&&quantity?"gui.industrial_facilities.camera.invalid_quantity":"";updateControls();
+        });addRenderableWidget(valueInput);
+        if(quantity)valueInput.setTooltip(Tooltip.create(tr("inventory_quantity_hint")));
+    }
+    private void zoneControls(CompoundTag node,int y){
+        boolean byType=node.getString("Filter").equals("type");
+        button(97,y,68,18,tr("zone_"+node.getString("Test")),b->cycleTest(node));
+        button(169,y,59,18,tr(byType?"zone_type":"zone_category"),b->{
+            if(!menu.editable||waitingSave)return;
+            remember();
+            node.putString("Filter",byType?"category":"type");
+            node.putString("Text",byType?"player":"minecraft:player");
+            changed();
+        });
+        if(!byType){
+            button(232,y,Math.max(30,imageWidth-242),18,tr("category_"+node.getString("Text")),b->cycleCategory(node));
+            return;
+        }
+        valueInput=new EditBox(font,leftPos+232,topPos+y,Math.max(30,imageWidth-242),18,tr("zone_type"));
+        valueInput.setMaxLength(CameraProgram.MAX_ZONE_TYPE_LENGTH);
+        valueInput.setValue(node.getString("Text"));
+        valueInput.setHint(Component.literal("minecraft:player"));
+        valueInput.setTooltip(Tooltip.create(tr("zone_type_hint")));
+        valueInput.setResponder(value->{
+            if(!menu.editable||waitingSave||value.equals(node.getString("Text")))return;
+            remember();
+            node.putString("Text",value);
+            dirty=!draft.equals(menu.program);
+            localStatus="";
+            rebuildRows();
+            updateControls();
+        });
+        addRenderableWidget(valueInput);
     }
     private void updateControls(){
         if(menu.mode!=CameraMenu.PROGRAM)return;
@@ -222,6 +257,11 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     }
     private static CompoundTag expression(String getter){
         CompoundTag node=new CompoundTag();node.putString("Op","compare");node.putString("Getter",getter);node.putString("Test",getter.equals("inventory_item")?"ge":numeric(getter)?"le":"eq");
+        if(getter.equals("zone_presence")){
+            node.putString("Filter","category");
+            node.putString("Text","player");
+            return node;
+        }
         if(getter.equals("inventory_item")){node.putString("Item","minecraft:iron_ingot");node.putDouble("Number",1);}else if(numeric(getter))node.putDouble("Number",getter.equals("distance")?4:10);else node.putString("Text",getter.equals("category")?"player":getter.equals("type")?"minecraft:player":"");return node;
     }
     private static boolean numeric(String getter){return getter.equals("distance")||getter.equals("health")||getter.equals("inventory_item");}
@@ -328,7 +368,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     }
     private void cycleGetter(CompoundTag node){
         if(!menu.editable||waitingSave)return;
-        List<String> choices=List.of("type","category","name","uuid","team","distance","health","inventory_item");String getter=choices.get((choices.indexOf(node.getString("Getter"))+1)%choices.size());
+        List<String> choices=List.of("type","category","name","uuid","team","distance","health","inventory_item","zone_presence");String getter=choices.get((choices.indexOf(node.getString("Getter"))+1)%choices.size());
         remember();replace(selected,expression(getter));changed();
     }
     private void cycleTest(CompoundTag node){
@@ -336,7 +376,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         List<String> choices=numeric(node.getString("Getter"))?List.of("eq","ne","lt","le","gt","ge"):List.of("eq","ne");
         remember();node.putString("Test",choices.get((choices.indexOf(node.getString("Test"))+1)%choices.size()));changed();
     }
-    private void cycleCategory(CompoundTag node){if(!menu.editable||waitingSave)return;List<String> values=List.of("player","animal","hostile","other");remember();node.putString("Text",values.get((values.indexOf(node.getString("Text"))+1)%values.size()));changed();}
+    private void cycleCategory(CompoundTag node){if(!menu.editable||waitingSave)return;List<String> values=CameraProgram.ENTITY_CATEGORIES;remember();node.putString("Text",values.get((values.indexOf(node.getString("Text"))+1)%values.size()));changed();}
     private void rebuildRows(){
         rows.clear();ListTag events=draft.getList("Events",Tag.TAG_COMPOUND);
         for(int i=0;i<events.size();i++){
@@ -365,8 +405,15 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private void condition(CompoundTag node,String path,int depth){
         String op=node.getString("Op"),label;
         if(op.equals("compare")){
-            String getter=node.getString("Getter");String value=getter.equals("inventory_item")?Long.toString(Math.round(node.getDouble("Number"))):numeric(getter)?Double.toString(node.getDouble("Number")):getter.equals("category")?tr("category_"+node.getString("Text")).getString():node.getString("Text");
-            label=getter.equals("inventory_item")?"GET "+tr("inventory_count_for",inventoryItemName(node)).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]":"GET "+tr("get_"+getter).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]";
+            String getter=node.getString("Getter");
+            if(getter.equals("zone_presence")){
+                String value=node.getString("Text");
+                if(node.getString("Filter").equals("category"))value=tr("category_"+value).getString();
+                label=tr("zone_check",tr("zone_"+node.getString("Test")).getString(),value).getString();
+            }else{
+                String value=getter.equals("inventory_item")?Long.toString(Math.round(node.getDouble("Number"))):numeric(getter)?Double.toString(node.getDouble("Number")):getter.equals("category")?tr("category_"+node.getString("Text")).getString():node.getString("Text");
+                label=getter.equals("inventory_item")?"GET "+tr("inventory_count_for",inventoryItemName(node)).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]":"GET "+tr("get_"+getter).getString()+" "+tr("test_"+node.getString("Test")).getString()+" ["+value+"]";
+            }
         }else label=tr(op).getString();
         rows.add(new Row(path,"expr",label,depth,""));
         if(op.equals("and")||op.equals("or")){condition(node.getCompound("Left"),path+"/Left",depth+1);condition(node.getCompound("Right"),path+"/Right",depth+1);}

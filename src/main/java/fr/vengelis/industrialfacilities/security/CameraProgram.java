@@ -2,6 +2,7 @@ package fr.vengelis.industrialfacilities.security;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -15,10 +16,12 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
-/** A closed, typed language: only event entity reads and linked output requests are executable. */
+/** A closed, typed language for camera observations and linked output requests. */
 public final class CameraProgram {
     public static final int MAX_EVENTS=16,MAX_NODES=64,MAX_DEPTH=6,MAX_DURATION_TICKS=72000,MAX_JOBS=128;
     public static final int MAX_ITEM_ID_LENGTH=256,MAX_INVENTORY_COUNT=1_000_000;
+    public static final int MAX_ZONE_TYPE_LENGTH=256;
+    public static final List<String> ENTITY_CATEGORIES=List.of("player","animal","hostile","other");
     private static final int MAX_INVENTORY_SLOTS=256,MAX_EQUIPMENT_SLOTS=16,COUNT_OVERFLOW=MAX_INVENTORY_COUNT+1;
     @FunctionalInterface public interface ActionOutput { void accept(UUID target, String action, String text); }
     public record Validation(boolean ok,String error,CompoundTag program) {}
@@ -66,6 +69,9 @@ public final class CameraProgram {
         public long readyAt(){return readyAt;}
         public boolean advance(long now,BiConsumer<UUID,String> output){ return advance(now,(id,action,text)->output.accept(id,action)); }
         public boolean advance(long now,ActionOutput output){
+            return advance(now,output,id->null);
+        }
+        boolean advance(long now,ActionOutput output,Function<UUID,List<Entity>> zoneEntities){
             if(now<readyAt)return false;int visited=0;
             while(!stack.isEmpty()){
                 Frame frame=stack.peekLast();if(frame.index>=frame.nodes.size()){stack.removeLast();continue;}
@@ -75,7 +81,12 @@ public final class CameraProgram {
                 else if(node instanceof If branch){
                     // Unknown inventory must not turn NOT or an ELSE branch into a fabricated absence.
                     if(branch.condition.requiresInventory()&&(snapshot==null||snapshot.inventory==null))continue;
-                    stack.addLast(new Frame(branch.condition.test(snapshot)?branch.yes:branch.no));
+                    List<Entity> zone=null;
+                    if(branch.condition.requiresZone()){
+                        zone=zoneEntities.apply(camera);
+                        if(zone==null)continue;
+                    }
+                    stack.addLast(new Frame(branch.condition.test(snapshot,zone)?branch.yes:branch.no));
                 }
             }return true;
         }
@@ -121,7 +132,12 @@ public final class CameraProgram {
     }
     private record Event(UUID camera,String trigger,Duration delay,List<Stmt> body) {}
     private interface Stmt {CompoundTag save();}
-    private interface Cond {boolean test(Snapshot snapshot);CompoundTag save();default boolean requiresInventory(){return false;}}
+    private interface Cond {
+        boolean test(Snapshot snapshot,List<Entity> zone);
+        CompoundTag save();
+        default boolean requiresInventory(){return false;}
+        default boolean requiresZone(){return false;}
+    }
     private record Action(UUID target,String action,String text) implements Stmt {
         public void request(ActionOutput consumer){consumer.accept(target,action,text);}
         public CompoundTag save(){CompoundTag tag=op("action");tag.putUUID("Target",target);tag.putString("Action",action);if(action.equals("panel_text"))tag.putString("Text",text);return tag;}
@@ -132,12 +148,19 @@ public final class CameraProgram {
     }
     private record BooleanCondition(String operator,Cond left,Cond right) implements Cond {
         public boolean requiresInventory(){return left.requiresInventory()||right!=null&&right.requiresInventory();}
-        public boolean test(Snapshot snapshot){return operator.equals("not")?!left.test(snapshot):operator.equals("and")?left.test(snapshot)&&right.test(snapshot):left.test(snapshot)||right.test(snapshot);}
+        public boolean requiresZone(){return left.requiresZone()||right!=null&&right.requiresZone();}
+        public boolean test(Snapshot snapshot,List<Entity> zone){
+            return switch(operator){
+                case "not"->!left.test(snapshot,zone);
+                case "and"->left.test(snapshot,zone)&&right.test(snapshot,zone);
+                default->left.test(snapshot,zone)||right.test(snapshot,zone);
+            };
+        }
         public CompoundTag save(){CompoundTag tag=op(operator);tag.put(operator.equals("not")?"Value":"Left",left.save());if(right!=null)tag.put("Right",right.save());return tag;}
     }
     private record Compare(String getter,String comparator,String text,double number) implements Cond {
         public boolean requiresInventory(){return getter.equals("inventory_item");}
-        public boolean test(Snapshot snapshot){
+        public boolean test(Snapshot snapshot,List<Entity> zone){
             if(snapshot==null)return false;
             if(getter.equals("distance")||getter.equals("health")||getter.equals("inventory_item")){
                 if(getter.equals("health")&&snapshot.health==null||getter.equals("inventory_item")&&snapshot.inventory==null)return false;
@@ -148,6 +171,23 @@ public final class CameraProgram {
             return comparator.equals("eq")==value.equals(text);
         }
         public CompoundTag save(){CompoundTag tag=op("compare");tag.putString("Getter",getter);tag.putString("Test",comparator);if(getter.equals("inventory_item")){tag.putString("Item",text);tag.putDouble("Number",number);}else if(getter.equals("distance")||getter.equals("health"))tag.putDouble("Number",number);else tag.putString("Text",text);return tag;}
+    }
+    private record ZonePresence(String filter,String value,EntityType<?> type,boolean expected) implements Cond {
+        public boolean requiresZone(){return true;}
+        public boolean test(Snapshot snapshot,List<Entity> zone){
+            boolean found=type==null
+                ?zone.stream().anyMatch(entity->category(entity).equals(value))
+                :zone.stream().anyMatch(entity->entity.getType()==type);
+            return found==expected;
+        }
+        public CompoundTag save(){
+            CompoundTag tag=op("compare");
+            tag.putString("Getter","zone_presence");
+            tag.putString("Test",expected?"ne":"eq");
+            tag.putString("Filter",filter);
+            tag.putString("Text",value);
+            return tag;
+        }
     }
     private static String category(Entity entity){if(entity instanceof Player)return "player";String name=entity.getType().getCategory().name();if(name.equals("MONSTER"))return "hostile";return Set.of("CREATURE","AMBIENT","WATER_CREATURE","WATER_AMBIENT","UNDERGROUND_WATER_CREATURE","AXOLOTLS").contains(name)?"animal":"other";}
     private static CompoundTag op(String operator){CompoundTag tag=new CompoundTag();tag.putString("Op",operator);return tag;}
@@ -187,6 +227,7 @@ public final class CameraProgram {
             count(depth);String op=tag.getString("Op");if(op.equals("and")||op.equals("or"))return new BooleanCondition(op,condition(tag.getCompound("Left"),depth+1),condition(tag.getCompound("Right"),depth+1));
             if(op.equals("not"))return new BooleanCondition(op,condition(tag.getCompound("Value"),depth+1),null);
             if(!op.equals("compare"))throw new IllegalArgumentException("invalid_program");String getter=tag.getString("Getter"),test=tag.getString("Test");
+            if(getter.equals("zone_presence"))return zonePresence(tag,test);
             if(!Set.of("type","category","name","uuid","team","distance","health","inventory_item").contains(getter))throw new IllegalArgumentException("invalid_program");
             if(getter.equals("inventory_item")){
                 String selected=tag.getString("Item");ResourceLocation item=selected.length()<=MAX_ITEM_ID_LENGTH?ResourceLocation.tryParse(selected):null;
@@ -198,6 +239,17 @@ public final class CameraProgram {
                 double value=tag.getDouble("Number");if(!tag.contains("Number",Tag.TAG_ANY_NUMERIC)||!Double.isFinite(value)||Math.abs(value)>1_000_000||!Set.of("eq","ne","lt","le","gt","ge").contains(test))throw new IllegalArgumentException("invalid_program");return new Compare(getter,test,"",value);
             }
             String value=tag.getString("Text");if(!tag.contains("Text",Tag.TAG_STRING)||value.length()>64||value.codePoints().anyMatch(Character::isISOControl)||!Set.of("eq","ne").contains(test))throw new IllegalArgumentException("invalid_program");return new Compare(getter,test,value,0);
+        }
+        private ZonePresence zonePresence(CompoundTag tag,String test){
+            if(!Set.of("eq","ne").contains(test))throw new IllegalArgumentException("invalid_program");
+            String filter=tag.getString("Filter"),value=tag.getString("Text");
+            boolean expected=test.equals("ne");
+            if(filter.equals("category")&&ENTITY_CATEGORIES.contains(value))return new ZonePresence(filter,value,null,expected);
+            if(filter.equals("type")&&!value.isEmpty()&&value.length()<=MAX_ZONE_TYPE_LENGTH){
+                ResourceLocation id=ResourceLocation.tryParse(value);
+                if(id!=null&&BuiltInRegistries.ENTITY_TYPE.containsKey(id))return new ZonePresence(filter,value,BuiltInRegistries.ENTITY_TYPE.get(id),expected);
+            }
+            throw new IllegalArgumentException("invalid_zone_filter");
         }
         Program parse(CompoundTag root){
             if(root.getInt("Version")!=1||!(root.get("Events") instanceof ListTag raw)||!raw.isEmpty()&&raw.getElementType()!=Tag.TAG_COMPOUND)throw new IllegalArgumentException("invalid_program");if(raw.size()>MAX_EVENTS)throw new IllegalArgumentException("program_limits");List<Event> events=new ArrayList<>();

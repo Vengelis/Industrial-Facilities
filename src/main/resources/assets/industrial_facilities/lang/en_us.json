@@ -576,5 +576,13 @@
   "gui.industrial_facilities.keypass.name_cleared": "Reader name removed.",
   "gui.industrial_facilities.keypass.invalid_name": "The name is limited to 32 characters.",
   "gui.industrial_facilities.camera.event_exit": "Entity Exits",
-  "gui.industrial_facilities.camera.event_exit_target": "When an entity exits [%s]"
+  "gui.industrial_facilities.camera.event_exit_target": "When an entity exits [%s]",
+  "gui.industrial_facilities.camera.get_zone_presence": "Zone presence",
+  "gui.industrial_facilities.camera.zone_eq": "None",
+  "gui.industrial_facilities.camera.zone_ne": "At least one",
+  "gui.industrial_facilities.camera.zone_category": "Category",
+  "gui.industrial_facilities.camera.zone_type": "Exact type",
+  "gui.industrial_facilities.camera.zone_check": "In zone · %s [%s]",
+  "gui.industrial_facilities.camera.zone_type_hint": "Enter an entity ID such as minecraft:zombie.",
+  "gui.industrial_facilities.camera.invalid_zone_filter": "Choose a category or enter a valid entity type ID."
 }
