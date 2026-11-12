@@ -23,8 +23,8 @@ public final class CameraProgram {
     @FunctionalInterface public interface ActionOutput { void accept(UUID target, String action, String text); }
     public record Validation(boolean ok,String error,CompoundTag program) {}
     private record Duration(int ticks,String unit,boolean explicit) {}
-    /** Values are captured once at entry. A sleeping sequence never retains a live entity. */
-    private record Snapshot(String type,String category,String name,String uuid,String team,double distance,Double health,Map<String,Integer> inventory) {
+    /** An entry or the last observation before an exit. Jobs never retain a live entity. */
+    record Snapshot(String type,String category,String name,String uuid,String team,double distance,Double health,Map<String,Integer> inventory) {
         static Snapshot capture(Entity entity,Vec3 origin,Set<String> items){return new Snapshot(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString(),CameraProgram.category(entity),entity.getName().getString(),entity.getUUID().toString(),entity.getTeam()==null?"":entity.getTeam().getName(),entity.position().distanceTo(origin),entity instanceof LivingEntity living?(double)living.getHealth():null,inventorySnapshot(entity,items));}
     }
     /** Read only materialized native slots. Null means unknown, never an empty inventory. */
@@ -85,10 +85,32 @@ public final class CameraProgram {
     public static final class Program {
         private final List<Event> events;
         private final Set<String> inventoryItems;
-        private Program(List<Event> events){this.events=List.copyOf(events);Set<String> selected=new HashSet<>();for(Event event:events)inventoryQueries(event.body,selected);inventoryItems=Set.copyOf(selected);}
+        private final Map<UUID,Set<String>> exitInventoryItems;
+        private Program(List<Event> events){
+            this.events=List.copyOf(events);
+            Set<String> entryItems=new HashSet<>();
+            Map<UUID,Set<String>> exitItems=new HashMap<>();
+            for(Event event:events){
+                if(event.trigger.equals("exit"))inventoryQueries(event.body,exitItems.computeIfAbsent(event.camera,key->new HashSet<>()));
+                else if(event.trigger.equals("entry"))inventoryQueries(event.body,entryItems);
+            }
+            inventoryItems=Set.copyOf(entryItems);
+            exitItems.replaceAll((camera,items)->Set.copyOf(items));
+            exitInventoryItems=Map.copyOf(exitItems);
+        }
         public Set<UUID> cameras(){Set<UUID> ids=new HashSet<>();for(Event event:events)ids.add(event.camera);return Set.copyOf(ids);}
         public boolean requiresStages(UUID camera){return events.stream().anyMatch(event->event.camera.equals(camera)&&event.trigger.startsWith("stage"));}
         public List<Job> entryJobs(UUID camera,Entity entity,Vec3 origin,long now){if(entity==null)return List.of();List<Event> matching=events.stream().filter(event->event.trigger.equals("entry")&&event.camera.equals(camera)).toList();if(matching.isEmpty())return List.of();Snapshot snapshot=Snapshot.capture(entity,origin,inventoryItems);List<Job> jobs=new ArrayList<>();for(Event event:matching)jobs.add(new Job(event,snapshot,now));return List.copyOf(jobs);}
+        Snapshot observeExit(UUID camera,Entity entity,Vec3 origin){
+            Set<String> items=exitInventoryItems.get(camera);
+            return items==null?null:Snapshot.capture(entity,origin,items);
+        }
+        List<Job> exitJobs(UUID camera,Snapshot lastSeen,long now){
+            if(lastSeen==null)return List.of();
+            List<Job> jobs=new ArrayList<>();
+            for(Event event:events)if(event.trigger.equals("exit")&&event.camera.equals(camera))jobs.add(new Job(event,lastSeen,now));
+            return List.copyOf(jobs);
+        }
         public List<Job> emptyJobs(UUID camera,long now){List<Job> jobs=new ArrayList<>();for(Event event:events)if(event.trigger.equals("empty")&&event.camera.equals(camera))jobs.add(new Job(event,null,now));return List.copyOf(jobs);}
         public List<Job> stageJobs(UUID camera,int stage,long now){if(stage<1||stage>3)return List.of();List<Job> jobs=new ArrayList<>();for(Event event:events)if(event.trigger.equals("stage"+stage)&&event.camera.equals(camera))jobs.add(new Job(event,null,now));return List.copyOf(jobs);}
         /** Compatibility dispatcher for immediate legacy programs. Timed callers use jobs. */
@@ -182,10 +204,11 @@ public final class CameraProgram {
             for(Tag value:raw){
                 count(1);CompoundTag tag=(CompoundTag)value;UUID camera=id(tag,"Camera");if(!"camera".equals(links.get(camera)))throw new IllegalArgumentException("invalid_camera");
                 if(tag.contains("Trigger")&&!tag.contains("Trigger",Tag.TAG_STRING))throw new IllegalArgumentException("invalid_trigger");String trigger=tag.contains("Trigger")?tag.getString("Trigger"):"entry";
-                if(!Set.of("entry","empty","stage1","stage2","stage3").contains(trigger))throw new IllegalArgumentException("invalid_trigger");
+                if(!Set.of("entry","exit","empty","stage1","stage2","stage3").contains(trigger))throw new IllegalArgumentException("invalid_trigger");
                 if(!trigger.equals("empty")&&(tag.contains("Ticks")||tag.contains("Unit")))throw new IllegalArgumentException("invalid_duration");Duration delay=trigger.equals("empty")?time(tag,false):new Duration(0,"seconds",false);
                 if(trigger.startsWith("stage")&&tag.get("Body") instanceof ListTag stageBody)for(Tag node:stageBody)if(!(node instanceof CompoundTag statement)||!Set.of("action","wait").contains(statement.getString("Op")))throw new IllegalArgumentException("entity_context_required");
-                events.add(new Event(camera,trigger,delay,body(tag,"Body",2,!trigger.equals("entry"))));
+                boolean hasEntity=trigger.equals("entry")||trigger.equals("exit");
+                events.add(new Event(camera,trigger,delay,body(tag,"Body",2,!hasEntity)));
             }return new Program(events);
         }
     }

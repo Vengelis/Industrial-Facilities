@@ -35,6 +35,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private record ItemChoice(Item item,String id,String name,String search) {}
     private static final List<Palette> PALETTE=List.of(
         new Palette("","section_events",0,true),new Palette("event","event",0xFF69527F,false),
+        new Palette("event_exit","event_exit",0xFF69527F,false),
         new Palette("event_empty","event_empty",0xFF69527F,false),
         new Palette("event_stage1","event_stage1",0xFF64616D,false),new Palette("event_stage2","event_stage2",0xFF8A5B31,false),new Palette("event_stage3","event_stage3",0xFF874246,false),
         new Palette("","section_logic",0,true),new Palette("if","if",0xFF69527F,false),
@@ -249,7 +250,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private String opposite(String action){return switch(action){case "door_open"->"door_close";case "door_close"->"door_open";case "alarm_on"->"alarm_off";case "alarm_off"->"alarm_on";case "emitter_on"->"emitter_off";default->"emitter_on";};}
     private UUID firstLink(String kind){return menu.links.stream().filter(l->l.kind().equals(kind)).map(CameraMessages.Link::id).findFirst().orElse(null);}
     private String linkName(UUID id){return menu.links.stream().filter(l->l.id().equals(id)).map(CameraMessages.Link::name).findFirst().orElse(tr("unlinked").getString());}
-    private static boolean eventToken(String token){return "event".equals(token)||"event_empty".equals(token)||"event_stage1".equals(token)||"event_stage2".equals(token)||"event_stage3".equals(token);}
+    private static boolean eventToken(String token){return switch(token){case "event","event_exit","event_empty","event_stage1","event_stage2","event_stage3"->true;default->false;};}
     private static boolean conditionToken(String token){return token.startsWith("get:")||List.of("and","or","not").contains(token);}
     private static boolean entityToken(String token){return token.equals("if")||conditionToken(token);}
     private boolean emptyEvent(String path){
@@ -340,7 +341,11 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         rows.clear();ListTag events=draft.getList("Events",Tag.TAG_COMPOUND);
         for(int i=0;i<events.size();i++){
             String path="Events/"+i;CompoundTag event=events.getCompound(i);String trigger=event.getString("Trigger"),target=linkName(event.hasUUID("Camera")?event.getUUID("Camera"):NONE);
-            String label=trigger.equals("empty")?tr("event_empty_delay_target",target,durationLabel(event)).getString():tr(trigger.startsWith("stage")?"event_"+trigger+"_target":"event_target",target).getString();
+            String label=switch(trigger){
+                case "empty"->tr("event_empty_delay_target",target,durationLabel(event)).getString();
+                case "exit","stage1","stage2","stage3"->tr("event_"+trigger+"_target",target).getString();
+                default->tr("event_target",target).getString();
+            };
             rows.add(new Row(path,"event",label,0,path+"/Body"));statements(event.getList("Body",Tag.TAG_COMPOUND),path+"/Body",1);rows.add(new Row(path+"/Body","insert",tr(emptyEvent(path)?"add_action_here":"add_here").getString(),1,path+"/Body"));
         }
         canvasScroll=Math.clamp(canvasScroll,0,Math.max(0,rows.size()*ROW-paneHeight));paletteScroll=Math.clamp(paletteScroll,0,Math.max(0,PALETTE.size()*ROW-paneHeight));

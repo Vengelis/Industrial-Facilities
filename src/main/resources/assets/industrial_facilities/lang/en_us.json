@@ -574,5 +574,7 @@
   "gui.industrial_facilities.keypass.named_row": "%1$s%2$s — %3$s",
   "gui.industrial_facilities.keypass.name_saved": "Reader name saved.",
   "gui.industrial_facilities.keypass.name_cleared": "Reader name removed.",
-  "gui.industrial_facilities.keypass.invalid_name": "The name is limited to 32 characters."
+  "gui.industrial_facilities.keypass.invalid_name": "The name is limited to 32 characters.",
+  "gui.industrial_facilities.camera.event_exit": "Entity Exits",
+  "gui.industrial_facilities.camera.event_exit_target": "When an entity exits [%s]"
 }

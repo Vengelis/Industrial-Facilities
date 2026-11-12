@@ -7,13 +7,18 @@ import fr.vengelis.industrialfacilities.door.IndustrialDoorEntity;
 import net.minecraft.core.*;
 import net.minecraft.nbt.*;
 import net.minecraft.server.level.*;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 public class CameraTerminalEntity extends AccessTerminalEntity {
     public record LinkView(UUID id,String kind,BlockPos pos,String name,boolean available) {}
     private record Link(UUID id,String kind,BlockPos pos) {}
     private final List<Link> links=new ArrayList<>();
     private final Map<UUID,Boolean> outputs=new HashMap<>();
-    private final Map<UUID,Map<UUID,Integer>> visible=new HashMap<>();
+    private static final class Observation {
+        int misses;
+        CameraProgram.Snapshot lastSeen;
+    }
+    private final Map<UUID,Map<UUID,Observation>> visible=new HashMap<>();
     private final List<CameraProgram.Job> jobs=new ArrayList<>();
     private final Map<UUID,Long> stageSeen=new HashMap<>();
     private final Map<UUID,UUID> stageResetSeen=new HashMap<>();
@@ -115,6 +120,17 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     private boolean otherSource(Link link){if(!(level instanceof ServerLevel server))return false;var target=level.getBlockEntity(link.pos);return target instanceof IndustrialDoorEntity door?AccessDoorService.shouldOpen(server,door):target instanceof AlarmBlockEntity alarm?alarm.powered():AutomationOutputs.active(server,link.pos,link.kind,link.id);}
     private boolean enqueue(List<CameraProgram.Job> added){if(jobs.size()+added.size()>CameraProgram.MAX_JOBS){pause("job_limit");return false;}jobs.addAll(added);return true;}
     private void cancelEmpty(UUID camera){jobs.removeIf(job->job.empty()&&job.camera().equals(camera));}
+    private boolean observe(UUID cameraId,SecurityCameraEntity camera,Map<UUID,Observation> seen,Entity entity,long tick){
+        UUID uuid=entity.getUUID();
+        Observation observation=seen.get(uuid);
+        if(observation==null){
+            if(!enqueue(compiled.entryJobs(cameraId,entity,camera.lens(),tick)))return false;
+            observation=new Observation();seen.put(uuid,observation);
+        }
+        observation.misses=0;
+        observation.lastSeen=compiled.observeExit(cameraId,entity,camera.lens());
+        return true;
+    }
     public void tickServer(){
         if(!(level instanceof ServerLevel server))return;
         if((server.getGameTime()+worldPosition.asLong())%20==0)reconcileDoorLinks(true);
@@ -132,10 +148,19 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         }
         if(scan){
             for(UUID id:compiled.cameras()){
-                Link link=find(id);SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(link.pos);Map<UUID,Integer> seen=visible.computeIfAbsent(id,k->new HashMap<>());boolean occupied=!seen.isEmpty();Set<UUID> now=new HashSet<>();
+                Link link=find(id);SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(link.pos);Map<UUID,Observation> seen=visible.computeIfAbsent(id,k->new HashMap<>());boolean occupied=!seen.isEmpty();Set<UUID> now=new HashSet<>();
                 var detected=camera.visibleEntities();if(!detected.isEmpty())cancelEmpty(id);
-                for(var entity:detected){UUID uuid=entity.getUUID();now.add(uuid);if(!seen.containsKey(uuid)&&!enqueue(compiled.entryJobs(id,entity,camera.lens(),tick)))return;seen.put(uuid,0);}
-                var iterator=seen.entrySet().iterator();while(iterator.hasNext()){var entity=iterator.next();if(!now.contains(entity.getKey())){int misses=entity.getValue()+1;if(misses>=2)iterator.remove();else entity.setValue(misses);}}
+                for(var entity:detected){now.add(entity.getUUID());if(!observe(id,camera,seen,entity,tick))return;}
+                var iterator=seen.entrySet().iterator();
+                while(iterator.hasNext()){
+                    var entity=iterator.next();
+                    if(now.contains(entity.getKey()))continue;
+                    var observation=entity.getValue();
+                    if(++observation.misses>=2){
+                        iterator.remove();
+                        if(!enqueue(compiled.exitJobs(id,observation.lastSeen,tick)))return;
+                    }
+                }
                 // Delay starts only after the last entity has been absent for two scans.
                 if(occupied&&seen.isEmpty()&&!enqueue(compiled.emptyJobs(id,tick)))return;
             }
@@ -147,8 +172,8 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
                 SecurityCameraEntity camera=(SecurityCameraEntity)server.getBlockEntity(find(id).pos);var detected=camera.visibleEntities();if(detected.isEmpty())continue;cancelEmpty(id);
                 // Positive observations also arm the next empty transition, even when a
                 // brief return ends before the next normal scan. Absences still count at 4 Hz.
-                Map<UUID,Integer> seen=visible.computeIfAbsent(id,k->new HashMap<>());
-                for(var entity:detected){UUID uuid=entity.getUUID();if(!seen.containsKey(uuid)&&!enqueue(compiled.entryJobs(id,entity,camera.lens(),tick)))return;seen.put(uuid,0);}
+                Map<UUID,Observation> seen=visible.computeIfAbsent(id,k->new HashMap<>());
+                for(var entity:detected)if(!observe(id,camera,seen,entity,tick))return;
             }
         }
         var continuation=jobs.iterator();while(continuation.hasNext())if(continuation.next().advance(tick,this::action))continuation.remove();
