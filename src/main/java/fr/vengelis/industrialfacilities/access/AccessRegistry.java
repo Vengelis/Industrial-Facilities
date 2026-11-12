@@ -21,6 +21,7 @@ public final class AccessRegistry extends SavedData {
         public final String dimension;
         public final BlockPos position;
         public int level;
+        public boolean keypass;
         private ReaderGroup group=new ReaderGroup();
         Entry(UUID id,UUID owner,String dimension,BlockPos position,int level){this.id=id;this.owner=owner;this.dimension=dimension;this.position=position.immutable();this.level=level;group.members.add(this);}
         public List<DoorLink> doors(){return group.view;}
@@ -38,8 +39,8 @@ public final class AccessRegistry extends SavedData {
     public void put(AccessTerminalEntity terminal){
         if(terminal.terminalId==null||terminal.creator==null)return;
         Entry existing=terminals.get(terminal.terminalId);
-        if(existing==null)terminals.put(terminal.terminalId,new Entry(terminal.terminalId,terminal.creator,terminal.getLevel().dimension().location().toString(),terminal.getBlockPos(),terminal.accessLevel));
-        else if(existing.owner.equals(terminal.creator))existing.level=terminal.accessLevel;
+        if(existing==null){existing=new Entry(terminal.terminalId,terminal.creator,terminal.getLevel().dimension().location().toString(),terminal.getBlockPos(),terminal.accessLevel);terminals.put(terminal.terminalId,existing);}
+        if(existing.owner.equals(terminal.creator)){existing.level=terminal.accessLevel;existing.keypass=terminal instanceof KeypassTerminalEntity;}
         setDirty();
     }
     public void remove(UUID id){Entry e=terminals.remove(id);if(e!=null){e.group.members.remove(e);reindex();setDirty();}}
@@ -88,6 +89,7 @@ public final class AccessRegistry extends SavedData {
     @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider provider){
         ListTag list=new ListTag();for(Entry e:terminals.values()){
             CompoundTag t=new CompoundTag();t.putUUID("Id",e.id);t.putUUID("Owner",e.owner);t.putString("Dimension",e.dimension);t.putLong("Position",e.position.asLong());t.putInt("Level",e.level);
+            if(e.keypass)t.putBoolean("Keypass",true);
             if(e.readerCount()==1)t.put("Doors",writeDoors(e.doors()));list.add(t);
         }tag.put("Terminals",list);
         ListTag grouped=new ListTag();for(ReaderGroup group:groups())if(group.members.size()>1){
@@ -103,6 +105,7 @@ public final class AccessRegistry extends SavedData {
         AccessRegistry data=new AccessRegistry();for(Tag raw:tag.getList("Terminals",Tag.TAG_COMPOUND)){
             CompoundTag t=(CompoundTag)raw;if(!t.hasUUID("Id")||!t.hasUUID("Owner"))continue;
             Entry e=new Entry(t.getUUID("Id"),t.getUUID("Owner"),t.getString("Dimension"),BlockPos.of(t.getLong("Position")),Math.clamp(t.getInt("Level"),1,5));
+            e.keypass=t.getBoolean("Keypass");
             e.group.doors.addAll(readDoors(t));
             data.terminals.put(e.id,e);
         }

@@ -98,11 +98,21 @@ public final class AccessDoorService {
         door.sync();return AccessBadges.Result.success(reader.readerCount()>1?"Porte liée aux "+reader.readerCount()+" lecteurs du groupe.":"Porte liée au terminal "+source+".");
     }
     public static AccessBadges.Result activate(Player player,AccessTerminalEntity terminal,ItemStack badge){
-        if(!(player instanceof ServerPlayer serverPlayer)||!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal.terminalId==null)return AccessBadges.Result.fail("Ce lecteur n'est pas configuré.");
+        if(!(player instanceof ServerPlayer serverPlayer)||!(terminal.getLevel() instanceof ServerLevel source)||terminal.encoder||terminal.bank||terminal instanceof KeypassTerminalEntity||terminal.terminalId==null)return AccessBadges.Result.fail("Ce lecteur n'est pas configuré.");
         if(!player.isAlive()||player.level()!=source||player.distanceToSqr(terminal.getBlockPos().getCenter())>64||AccessTerminalEntity.resolve(source,terminal.getBlockPos())!=terminal)return AccessBadges.Result.fail("Le terminal est hors de portée.");
         var registry=AccessRegistry.get(source.getServer());var entry=registry.find(terminal.terminalId);
         if(TerminalLinks.loadedReader(source,entry)!=terminal)return AccessBadges.Result.fail("Ce lecteur n'est plus enregistré.");
         if(!AccessBadges.canUse(badge,terminal))return AccessBadges.Result.fail(AccessBadges.remaining(badge)==0?"Ce badge est épuisé.":"Accès refusé : badge ou niveau insuffisant.");
+        return openDoors(source,registry,entry,terminal,()->AccessBadges.consume(serverPlayer,badge));
+    }
+    public static String activateKeypass(ServerPlayer player,KeypassTerminalEntity terminal,String pin){
+        if(terminal.manager()||!KeypassData.validDevice(player,terminal)||player.distanceToSqr(terminal.getBlockPos().getCenter())>64)return "link_denied";
+        var source=player.serverLevel();var registry=AccessRegistry.get(source.getServer());var entry=registry.find(terminal.terminalId);
+        if(TerminalLinks.loadedReader(source,entry)!=terminal)return "not_configured";
+        String rejected=terminal.checkPin(source,pin);if(!rejected.isEmpty())return rejected;
+        return openDoors(source,registry,entry,terminal,()->true).ok()?"granted":"no_door";
+    }
+    private static AccessBadges.Result openDoors(ServerLevel source,AccessRegistry registry,AccessRegistry.Entry entry,AccessTerminalEntity terminal,java.util.function.BooleanSupplier consume){
         List<IndustrialDoorEntity> usable=new ArrayList<>();
         for(var link:entry.doors()){
             if(!TerminalLinks.admissible(source,terminal.getBlockPos(),link))continue;
@@ -110,7 +120,7 @@ public final class AccessDoorService {
             if(door!=null&&door.accessOpenUntil<=source.getGameTime()&&!door.targetOpen)usable.add(door);
         }
         if(usable.isEmpty())return AccessBadges.Result.fail("Aucune porte liée disponible à ouvrir.");
-        if(!AccessBadges.consume(serverPlayer,badge))return AccessBadges.Result.fail("Ce badge est épuisé.");
+        if(!consume.getAsBoolean())return AccessBadges.Result.fail("Ce badge est épuisé.");
         for(var door:usable){door.accessOpenUntil=door.getLevel().getGameTime()+100;door.sync();}
         terminal.grantedUntil=source.getGameTime()+100;terminal.accessGranted=true;terminal.sync();
         // All readers of a door, including separately configured legacy readers, turn green on this tick.

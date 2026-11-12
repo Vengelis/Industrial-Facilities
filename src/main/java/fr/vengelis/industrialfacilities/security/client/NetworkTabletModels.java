@@ -16,7 +16,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.client.RenderTypeHelper;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
@@ -33,7 +32,7 @@ public final class NetworkTabletModels {
         BlockEntity entity=level.getBlockEntity(endpoint.root());
         if(entity==null||entity.isRemoved()||entity.getLevel()!=level||!entity.getBlockPos().equals(endpoint.root()))return false;
         return switch(endpoint.kind()){
-            case "reader","automation"->terminal(level,entity,endpoint,partial,pose,buffers);
+            case "reader","automation",TerminalLinks.KEYPASS_MANAGER,TerminalLinks.KEYPASS_READER->terminal(level,entity,endpoint,partial,pose,buffers);
             case "door"->entity instanceof IndustrialDoorEntity door&&endpoint.instance().equals(door.doorInstanceId)&&door(level,door,partial,pose,buffers);
             case "camera"->entity instanceof SecurityCameraEntity camera&&endpoint.instance().equals(camera.instanceId)&&camera(level,camera,partial,pose,buffers);
             // These endpoints' instance UUIDs are intentionally not synchronized to clients.
@@ -51,10 +50,7 @@ public final class NetworkTabletModels {
         for(BlockPos member:group.blocks()){staticModel(level,member,pose,buffers);var panel=level.getBlockEntity(member);if(panel!=null)blockEntity(panel,partial,pose,buffers);}return true;
     }
     private static boolean terminal(ClientLevel level,BlockEntity entity,NetworkTabletOutlines.Outline endpoint,float partial,PoseStack pose,MultiBufferSource buffers){
-        if(!(entity instanceof AccessTerminalEntity terminal)||!endpoint.instance().equals(terminal.instanceId)
-            ||AccessTerminalEntity.resolve(level,endpoint.root())!=terminal||terminal.getBlockState().getValue(AccessTerminalBlock.HALF)!=DoubleBlockHalf.LOWER)return false;
-        boolean automation=terminal instanceof CameraTerminalEntity;
-        if(automation?!endpoint.kind().equals("automation"):!endpoint.kind().equals("reader")||terminal.encoder||terminal.bank)return false;
+        if(!(entity instanceof AccessTerminalEntity terminal)||NetworkTabletOutlines.terminalAt(level,endpoint.root(),endpoint.instance(),endpoint.kind())!=terminal)return false;
         // The normal terminal BER owns the complete 1.8-block baked model, including the
         // bevels, keyboard and both screen passes. Never draw its upper block separately.
         return blockEntity(terminal,partial,pose,buffers);

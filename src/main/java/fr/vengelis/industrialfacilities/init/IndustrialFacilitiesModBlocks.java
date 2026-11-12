@@ -133,6 +133,8 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> SECURITY_CAMERA;
 	public static final DeferredBlock<Block> CAMERA_TERMINAL;
 	public static final DeferredBlock<Block> SIGNAL_EMITTER;
+	public static final DeferredBlock<Block> KEYPASS_READER;
+	public static final DeferredBlock<Block> KEYPASS_MANAGER;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -251,6 +253,8 @@ public class IndustrialFacilitiesModBlocks {
 		SECURITY_CAMERA = REGISTRY.register("security_camera", SecurityCameraBlock::new);
 		CAMERA_TERMINAL = REGISTRY.register("camera_terminal", CameraTerminalBlock::new);
 		SIGNAL_EMITTER = REGISTRY.register("signal_emitter", SignalEmitterBlock::new);
+		KEYPASS_READER = REGISTRY.register("keypass_reader", KeypassReaderBlock::new);
+		KEYPASS_MANAGER = REGISTRY.register("keypass_manager", KeypassManagerBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

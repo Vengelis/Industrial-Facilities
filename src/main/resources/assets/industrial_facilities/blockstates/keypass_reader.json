@@ -1,0 +1,73 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "south"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/keypass_reader",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "east"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/keypass_reader",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "north"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/keypass_reader",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "assembled": "false",
+        "facing": "west"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/keypass_reader",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "assembled": "true",
+        "half": "lower"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_light_anchor_empty"
+      }
+    },
+    {
+      "when": {
+        "assembled": "true",
+        "half": "upper",
+        "access_granted": "false"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_light_anchor_orange"
+      }
+    },
+    {
+      "when": {
+        "assembled": "true",
+        "half": "upper",
+        "access_granted": "true"
+      },
+      "apply": {
+        "model": "industrial_facilities:block/terminal_light_anchor_green"
+      }
+    }
+  ]
+}

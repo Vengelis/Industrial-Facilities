@@ -12,7 +12,7 @@ import net.minecraft.world.phys.AABB;
 /** Loaded endpoint envelopes only; the server snapshot remains the authority for each link. */
 public final class NetworkTabletOutlines {
     public record Outline(BlockPos root,UUID instance,String kind,AABB bounds,int color){public Outline{root=root.immutable();}}
-    private record Key(BlockPos root,UUID instance,String kind){}
+    private record Key(BlockPos root,UUID instance){}
 
     public static AABB terminalBounds(BlockPos root,Direction facing){
         // Enclose the entire 1.8-block model, including its base and projecting keyboard.
@@ -31,18 +31,32 @@ public final class NetworkTabletOutlines {
         BlockPos far=IndustrialDoorManager.at(origin,facing,size-1,size-1);
         return new AABB(origin).minmax(new AABB(far));
     }
-    private static Outline source(ClientLevel level,TerminalLinks.Link link){
-        if(!level.hasChunkAt(link.sourceRoot()))return null;
-        var terminal=AccessTerminalEntity.resolve(level,link.sourceRoot());
-        if(terminal==null||terminal.isRemoved()||!terminal.getBlockPos().equals(link.sourceRoot())||!link.sourceId().equals(terminal.instanceId))return null;
-        boolean automation=terminal instanceof CameraTerminalEntity;
-        boolean matches=automation?link.sourceKind().equals("automation"):link.sourceKind().equals("reader")&&!terminal.encoder&&!terminal.bank;
-        if(!matches)return null;
+    static AccessTerminalEntity terminalAt(ClientLevel level,BlockPos pos,UUID id,String kind){
+        if(!level.hasChunkAt(pos))return null;
+        var terminal=AccessTerminalEntity.resolve(level,pos);
+        if(terminal==null||terminal.isRemoved()||!terminal.getBlockPos().equals(pos)||!id.equals(terminal.instanceId))return null;
+        boolean matches=switch(kind){
+            case "reader"->!terminal.encoder&&!terminal.bank;
+            case "automation"->terminal instanceof CameraTerminalEntity;
+            case TerminalLinks.KEYPASS_MANAGER->terminal instanceof KeypassTerminalEntity keypass&&keypass.manager();
+            case TerminalLinks.KEYPASS_READER->terminal instanceof KeypassTerminalEntity keypass&&!keypass.manager();
+            default->false;
+        };
+        return matches?terminal:null;
+    }
+    private static Outline terminalOutline(AccessTerminalEntity terminal,BlockPos pos,UUID id,String kind,int color){
+        if(terminal==null)return null;
         var facing=terminal.getBlockState().getValue(AccessTerminalBlock.FACING);
-        return new Outline(link.sourceRoot(),link.sourceId(),link.sourceKind(),terminalBounds(link.sourceRoot(),facing),automation?0xBE94F0:0x62DDE7);
+        return new Outline(pos,id,kind,terminalBounds(pos,facing),color);
+    }
+    private static Outline source(ClientLevel level,TerminalLinks.Link link){
+        var pos=link.sourceRoot();var id=link.sourceId();String kind=link.sourceKind();
+        return terminalOutline(terminalAt(level,pos,id,kind),pos,id,kind,NetworkTabletClient.sourceColor(kind));
     }
     private static Outline target(ClientLevel level,TerminalLinks.Link link){
         BlockPos pos=link.targetRoot();if(!level.hasChunkAt(pos))return null;
+        if(link.targetKind().equals(TerminalLinks.KEYPASS_READER))
+            return terminalOutline(terminalAt(level,pos,link.targetId(),link.targetKind()),pos,link.targetId(),link.targetKind(),NetworkTabletClient.colorFor(link.sourceKind(),link.targetKind()));
         var entity=level.getBlockEntity(pos);if(entity==null||entity.isRemoved())return null;
         AABB box;
         if(link.targetKind().equals("door")){
@@ -73,9 +87,13 @@ public final class NetworkTabletOutlines {
         for(var link:links){
             if(++count>TerminalLinks.MAX_LINKS)break;
             Outline source=source(level,link);if(source==null)continue;
-            outlines.putIfAbsent(new Key(source.root(),source.instance(),source.kind()),source);
+            outlines.putIfAbsent(new Key(source.root(),source.instance()),source);
             Outline target=target(level,link);
-            if(target!=null)outlines.putIfAbsent(new Key(target.root(),target.instance(),target.kind()),target);
+            if(target!=null){
+                var key=new Key(target.root(),target.instance());
+                // A Keypass reader may also lead to a door. Draw its real model only once.
+                if(target.kind().equals(TerminalLinks.KEYPASS_READER))outlines.put(key,target);else outlines.putIfAbsent(key,target);
+            }
         }
         return List.copyOf(outlines.values());
     }

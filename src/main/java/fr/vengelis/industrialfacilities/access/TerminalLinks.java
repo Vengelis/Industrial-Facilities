@@ -13,10 +13,21 @@ import net.minecraft.world.entity.player.Player;
 /** Shared limits and a server-owned, loaded-only view of the current player's network. */
 public final class TerminalLinks {
     public static final int MAX_DISTANCE=64,SOURCE_RADIUS=96,TARGET_RADIUS=128,MAX_LINKS=512,MAX_SOURCES=128,MAX_SCANNED_BLOCK_ENTITIES=32768;
-    public record Link(BlockPos sourceRoot,UUID sourceId,String sourceKind,BlockPos targetRoot,UUID targetId,String targetKind) {
-        public Link {sourceRoot=sourceRoot.immutable();targetRoot=targetRoot.immutable();}
+    public static final String KEYPASS_MANAGER="keypass_manager",KEYPASS_READER="keypass_reader";
+    private static final Set<String> AUTOMATION_TARGETS=Set.of("door","camera","alarm","emitter","panel");
+    public record Link(BlockPos sourceRoot,UUID sourceId,String sourceKind,BlockPos targetRoot,UUID targetId,String targetKind,String sourceName,String targetName) {
+        public Link(BlockPos sourceRoot,UUID sourceId,String sourceKind,BlockPos targetRoot,UUID targetId,String targetKind){this(sourceRoot,sourceId,sourceKind,targetRoot,targetId,targetKind,"","");}
+        public Link {sourceRoot=sourceRoot.immutable();targetRoot=targetRoot.immutable();Objects.requireNonNull(sourceName);Objects.requireNonNull(targetName);}
+        public boolean validNames(){return validName(sourceName,"reader".equals(sourceKind))&&validName(targetName,KEYPASS_READER.equals(targetKind));}
+        private static boolean validName(String name,boolean permitted){return name.isEmpty()||permitted&&name.equals(KeypassData.cleanReaderName(name));}
     }
     public record Snapshot(List<Link> links,boolean truncated) {public Snapshot {links=List.copyOf(links);}}
+    public static boolean validKinds(String source,String target){return switch(source){
+        case "reader"->target.equals("door");
+        case "automation"->AUTOMATION_TARGETS.contains(target);
+        case KEYPASS_MANAGER->target.equals(KEYPASS_READER);
+        default->false;
+    };}
     public static boolean inRange(BlockPos source,BlockPos target){return source.distSqr(target)<=(double)MAX_DISTANCE*MAX_DISTANCE;}
     /** Nonblocking: a ticket alone is not proof that full block data is already available. */
     public static boolean loaded(ServerLevel level,BlockPos pos){return level.getChunkSource().getChunkNow(pos.getX()>>4,pos.getZ()>>4)!=null;}
@@ -35,6 +46,11 @@ public final class TerminalLinks {
         return door!=null&&!door.isRemoved()&&door.getBlockPos().equals(link.position())&&link.instance().equals(door.doorInstanceId)?door:null;
     }
     private static boolean near(Player player,BlockPos pos,int radius){return player.distanceToSqr(pos.getCenter())<=(double)radius*radius;}
+    private static boolean keypassTarget(ServerLevel level,UUID owner,KeypassData.Reader link){
+        return loaded(level,link.position())&&AccessTerminalEntity.resolve(level,link.position()) instanceof KeypassTerminalEntity reader
+            &&!reader.isRemoved()&&!reader.manager()&&reader.getBlockPos().equals(link.position())
+            &&link.id().equals(reader.instanceId)&&owner.equals(reader.creator);
+    }
     private static boolean automationTarget(ServerLevel level,UUID owner,CameraTerminalEntity.LinkView link){
         if(!loaded(level,link.pos()))return false;var target=level.getBlockEntity(link.pos());if(target==null||target.isRemoved())return false;
         return switch(link.kind()){
@@ -57,7 +73,7 @@ public final class TerminalLinks {
             for(var entity:chunk.getBlockEntities().values()){
                 if(++inspected>MAX_SCANNED_BLOCK_ENTITIES){truncated=true;break scan;}
                 if(entity instanceof AccessTerminalEntity terminal&&!terminal.isRemoved()&&terminal.isOwner(player)&&near(player,terminal.getBlockPos(),SOURCE_RADIUS)
-                    &&(terminal instanceof CameraTerminalEntity||!terminal.encoder&&!terminal.bank))candidates.add(terminal);
+                    &&(terminal instanceof CameraTerminalEntity||terminal instanceof KeypassTerminalEntity||!terminal.encoder&&!terminal.bank))candidates.add(terminal);
             }
         }
         candidates.sort(Comparator.comparingDouble((AccessTerminalEntity terminal)->player.distanceToSqr(terminal.getBlockPos().getCenter())).thenComparingLong(terminal->terminal.getBlockPos().asLong()));
@@ -71,14 +87,21 @@ public final class TerminalLinks {
                     if(result.size()>=MAX_LINKS){truncated=true;break;}
                     result.add(new Link(terminal.getBlockPos(),terminal.instanceId,"automation",link.pos(),link.id(),link.kind()));
                 }
+            }else if(terminal instanceof KeypassTerminalEntity manager&&manager.manager()){
+                for(var link:KeypassData.get(level).readers(manager)){
+                    if(!inRange(manager.getBlockPos(),link.position())||!near(player,link.position(),TARGET_RADIUS)||!keypassTarget(level,player.getUUID(),link))continue;
+                    if(result.size()>=MAX_LINKS){truncated=true;break;}
+                    result.add(new Link(manager.getBlockPos(),manager.instanceId,KEYPASS_MANAGER,link.position(),link.id(),KEYPASS_READER,"",link.name()));
+                }
             }else{
                 var entry=terminal.terminalId==null?null:registry.find(terminal.terminalId);if(loadedReader(level,entry)!=terminal)continue;int count=0;
+                String name=terminal instanceof KeypassTerminalEntity reader?KeypassData.get(level).readerName(reader):"";
                 for(var link:entry.doors()){
                     if(++count>64){truncated=true;break;}
                     if(!admissible(level,terminal.getBlockPos(),link)||!near(player,link.position(),TARGET_RADIUS))continue;
                     var door=loadedDoor(level,link);if(door==null||!AccessDoorService.canConfigureOwner(player.getUUID(),door))continue;
                     if(result.size()>=MAX_LINKS){truncated=true;break;}
-                    result.add(new Link(terminal.getBlockPos(),terminal.instanceId,"reader",door.getBlockPos(),door.doorInstanceId,"door"));
+                    result.add(new Link(terminal.getBlockPos(),terminal.instanceId,"reader",door.getBlockPos(),door.doorInstanceId,"door",name,""));
                 }
             }
             if(result.size()>=MAX_LINKS){truncated=true;break;}

@@ -1,0 +1,16 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "body": "terminal_body_32",
+        "trim": "terminal_trim_32",
+        "dark": "terminal_dark_32",
+        "key": "terminal_key_32",
+        "metal": "terminal_metal_32",
+        "light": "terminal_light_32",
+        "particle": "terminal_body_32",
+        "screen": "keypass_manager_screen_32"
+      }
+    }
+  }
+}

@@ -27,17 +27,29 @@ public final class AccessLinkEvents {
             player.displayClientMessage(Component.translatable(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();return;
         }
         var result=accessClick(player,event.getPos(),stack);
-        player.displayClientMessage(Component.literal(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();
+        player.displayClientMessage(result.message().startsWith("gui.industrial_facilities.keypass.")?Component.translatable(result.message()):Component.literal(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();
     }
     static AccessBadges.Result accessClick(ServerPlayer player,BlockPos pos,ItemStack stack){
         var terminal=AccessTerminalEntity.resolve(player.level(),pos);
         CompoundTag tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();
         if(terminal!=null){
+            if(terminal instanceof KeypassTerminalEntity kp&&kp.manager()){
+                if(!kp.isOwner(player)||!KeypassData.validDevice(player,kp))return keypass("link_denied");
+                CustomData.update(DataComponents.CUSTOM_DATA,stack,data->{data.remove("AccessReader");data.putUUID("KeypassManager",kp.instanceId);data.putLong("KeypassManagerPos",kp.getBlockPos().asLong());data.putString("KeypassDimension",player.level().dimension().location().toString());});
+                return keypass("manager_selected");
+            }
             if(terminal.encoder||terminal.bank)return AccessBadges.Result.fail("La carte de liaison se configure sur un terminal lecteur.");
             if(!terminal.isOwner(player))return AccessBadges.Result.fail("Seul le créateur du terminal peut le lier.");
+            if(player.isShiftKeyDown()&&tag.hasUUID("KeypassManager")){
+                if(!(terminal instanceof KeypassTerminalEntity reader)||!tag.getString("KeypassDimension").equals(player.level().dimension().location().toString()))return keypass("link_denied");
+                BlockPos managerPos=BlockPos.of(tag.getLong("KeypassManagerPos"));
+                if(!TerminalLinks.loaded(player.serverLevel(),managerPos)||!(AccessTerminalEntity.resolve(player.level(),managerPos) instanceof KeypassTerminalEntity manager)
+                    ||!manager.instanceId.equals(tag.getUUID("KeypassManager")))return keypass("link_denied");
+                return keypass(KeypassData.get(player.serverLevel()).link(player,manager,reader));
+            }
             if(player.isShiftKeyDown())return tag.hasUUID("AccessReader")?AccessDoorService.linkReaders(player,tag.getUUID("AccessReader"),terminal)
                 :AccessBadges.Result.fail("Sélectionne d'abord un lecteur avec un clic gauche sans Maj.");
-            UUID id=terminal.ensureCode();CustomData.update(DataComponents.CUSTOM_DATA,stack,data->data.putUUID("AccessReader",id));
+            UUID id=terminal.ensureCode();CustomData.update(DataComponents.CUSTOM_DATA,stack,data->{data.remove("KeypassManager");data.remove("KeypassManagerPos");data.remove("KeypassDimension");data.putUUID("AccessReader",id);});
             return AccessBadges.Result.success("Lecteur sélectionné. Clic gauche sur une porte, ou Maj + clic gauche sur un autre lecteur.");
         }
         var door=AccessDoorService.resolveDoor(player.level(),pos);
@@ -45,5 +57,6 @@ public final class AccessLinkEvents {
             :!tag.hasUUID("AccessReader")?AccessBadges.Result.fail("Sélectionnez d'abord un terminal lecteur avec la carte.")
             :AccessDoorService.link(player,tag.getUUID("AccessReader"),door);
     }
+    private static AccessBadges.Result keypass(String suffix){String key="gui.industrial_facilities.keypass."+suffix;return suffix.equals("linked")||suffix.equals("manager_selected")?AccessBadges.Result.success(key):AccessBadges.Result.fail(key);}
     private AccessLinkEvents(){}
 }

@@ -139,5 +139,7 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.SIGNAL_EMITTER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModItems.NETWORK_TABLET.get());
+				tabData.accept(IndustrialFacilitiesModBlocks.KEYPASS_READER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.KEYPASS_MANAGER.get().asItem());
 			}).build());
 }

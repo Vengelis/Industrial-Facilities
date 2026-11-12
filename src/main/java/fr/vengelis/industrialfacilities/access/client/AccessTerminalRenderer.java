@@ -44,7 +44,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     }
     @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();INDICATOR_QUADS.clear();}
     @SubscribeEvent public static void itemColours(RegisterColorHandlersEvent.Item event){
-        event.register((stack,index)->0xff000000|colour(index,1,false),IndustrialFacilitiesModItems.TERMINAL_READER.get(),IndustrialFacilitiesModItems.TERMINAL_ENCODER.get(),IndustrialFacilitiesModItems.TERMINAL_BADGE_BANK.get());
+        event.register((stack,index)->0xff000000|colour(index,1,false),IndustrialFacilitiesModItems.TERMINAL_READER.get(),IndustrialFacilitiesModItems.TERMINAL_ENCODER.get(),IndustrialFacilitiesModItems.TERMINAL_BADGE_BANK.get(),IndustrialFacilitiesModItems.KEYPASS_READER.get(),IndustrialFacilitiesModItems.KEYPASS_MANAGER.get());
     }
     public static int colour(int index,int level,boolean granted){
         if(index>=100&&index<105)return index-100<level?0xf2f5f8:0x343841;
@@ -56,7 +56,8 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     }
     /** Remap only the screen's sprite; every bevel, vertex and normal stays intact. */
     public static BakedQuad screenQuad(BakedQuad quad,boolean granted){
-        if(!granted||!quad.getSprite().contents().name().getPath().equals("block/terminal_reader_screen_32"))return quad;
+        String sprite=quad.getSprite().contents().name().getPath();
+        if(!granted||!sprite.equals("block/terminal_reader_screen_32")&&!sprite.equals("block/keypass_reader_screen_32"))return quad;
         return remap(quad,OPEN_SCREEN,OPEN_QUADS);
     }
     private static BakedQuad remap(BakedQuad quad,ResourceLocation target,Map<BakedQuad,BakedQuad> cache){
@@ -75,7 +76,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     }
     public static boolean isEmissive(BakedQuad quad,int level){
         String sprite=quad.getSprite().contents().name().getPath();int index=quad.getTintIndex();
-        return sprite.contains("terminal_reader_screen")||sprite.contains("terminal_encoder_screen")||sprite.contains("terminal_badge_bank_screen")||sprite.contains("camera_terminal_screen")
+        return sprite.contains("terminal_reader_screen")||sprite.contains("terminal_encoder_screen")||sprite.contains("terminal_badge_bank_screen")||sprite.contains("camera_terminal_screen")||sprite.contains("keypass_reader_screen")||sprite.contains("keypass_manager_screen")
             ||index==200||(index>=100&&index<100+Math.clamp(level,1,5));
     }
     /** Native glowing-eyes lane is recognized by Iris shader packs. The normal

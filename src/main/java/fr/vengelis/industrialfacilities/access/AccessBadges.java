@@ -35,7 +35,7 @@ public final class AccessBadges {
         Result editable=editable(player,stack);if(!editable.ok())return editable;
         UUID id;try{id=UUID.fromString(code.trim());}catch(IllegalArgumentException e){return Result.fail("Code de terminal invalide.");}
         AccessRegistry.Entry terminal=AccessRegistry.get(((ServerPlayer)player).server).find(id);
-        if(terminal==null||!terminal.owner.equals(player.getUUID()))return Result.fail("Vous devez être le créateur du terminal correspondant à ce code.");
+        if(terminal==null||terminal.keypass||!terminal.owner.equals(player.getUUID()))return Result.fail("Ce code doit correspondre à un de vos lecteurs à badge.");
         Result prepared=prepareEdit(player,stack);if(!prepared.ok())return prepared;
         List<UUID> codes=new ArrayList<>(codes(stack));
         if(add){if(codes.contains(id))return Result.fail("Ce code figure déjà sur le badge.");if(codes.size()>=MAX_CODES)return Result.fail("Le badge contient déjà 64 codes.");codes.add(id);}
@@ -46,7 +46,7 @@ public final class AccessBadges {
     public static Result encodeMaster(Player player,ItemStack stack,int level){
         Result editable=editable(player,stack);if(!editable.ok())return editable;
         if(level<1||level>5)return Result.fail("Le niveau doit être compris entre 1 et 5.");
-        boolean authorized=AccessRegistry.get(((ServerPlayer)player).server).entries().stream().anyMatch(e->e.owner.equals(player.getUUID())&&e.level>=level);
+        boolean authorized=AccessRegistry.get(((ServerPlayer)player).server).entries().stream().anyMatch(e->!e.keypass&&e.owner.equals(player.getUUID())&&e.level>=level);
         if(!authorized)return Result.fail("Créez et configurez un lecteur de ce niveau avant d'encoder un passe-partout.");
         Result prepared=prepareEdit(player,stack);if(!prepared.ok())return prepared;
         CompoundTag data=issued(player,stack);data.remove("Codes");data.putInt("MasterLevel",level);write(stack,data);archiveEdit(player,stack);return Result.success("Passe-partout niveau "+level+" : les anciens codes ont été remplacés.");
@@ -87,7 +87,7 @@ public final class AccessBadges {
     }
     public static Result clear(Player player,ItemStack stack){Result editable=editable(player,stack);if(!editable.ok())return editable;BadgeBankData.get(((ServerPlayer)player).server).clearIdentity((ServerPlayer)player,stack);CustomData.update(DataComponents.CUSTOM_DATA,stack,tag->tag.remove(ROOT));return Result.success("Badge effacé.");}
     public static boolean canUse(ItemStack stack,AccessTerminalEntity terminal){
-        if(!isBadge(stack)||stack.getCount()!=1||terminal.encoder||terminal.bank||terminal.terminalId==null||terminal.creator==null)return false;
+        if(!isBadge(stack)||stack.getCount()!=1||terminal.encoder||terminal.bank||terminal instanceof KeypassTerminalEntity||terminal.terminalId==null||terminal.creator==null)return false;
         if(terminal.getLevel() instanceof net.minecraft.server.level.ServerLevel level&&BadgeBankData.get(level.getServer()).current(stack).isEmpty())return false;
         if(remaining(stack)==0)return false;
         CompoundTag data=read(stack);if(!data.hasUUID("Issuer"))return false;
