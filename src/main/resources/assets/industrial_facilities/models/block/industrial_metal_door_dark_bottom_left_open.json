@@ -1,0 +1,76 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "#bottom",
+    "bottom": "industrial_facilities:block/industrial_metal_door_dark_bottom",
+    "edge_left_bottom": "industrial_facilities:block/industrial_metal_door_dark_edge_left_bottom",
+    "edge_right_bottom": "industrial_facilities:block/industrial_metal_door_dark_edge_right_bottom",
+    "edge_bottom": "industrial_facilities:block/industrial_metal_door_dark_edge_bottom"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        3,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#edge_bottom",
+          "cullface": "down",
+          "rotation": 90
+        },
+        "north": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#edge_right_bottom",
+          "cullface": "north"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#edge_left_bottom",
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#bottom",
+          "cullface": "west"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bottom"
+        }
+      }
+    }
+  ]
+}

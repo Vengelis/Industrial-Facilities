@@ -584,5 +584,12 @@
   "gui.industrial_facilities.camera.zone_type": "Exact type",
   "gui.industrial_facilities.camera.zone_check": "In zone · %s [%s]",
   "gui.industrial_facilities.camera.zone_type_hint": "Enter an entity ID such as minecraft:zombie.",
-  "gui.industrial_facilities.camera.invalid_zone_filter": "Choose a category or enter a valid entity type ID."
+  "gui.industrial_facilities.camera.invalid_zone_filter": "Choose a category or enter a valid entity type ID.",
+  "block.industrial_facilities.industrial_metal_door": "Industrial Metal Door",
+  "block.industrial_facilities.industrial_metal_door_dark": "Dark Metal Door",
+  "block.industrial_facilities.industrial_metal_door_restricted": "RESTRICTED Metal Door",
+  "block.industrial_facilities.industrial_metal_door_glass": "Glazed Metal Door",
+  "block.industrial_facilities.industrial_metal_door_rusty": "Rusty Metal Door",
+  "block.industrial_facilities.industrial_metal_door_safe": "SAFE ZONE Metal Door",
+  "block.industrial_facilities.industrial_metal_door_radiation": "Radioactive Metal Door"
 }

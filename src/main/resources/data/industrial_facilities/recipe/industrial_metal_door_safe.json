@@ -1,0 +1,18 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "industrial_facilities:industrial_metal_door_dark",
+      "count": 1
+    },
+    {
+      "item": "minecraft:green_dye",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:industrial_metal_door_safe",
+    "count": 1
+  }
+}

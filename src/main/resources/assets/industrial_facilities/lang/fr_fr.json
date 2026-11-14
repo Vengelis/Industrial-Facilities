@@ -584,5 +584,12 @@
   "gui.industrial_facilities.camera.zone_type": "Type exact",
   "gui.industrial_facilities.camera.zone_check": "Dans la zone · %s [%s]",
   "gui.industrial_facilities.camera.zone_type_hint": "Saisis un identifiant d’entité, par exemple minecraft:zombie.",
-  "gui.industrial_facilities.camera.invalid_zone_filter": "Choisis une catégorie ou saisis un identifiant de type d’entité valide."
+  "gui.industrial_facilities.camera.invalid_zone_filter": "Choisis une catégorie ou saisis un identifiant de type d’entité valide.",
+  "block.industrial_facilities.industrial_metal_door": "Porte métallique industrielle",
+  "block.industrial_facilities.industrial_metal_door_dark": "Porte métallique sombre",
+  "block.industrial_facilities.industrial_metal_door_restricted": "Porte métallique RESTRICTED",
+  "block.industrial_facilities.industrial_metal_door_glass": "Porte métallique vitrée",
+  "block.industrial_facilities.industrial_metal_door_rusty": "Porte métallique rouillée",
+  "block.industrial_facilities.industrial_metal_door_safe": "Porte métallique SAFE ZONE",
+  "block.industrial_facilities.industrial_metal_door_radiation": "Porte métallique radioactive"
 }

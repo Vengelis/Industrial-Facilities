@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "industrial_facilities:industrial_metal_door_restricted",
+    "industrial_facilities:industrial_metal_door_glass",
+    "industrial_facilities:industrial_metal_door_radiation",
+    "industrial_facilities:industrial_metal_door_dark",
+    "industrial_facilities:industrial_metal_door_safe",
+    "industrial_facilities:industrial_metal_door_rusty",
+    "industrial_facilities:industrial_metal_door"
+  ]
+}
