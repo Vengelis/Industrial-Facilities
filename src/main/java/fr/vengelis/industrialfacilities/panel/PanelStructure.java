@@ -1,70 +1,145 @@
 package fr.vengelis.industrialfacilities.panel;
 
 import fr.vengelis.industrialfacilities.block.LuminousPanelBlock;
-import net.minecraft.core.*;
+import fr.vengelis.industrialfacilities.block.LuminousPanelSurfaceBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import java.util.*;
+import net.minecraft.world.level.block.state.BlockState;
 
-/** Bounded flood fill, always restricted to a single plane and orientation; never loads chunks. */
-public record PanelStructure(BlockPos origin, Direction facing, Direction right, Direction up, int width, int height, List<BlockPos> blocks, boolean valid) {
-    public static final int MAX_WIDTH = 7, MAX_HEIGHT = 3;
-    public int column(BlockPos p) { return coordinate(p, right()) - coordinate(origin, right()); }
-    public int row(BlockPos p) { return coordinate(p,up)-coordinate(origin,up); }
-    public static Direction[] directions(Direction f) { return new Direction[]{Direction.UP, Direction.DOWN, f.getClockWise(), f.getCounterClockWise()}; }
-    public static Direction[] directions(net.minecraft.world.level.block.state.BlockState s) { return PanelBasis.of(s).neighbors(); }
-    public static int coordinate(BlockPos p, Direction d) { return p.getX()*d.getStepX() + p.getY()*d.getStepY() + p.getZ()*d.getStepZ(); }
-    public static boolean matches(Level l, BlockPos p, Direction f) {
-        return l.hasChunkAt(p) && l.getBlockState(p).getBlock() instanceof LuminousPanelBlock
-            && l.getBlockState(p).getValue(LuminousPanelBlock.FACING) == f;
+import java.util.ArrayDeque;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+/** Groupe de panneaux contigus d'un même type et dans un même plan. */
+public record PanelStructure(BlockPos origin, Direction facing, Direction right, Direction up,
+                             int width, int height, List<BlockPos> blocks, boolean valid) {
+    public static final int MAX_WIDTH = 7;
+    public static final int MAX_HEIGHT = 3;
+
+    // Ces bits sont lus par les modèles de bloc dans les ressources.
+    private static final int TOP_EDGE = 1;
+    private static final int BOTTOM_EDGE = 2;
+    private static final int LEFT_EDGE = 4;
+    private static final int RIGHT_EDGE = 8;
+
+    public int column(BlockPos pos) {
+        return coordinate(pos, right) - coordinate(origin, right);
     }
-    public static boolean matches(Level l, BlockPos p, net.minecraft.world.level.block.state.BlockState template) {
-        if (!matches(l,p,template.getValue(LuminousPanelBlock.FACING)) || !l.getBlockState(p).is(template.getBlock())) return false;
-        return !(template.getBlock() instanceof fr.vengelis.industrialfacilities.block.LuminousPanelSurfaceBlock)
-            || l.getBlockState(p).getValue(fr.vengelis.industrialfacilities.block.LuminousPanelSurfaceBlock.CEILING)
-                == template.getValue(fr.vengelis.industrialfacilities.block.LuminousPanelSurfaceBlock.CEILING);
+
+    public int row(BlockPos pos) {
+        return coordinate(pos, up) - coordinate(origin, up);
     }
-    public static PanelStructure find(Level l, BlockPos start) {
-        var state = l.getBlockState(start);
-        if (!(state.getBlock() instanceof LuminousPanelBlock))
+
+    public static Direction[] directions(Direction facing) {
+        return new Direction[]{Direction.UP, Direction.DOWN, facing.getClockWise(), facing.getCounterClockWise()};
+    }
+
+    public static Direction[] directions(BlockState state) {
+        return PanelBasis.of(state).neighbors();
+    }
+
+    /** Projette une position du monde sur un axe du panneau, y compris au sol ou au plafond. */
+    public static int coordinate(BlockPos pos, Direction axis) {
+        return pos.getX() * axis.getStepX() + pos.getY() * axis.getStepY() + pos.getZ() * axis.getStepZ();
+    }
+
+    public static boolean matches(Level level, BlockPos pos, Direction facing) {
+        return level.hasChunkAt(pos) && level.getBlockState(pos).getBlock() instanceof LuminousPanelBlock
+            && level.getBlockState(pos).getValue(LuminousPanelBlock.FACING) == facing;
+    }
+
+    public static boolean matches(Level level, BlockPos pos, BlockState template) {
+        if (!matches(level, pos, template.getValue(LuminousPanelBlock.FACING))) {
+            return false;
+        }
+        BlockState candidate = level.getBlockState(pos);
+        if (!candidate.is(template.getBlock())) {
+            return false;
+        }
+        return !(template.getBlock() instanceof LuminousPanelSurfaceBlock)
+            || candidate.getValue(LuminousPanelSurfaceBlock.CEILING)
+                == template.getValue(LuminousPanelSurfaceBlock.CEILING);
+    }
+
+    public static PanelStructure find(Level level, BlockPos start) {
+        BlockState state = level.getBlockState(start);
+        if (!(state.getBlock() instanceof LuminousPanelBlock)) {
             return new PanelStructure(start, Direction.NORTH, Direction.WEST, Direction.UP, 1, 1, List.of(), false);
-        var basis=PanelBasis.of(state);
-        Direction right=basis.right(), up=basis.up();
+        }
+
+        PanelBasis basis = PanelBasis.of(state);
+        Direction right = basis.right();
+        Direction up = basis.up();
+        BlockPos first = start.immutable();
         Set<BlockPos> seen = new LinkedHashSet<>();
-        var pending = new ArrayDeque<BlockPos>(); seen.add(start.immutable()); pending.add(start.immutable());
-        int min = coordinate(start, right), max = min, bottom = coordinate(start,up), top = bottom;
+        ArrayDeque<BlockPos> pending = new ArrayDeque<>();
+        seen.add(first);
+        pending.add(first);
+
+        int startColumn = coordinate(start, right);
+        int startRow = coordinate(start, up);
+        int left = startColumn;
+        int rightmost = startColumn;
+        int bottom = startRow;
+        int top = startRow;
         boolean overflow = false;
+
+        // Parcours en largeur limité à la surface maximale. matches ignore les chunks déchargés.
+        Direction[] neighbors = basis.neighbors();
         while (!pending.isEmpty() && !overflow) {
-            BlockPos p = pending.remove();
-            min = Math.min(min, coordinate(p, right)); max = Math.max(max, coordinate(p, right));
-            bottom = Math.min(bottom, coordinate(p,up)); top = Math.max(top, coordinate(p,up));
-            for (Direction d : directions(state)) {
-                BlockPos n = p.relative(d);
-                if (matches(l, n, state) && !seen.contains(n)) {
-                    if (seen.size() == MAX_WIDTH*MAX_HEIGHT) { overflow = true; break; }
-                    seen.add(n); pending.add(n);
+            BlockPos pos = pending.remove();
+            int column = coordinate(pos, right);
+            int row = coordinate(pos, up);
+            left = Math.min(left, column);
+            rightmost = Math.max(rightmost, column);
+            bottom = Math.min(bottom, row);
+            top = Math.max(top, row);
+            for (Direction direction : neighbors) {
+                BlockPos neighbor = pos.relative(direction);
+                if (!matches(level, neighbor, state) || seen.contains(neighbor)) {
+                    continue;
                 }
+                if (seen.size() == MAX_WIDTH * MAX_HEIGHT) {
+                    overflow = true;
+                    break;
+                }
+                seen.add(neighbor);
+                pending.add(neighbor);
             }
         }
-        int w = max-min+1, h = top-bottom+1;
-        BlockPos origin = start.relative(right, min-coordinate(start, right)).relative(up,bottom-coordinate(start,up));
-        boolean valid = !overflow && w <= MAX_WIDTH && h <= MAX_HEIGHT && seen.size() == w*h;
-        return new PanelStructure(origin, basis.normal(), right, up, w, h, List.copyOf(seen), valid);
+
+        int width = rightmost - left + 1;
+        int height = top - bottom + 1;
+        BlockPos origin = start.relative(right, left - startColumn).relative(up, bottom - startRow);
+        // Un rectangle doit contenir autant de panneaux que de cases. Son coin sert de contrôleur.
+        boolean valid = !overflow && width <= MAX_WIDTH && height <= MAX_HEIGHT && seen.size() == width * height;
+        return new PanelStructure(origin, basis.normal(), right, up, width, height, List.copyOf(seen), valid);
     }
-    public int edges(BlockPos p) {
-        if (!valid) return 15;
-        return (row(p) == height-1 ? 1 : 0) | (row(p) == 0 ? 2 : 0)
-            | (column(p) == 0 ? 4 : 0) | (column(p) == width-1 ? 8 : 0);
+
+    public int edges(BlockPos pos) {
+        if (!valid) {
+            return TOP_EDGE | BOTTOM_EDGE | LEFT_EDGE | RIGHT_EDGE;
+        }
+        int row = row(pos);
+        int column = column(pos);
+        return (row == height - 1 ? TOP_EDGE : 0) | (row == 0 ? BOTTOM_EDGE : 0)
+            | (column == 0 ? LEFT_EDGE : 0) | (column == width - 1 ? RIGHT_EDGE : 0);
     }
-    public static void refresh(Level l, BlockPos p) {
-        PanelStructure group = find(l, p);
+
+    public static void refresh(Level level, BlockPos pos) {
+        PanelStructure group = find(level, pos);
         for (BlockPos member : group.blocks) {
-            var s = l.getBlockState(member);
-            int edge = group.edges(member);
-            if (s.getValue(LuminousPanelBlock.EDGES) != edge)
-                l.setBlock(member, s.setValue(LuminousPanelBlock.EDGES, edge), 3);
+            BlockState state = level.getBlockState(member);
+            int edgeMask = group.edges(member);
+            if (state.getValue(LuminousPanelBlock.EDGES) != edgeMask) {
+                level.setBlock(member, state.setValue(LuminousPanelBlock.EDGES, edgeMask), 3);
+            }
         }
     }
-    public PanelBlockEntity controller(Level l) {
-        return l.getBlockEntity(origin) instanceof PanelBlockEntity be ? be : null;
+
+    public PanelBlockEntity controller(Level level) {
+        return level.getBlockEntity(origin) instanceof PanelBlockEntity entity ? entity : null;
     }
 }

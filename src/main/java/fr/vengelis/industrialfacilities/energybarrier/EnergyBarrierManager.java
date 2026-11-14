@@ -1,109 +1,239 @@
 package fr.vengelis.industrialfacilities.energybarrier;
 
-import fr.vengelis.industrialfacilities.block.*;
+import fr.vengelis.industrialfacilities.block.EnergyBarrierBaseBlock;
+import fr.vengelis.industrialfacilities.block.EnergyBarrierFieldBlock;
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Bounded, stateless reconstruction: no global world cache and no forced chunk loads. */
+/** Reconstruit le cadre à partir des blocs chargés, sans conserver d'état global par monde. */
 public final class EnergyBarrierManager {
-    public static final int MAX_WIDTH=5,MAX_HEIGHT=4;
-    public record Structure(BlockPos anchor,Direction along,int width,int height) {
-        public BlockPos at(int column,int row){return anchor.relative(along,column).above(row);}
-        public Direction.Axis axis(){return along.getAxis();}
-        public BlockState field(int column,int row){return IndustrialFacilitiesModBlocks.ENERGY_BARRIER_FIELD.get().defaultBlockState()
-            .setValue(EnergyBarrierFieldBlock.AXIS,axis()).setValue(EnergyBarrierFieldBlock.COLUMN,column).setValue(EnergyBarrierFieldBlock.ROW,row);}
-    }
-    private static boolean base(BlockState s){return s.is(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_BASE.get());}
-    private static boolean pillar(BlockState s){return s.is(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_PILLAR.get());}
-    private static boolean field(BlockState s){return s.is(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_FIELD.get());}
-    public static BlockPos owner(BlockPos p,BlockState state){
-        Direction along=state.getValue(EnergyBarrierFieldBlock.AXIS)==Direction.Axis.X?Direction.EAST:Direction.SOUTH;
-        return p.below(state.getValue(EnergyBarrierFieldBlock.ROW)).relative(along,-state.getValue(EnergyBarrierFieldBlock.COLUMN));
-    }
-    /** Conservative load check, including one extra column level for rejecting >4-high frames. */
-    private static boolean loaded(ServerLevel level,BlockPos p,Direction along){
-        for(int x=-6;x<=6;x++)for(int y=0;y<=5;y++)if(!level.hasChunkAt(p.relative(along,x).above(y)))return false;
-        return true;
-    }
-    public static Structure detect(ServerLevel level,BlockPos p,Direction along){
-        if(!loaded(level,p,along)||!base(level.getBlockState(p)))return null;
-        BlockPos left=p;
-        int count=1;
-        while(base(level.getBlockState(left.relative(along.getOpposite())))){
-            if(++count>MAX_WIDTH)return null;
-            left=left.relative(along.getOpposite());
+    public static final int MAX_WIDTH = 5;
+    public static final int MAX_HEIGHT = 4;
+    private static final Direction[] SCAN_DIRECTIONS = {Direction.EAST, Direction.SOUTH};
+
+    private EnergyBarrierManager() {}
+
+    // L'ancrage est la première base intérieure. La ligne 0 désigne le sol du cadre.
+    public record Structure(BlockPos anchor, Direction along, int width, int height) {
+        public BlockPos at(int column, int row) {
+            return anchor.relative(along, column).above(row);
         }
-        if(!pillar(level.getBlockState(left.relative(along.getOpposite()))))return null;
-        int width=0;
-        while(base(level.getBlockState(left.relative(along,width)))){
-            if(++width>MAX_WIDTH)return null;
+
+        public Direction.Axis axis() {
+            return along.getAxis();
         }
-        BlockPos l=left.relative(along.getOpposite()),r=left.relative(along,width);
-        if(!pillar(level.getBlockState(r)))return null;
-        int a=0,b=0;
-        while(a<=MAX_HEIGHT&&pillar(level.getBlockState(l.above(a+1))))a++;
-        while(b<=MAX_HEIGHT&&pillar(level.getBlockState(r.above(b+1))))b++;
-        if(a<1||a>MAX_HEIGHT||a!=b||left.getY()+a>=level.getMaxBuildHeight())return null;
-        return new Structure(left.immutable(),along,width,a);
-    }
-    public static boolean powered(ServerLevel level,Structure s){
-        for(int x=0;x<s.width;x++)if(level.hasNeighborSignal(s.at(x,0)))return true;
-        for(int y=0;y<=s.height;y++)if(level.hasNeighborSignal(s.at(-1,y))||level.hasNeighborSignal(s.at(s.width,y)))return true;
-        return false;
-    }
-    public static boolean clear(ServerLevel level,Structure s){
-        for(int x=0;x<s.width;x++)for(int y=1;y<=s.height;y++){
-            BlockPos p=s.at(x,y);BlockState state=level.getBlockState(p);
-            // Never replace fluids, vegetation, blocks, or a neighboring structure's field.
-            if(!state.isAir()&&(!field(state)||!owner(p,state).equals(s.anchor)||state.getValue(EnergyBarrierFieldBlock.AXIS)!=s.axis()))return false;
-        }
-        return true;
-    }
-    private static void clearOwned(ServerLevel level,BlockPos anchor,Direction along,Structure keep){
-        for(int x=0;x<MAX_WIDTH;x++)for(int y=1;y<=MAX_HEIGHT;y++){
-            BlockPos p=anchor.relative(along,x).above(y);if(!level.hasChunkAt(p))continue;
-            BlockState state=level.getBlockState(p);
-            if(field(state)&&owner(p,state).equals(anchor)&&state.getValue(EnergyBarrierFieldBlock.AXIS)==along.getAxis()
-                &&(keep==null||x>=keep.width||y>keep.height))level.removeBlock(p,false);
+
+        public BlockState field(int column, int row) {
+            return IndustrialFacilitiesModBlocks.ENERGY_BARRIER_FIELD.get().defaultBlockState()
+                .setValue(EnergyBarrierFieldBlock.AXIS, axis())
+                .setValue(EnergyBarrierFieldBlock.COLUMN, column)
+                .setValue(EnergyBarrierFieldBlock.ROW, row);
         }
     }
-    private static void setActive(ServerLevel level,Structure s,boolean active){
-        for(int x=0;x<s.width;x++){
-            BlockPos p=s.at(x,0);BlockState before=level.getBlockState(p);
-            BlockState after=before.setValue(EnergyBarrierBaseBlock.ACTIVE,active).setValue(EnergyBarrierBaseBlock.AXIS,s.axis());
-            after=EnergyBarrierBaseBlock.connected(after,level,p);
-            if(before!=after)level.setBlock(p,after,3);
-        }
+
+    public static BlockPos owner(BlockPos pos, BlockState state) {
+        Direction along = fieldDirection(state);
+        return pos.below(state.getValue(EnergyBarrierFieldBlock.ROW))
+            .relative(along, -state.getValue(EnergyBarrierFieldBlock.COLUMN));
     }
-    public static void update(ServerLevel level,BlockPos p){
-        boolean found=false;
-        for(Direction along:new Direction[]{Direction.EAST,Direction.SOUTH}){
-            if(!loaded(level,p,along))continue;
-            Structure s=detect(level,p,along);
-            if(s==null){clearOwned(level,p,along,null);continue;}
-            found=true;
-            if(!s.anchor.equals(p))continue;
-            boolean active=powered(level,s)&&clear(level,s);
-            clearOwned(level,p,along,active?s:null);
-            setActive(level,s,active);
-            if(active)for(int x=0;x<s.width;x++)for(int y=1;y<=s.height;y++){
-                BlockPos cell=s.at(x,y);BlockState desired=s.field(x,y);
-                if(level.getBlockState(cell)!=desired)level.setBlock(cell,desired,3);
+
+    private static Direction fieldDirection(BlockState state) {
+        return state.getValue(EnergyBarrierFieldBlock.AXIS) == Direction.Axis.X ? Direction.EAST : Direction.SOUTH;
+    }
+
+    private static boolean isBase(BlockState state) {
+        return state.is(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_BASE.get());
+    }
+
+    private static boolean isPillar(BlockState state) {
+        return state.is(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_PILLAR.get());
+    }
+
+    private static boolean belongsToField(BlockPos pos, BlockState state, BlockPos anchor, Direction.Axis axis) {
+        return state.is(IndustrialFacilitiesModBlocks.ENERGY_BARRIER_FIELD.get())
+            && owner(pos, state).equals(anchor)
+            && state.getValue(EnergyBarrierFieldBlock.AXIS) == axis;
+    }
+
+    private static boolean isSearchAreaLoaded(ServerLevel level, BlockPos pos, Direction along) {
+        // Vérifier aussi la marge nécessaire pour reconnaître un cadre trop large ou trop haut.
+        for (int column = -MAX_WIDTH - 1; column <= MAX_WIDTH + 1; column++) {
+            for (int row = 0; row <= MAX_HEIGHT + 1; row++) {
+                if (!level.hasChunkAt(pos.relative(along, column).above(row))) {
+                    return false;
+                }
             }
         }
-        if(!found&&base(level.getBlockState(p))&&level.getBlockState(p).getValue(EnergyBarrierBaseBlock.ACTIVE))
-            level.setBlock(p,level.getBlockState(p).setValue(EnergyBarrierBaseBlock.ACTIVE,false),3);
+        return true;
     }
-    /** Also cleans up orphan fields after the anchor itself was destroyed or after a restart. */
-    public static void checkField(ServerLevel level,BlockPos p,BlockState state){
-        BlockPos anchor=owner(p,state);
-        Direction along=state.getValue(EnergyBarrierFieldBlock.AXIS)==Direction.Axis.X?Direction.EAST:Direction.SOUTH;
-        if(!loaded(level,anchor,along))return;
-        Structure s=detect(level,anchor,along);
-        if(s==null||!s.anchor.equals(anchor)||state.getValue(EnergyBarrierFieldBlock.COLUMN)>=s.width
-            ||state.getValue(EnergyBarrierFieldBlock.ROW)>s.height||!powered(level,s)||!clear(level,s))level.removeBlock(p,false);
+
+    public static Structure detect(ServerLevel level, BlockPos pos, Direction along) {
+        if (!isSearchAreaLoaded(level, pos, along) || !isBase(level.getBlockState(pos))) {
+            return null;
+        }
+
+        Direction backward = along.getOpposite();
+        BlockPos anchor = pos;
+        int basesBehind = 1;
+        while (isBase(level.getBlockState(anchor.relative(backward)))) {
+            if (++basesBehind > MAX_WIDTH) {
+                return null;
+            }
+            anchor = anchor.relative(backward);
+        }
+
+        BlockPos firstPillar = anchor.relative(backward);
+        if (!isPillar(level.getBlockState(firstPillar))) {
+            return null;
+        }
+        int width = 0;
+        while (isBase(level.getBlockState(anchor.relative(along, width)))) {
+            if (++width > MAX_WIDTH) {
+                return null;
+            }
+        }
+
+        BlockPos lastPillar = anchor.relative(along, width);
+        if (!isPillar(level.getBlockState(lastPillar))) {
+            return null;
+        }
+        int firstHeight = pillarHeight(level, firstPillar);
+        int lastHeight = pillarHeight(level, lastPillar);
+        if (firstHeight < 1 || firstHeight > MAX_HEIGHT || firstHeight != lastHeight
+                || anchor.getY() + firstHeight >= level.getMaxBuildHeight()) {
+            return null;
+        }
+        return new Structure(anchor.immutable(), along, width, firstHeight);
     }
-    private EnergyBarrierManager(){}
+
+    private static int pillarHeight(ServerLevel level, BlockPos foot) {
+        int height = 0;
+        while (height <= MAX_HEIGHT && isPillar(level.getBlockState(foot.above(height + 1)))) {
+            height++;
+        }
+        return height;
+    }
+
+    public static boolean powered(ServerLevel level, Structure structure) {
+        for (int column = 0; column < structure.width; column++) {
+            if (level.hasNeighborSignal(structure.at(column, 0))) {
+                return true;
+            }
+        }
+        for (int row = 0; row <= structure.height; row++) {
+            if (level.hasNeighborSignal(structure.at(-1, row))
+                    || level.hasNeighborSignal(structure.at(structure.width, row))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean clear(ServerLevel level, Structure structure) {
+        for (int column = 0; column < structure.width; column++) {
+            for (int row = 1; row <= structure.height; row++) {
+                BlockPos pos = structure.at(column, row);
+                BlockState state = level.getBlockState(pos);
+                // Un champ déjà installé peut rester en place si son ancrage et son axe correspondent.
+                if (!state.isAir() && !belongsToField(pos, state, structure.anchor, structure.axis())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static void clearOwned(ServerLevel level, BlockPos anchor, Direction along, Structure keep) {
+        // Parcourir les dimensions maximales pour retirer aussi les cellules hors d'un cadre rétréci.
+        for (int column = 0; column < MAX_WIDTH; column++) {
+            for (int row = 1; row <= MAX_HEIGHT; row++) {
+                BlockPos pos = anchor.relative(along, column).above(row);
+                if (!level.hasChunkAt(pos)) {
+                    continue;
+                }
+                BlockState state = level.getBlockState(pos);
+                if (belongsToField(pos, state, anchor, along.getAxis())
+                        && (keep == null || column >= keep.width || row > keep.height)) {
+                    level.removeBlock(pos, false);
+                }
+            }
+        }
+    }
+
+    private static void setActive(ServerLevel level, Structure structure, boolean active) {
+        for (int column = 0; column < structure.width; column++) {
+            BlockPos pos = structure.at(column, 0);
+            BlockState before = level.getBlockState(pos);
+            BlockState after = before.setValue(EnergyBarrierBaseBlock.ACTIVE, active)
+                .setValue(EnergyBarrierBaseBlock.AXIS, structure.axis());
+            after = EnergyBarrierBaseBlock.connected(after, level, pos);
+            if (before != after) {
+                level.setBlock(pos, after, 3);
+            }
+        }
+    }
+
+    public static void update(ServerLevel level, BlockPos pos) {
+        boolean foundStructure = false;
+        for (Direction along : SCAN_DIRECTIONS) {
+            if (!isSearchAreaLoaded(level, pos, along)) {
+                continue;
+            }
+            Structure structure = detect(level, pos, along);
+            if (structure == null) {
+                clearOwned(level, pos, along, null);
+                continue;
+            }
+
+            foundStructure = true;
+            // Seule la base d'ancrage met le cadre entier à jour.
+            if (!structure.anchor.equals(pos)) {
+                continue;
+            }
+            boolean active = powered(level, structure) && clear(level, structure);
+            clearOwned(level, pos, along, active ? structure : null);
+            setActive(level, structure, active);
+            if (active) {
+                placeField(level, structure);
+            }
+        }
+
+        if (!foundStructure) {
+            BlockState state = level.getBlockState(pos);
+            if (isBase(state) && state.getValue(EnergyBarrierBaseBlock.ACTIVE)) {
+                level.setBlock(pos, state.setValue(EnergyBarrierBaseBlock.ACTIVE, false), 3);
+            }
+        }
+    }
+
+    private static void placeField(ServerLevel level, Structure structure) {
+        for (int column = 0; column < structure.width; column++) {
+            for (int row = 1; row <= structure.height; row++) {
+                BlockPos pos = structure.at(column, row);
+                BlockState desired = structure.field(column, row);
+                if (level.getBlockState(pos) != desired) {
+                    level.setBlock(pos, desired, 3);
+                }
+            }
+        }
+    }
+
+    /** Retire une cellule orpheline même si son ancrage a disparu avant le rechargement du monde. */
+    public static void checkField(ServerLevel level, BlockPos pos, BlockState state) {
+        BlockPos anchor = owner(pos, state);
+        Direction along = fieldDirection(state);
+        if (!isSearchAreaLoaded(level, anchor, along)) {
+            return;
+        }
+        Structure structure = detect(level, anchor, along);
+        int column = state.getValue(EnergyBarrierFieldBlock.COLUMN);
+        int row = state.getValue(EnergyBarrierFieldBlock.ROW);
+        if (structure == null || !structure.anchor.equals(anchor) || column >= structure.width
+                || row > structure.height || !powered(level, structure) || !clear(level, structure)) {
+            level.removeBlock(pos, false);
+        }
+    }
 }

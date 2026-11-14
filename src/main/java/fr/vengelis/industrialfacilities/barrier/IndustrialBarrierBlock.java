@@ -89,6 +89,7 @@ public class IndustrialBarrierBlock extends WallBlock {
     public static final BooleanProperty SOUTH_EAST = BooleanProperty.create("south_east");
     public static final BooleanProperty SOUTH_WEST = BooleanProperty.create("south_west");
     public static final BooleanProperty NORTH_WEST = BooleanProperty.create("north_west");
+    // Ordre horaire partagé par les propriétés, les bitmasks et les formes de collision.
     private static final BooleanProperty[] DIAGONALS = {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST};
     private static final int[][] DIAGONAL_OFFSETS = {{1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
     private static final VoxelShape[] DIAGONAL_SOLID = makeDiagonalShapes(false);
@@ -163,6 +164,7 @@ public class IndustrialBarrierBlock extends WallBlock {
 
     private static boolean connectsDiagonally(LevelAccessor level, BlockPos pos, int dx, int dz) {
         BlockPos other = pos.offset(dx, 0, dz);
+        // Le raccord coupe un coin. Les deux cases orthogonales doivent donc rester libres.
         return level.hasChunkAt(other) && level.getBlockState(other).getBlock() instanceof IndustrialBarrierBlock
             && clearForDiagonal(level, pos.offset(dx, 0, 0))
             && clearForDiagonal(level, pos.offset(0, 0, dz));
@@ -174,9 +176,13 @@ public class IndustrialBarrierBlock extends WallBlock {
             int[] offset = DIAGONAL_OFFSETS[i];
             state = state.setValue(DIAGONALS[i], connectsDiagonally(level, pos, offset[0], offset[1]));
         }
-        int diagonal = diagonalMask(state);
-        if (diagonal == 0) return junctionPost(state);
-        boolean straight = (shapeIndex(state) & 15) == 0 && (diagonal == 5 || diagonal == 10);
+        int diagonals = diagonalMask(state);
+        if (diagonals == 0) {
+            return junctionPost(state);
+        }
+        int cardinalArms = shapeIndex(state) & 0b01111;
+        boolean oppositeDiagonals = diagonals == 0b0101 || diagonals == 0b1010;
+        boolean straight = cardinalArms == 0 && oppositeDiagonals;
         BlockState above = level.getBlockState(pos.above());
         boolean supportsPost = above.getBlock() instanceof WallBlock && above.getValue(UP);
         return state.setValue(UP, !straight || supportsPost);
@@ -213,14 +219,22 @@ public class IndustrialBarrierBlock extends WallBlock {
     }
 
     private static VoxelShape connectedShape(BlockState state) {
-        int diagonal = diagonalMask(state), cardinal = shapeIndex(state);
+        int diagonal = diagonalMask(state);
+        int cardinal = shapeIndex(state);
         boolean grid = state.getValue(STACKED);
-        if (diagonal == 0) return (grid ? GRID_SHAPES : SHAPES)[cardinal];
-        int key = cardinal | (diagonal << 5) | (grid ? 512 : 0);
+        if (diagonal == 0) {
+            return (grid ? GRID_SHAPES : SHAPES)[cardinal];
+        }
+        // Le cache dépend de quatre bras cardinaux, du poteau, de quatre diagonales et du type de remplissage.
+        int key = cardinal | (diagonal << 5) | (grid ? 1 << 9 : 0);
         return CONNECTED_SHAPES.computeIfAbsent(key, ignored -> {
             VoxelShape shape = simpleDiagonalCore(cardinal, grid);
-            for (int i = 0; i < 4; i++) if ((diagonal & (1 << i)) != 0)
-                shape = Shapes.or(shape, (grid ? DIAGONAL_GRID : DIAGONAL_SOLID)[i]);
+            VoxelShape[] diagonalShapes = grid ? DIAGONAL_GRID : DIAGONAL_SOLID;
+            for (int i = 0; i < DIAGONALS.length; i++) {
+                if ((diagonal & (1 << i)) != 0) {
+                    shape = Shapes.or(shape, diagonalShapes[i]);
+                }
+            }
             return shape.optimize();
         });
     }

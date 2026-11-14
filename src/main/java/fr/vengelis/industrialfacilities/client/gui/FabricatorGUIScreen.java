@@ -117,20 +117,45 @@ public class FabricatorGUIScreen extends AbstractContainerScreen<FabricatorGUIMe
         refreshCatalogue();
     }
     private void refreshCatalogue() {
-        var all = menu.recipes();
-        categories = FabricatorCategoryResources.current().tabs(all.stream().map(holder -> holder.value().category()).toList());
-        if (categories.stream().noneMatch(category -> category.id().equals(selectedCategory))) selectedCategory = "*";
+        var recipes = menu.recipes();
+        categories = FabricatorCategoryResources.current()
+            .tabs(recipes.stream().map(holder -> holder.value().category()).toList());
+        if (categories.stream().noneMatch(category -> category.id().equals(selectedCategory))) {
+            selectedCategory = "*";
+        }
         categoryStart = Math.max(0, Math.min(categoryStart, Math.max(0, categories.size() - 3)));
+
         String query = draft.strip().toLowerCase(Locale.ROOT);
-        shown = all.stream().filter(holder -> selectedCategory.equals("*") || holder.value().category().equals(selectedCategory))
-            .filter(holder -> query.isEmpty() || holder.value().output().getHoverName().getString().toLowerCase(Locale.ROOT).contains(query)
-                || holder.id().toString().toLowerCase(Locale.ROOT).contains(query)).toList();
+        shown = recipes.stream()
+            .filter(holder -> selectedCategory.equals("*") || holder.value().category().equals(selectedCategory))
+            .filter(holder -> matchesSearch(holder, query))
+            .toList();
+
+        // Un filtre peut rendre la page ou la sélection courante inaccessible.
         page = Math.max(0, Math.min(page, Math.max(0, (shown.size() - 1) / layout.pageSize())));
-        if (selection() == null) { selected = shown.isEmpty() ? null : shown.getFirst().id(); materialScroll = 0; }
-        for (int index = 0; index < recipeButtons.size(); index++) recipeButtons.get(index).visible = page * layout.pageSize() + index < shown.size();
+        if (selection() == null) {
+            selected = shown.isEmpty() ? null : shown.getFirst().id();
+            materialScroll = 0;
+        }
+        updateCatalogueButtons();
+    }
+
+    private static boolean matchesSearch(RecipeHolder<FabricatorRecipe> holder, String query) {
+        return query.isEmpty()
+            || holder.value().output().getHoverName().getString().toLowerCase(Locale.ROOT).contains(query)
+            || holder.id().toString().toLowerCase(Locale.ROOT).contains(query);
+    }
+
+    private void updateCatalogueButtons() {
+        for (int index = 0; index < recipeButtons.size(); index++) {
+            recipeButtons.get(index).visible = page * layout.pageSize() + index < shown.size();
+        }
         for (int index = 0; index < categoryButtons.size(); index++) {
-            Button button = categoryButtons.get(index); button.visible = categoryStart + index < categories.size();
-            if (button.visible) button.setMessage(Component.literal(categories.get(categoryStart + index).label()));
+            Button button = categoryButtons.get(index);
+            button.visible = categoryStart + index < categories.size();
+            if (button.visible) {
+                button.setMessage(Component.literal(categories.get(categoryStart + index).label()));
+            }
         }
         if (categoryPrevious != null) categoryPrevious.active = categoryStart > 0;
         if (categoryNext != null) categoryNext.active = categoryStart + 3 < categories.size();

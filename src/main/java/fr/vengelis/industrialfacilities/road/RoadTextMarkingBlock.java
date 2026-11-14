@@ -11,9 +11,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
-/** Bounded local groups of at most three tiles. No world scan, block entity or client-only state. */
+/** Raccorde jusqu'à trois dalles de texte en se fondant sur leurs états de bloc. */
 public class RoadTextMarkingBlock extends RoadMarkingBlock {
     public static final IntegerProperty WIDTH = IntegerProperty.create("width", 1, 3);
+    // PART est l'indice depuis le début du texte dans le sens de lecture.
     public static final IntegerProperty PART = IntegerProperty.create("part", 0, 2);
     private record Group(BlockPos start, int size, Direction facing) {
         Direction right() { return facing.getClockWise(); }
@@ -57,7 +58,7 @@ public class RoadTextMarkingBlock extends RoadMarkingBlock {
             BlockState before = world.getBlockState(pos);
             BlockState after = before.setValue(WIDTH, group.size()).setValue(PART, part);
             if (before != after) {
-                // Send each segment to clients without exposing an incomplete group to neighbor updates.
+                // Informer les clients sans déclencher de mise à jour de voisinage en cours de raccordement.
                 world.setBlock(pos, after, Block.UPDATE_CLIENTS);
                 changed = true;
             }
@@ -88,7 +89,7 @@ public class RoadTextMarkingBlock extends RoadMarkingBlock {
             }
         }
         if (valid) return declared;
-        // A removed tile can split one group into two. Repair only its surviving members.
+        // Après une casse, réindexer uniquement le fragment contigu auquel appartient cette dalle.
         int left = 0, rightCount = 0;
         while (left < 2 && hasRoot(world, pos.relative(right, -left - 1), facing, root, size)) left++;
         while (left + rightCount < 2 && hasRoot(world, pos.relative(right, rightCount + 1), facing, root, size)) rightCount++;
@@ -99,6 +100,7 @@ public class RoadTextMarkingBlock extends RoadMarkingBlock {
     @Override public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (!world.getBlockState(pos).is(this)) return;
         Group group = normalize(world, pos);
+        // Les groupes sont réparés avant de fusionner, de gauche à droite.
         BlockPos leftPos = group.at(-1);
         if (compatible(world, leftPos, group.facing())) {
             Group left = normalize(world, leftPos);

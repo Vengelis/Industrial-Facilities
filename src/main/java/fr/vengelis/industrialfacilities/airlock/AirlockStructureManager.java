@@ -3,6 +3,7 @@ package fr.vengelis.industrialfacilities.airlock;
 
 import fr.vengelis.industrialfacilities.block.AirlockControllerBlock;
 import fr.vengelis.industrialfacilities.block.AirlockFrameBlock;
+import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,9 +18,7 @@ public final class AirlockStructureManager {
     private AirlockStructureManager() {
     }
 
-    // Résultat de la détection.
-    // origin : premier coin du rectangle.
-    // axisA et axisB : directions parcourues depuis ce coin.
+    /** Rectangle repéré par un coin et deux directions locales dans le plan du sas. */
     public record AirlockStructure(
         BlockPos origin,
         Direction axisA,
@@ -28,9 +27,12 @@ public final class AirlockStructureManager {
         int height,
         String plane
     ) {
-        public BlockPos getPosition(int a, int b) {
-            return origin.relative(axisA, a)
-                         .relative(axisB, b);
+        public BlockPos getPosition(int column, int row) {
+            return origin.relative(axisA, column).relative(axisB, row);
+        }
+
+        boolean isBorder(int column, int row) {
+            return column == 0 || row == 0 || column == width - 1 || row == height - 1;
         }
 
         public int getInteriorWidth() {
@@ -183,10 +185,10 @@ public final class AirlockStructureManager {
     ) {
         int controllerCount = 0;
 
-        for (int a = 0; a < structure.width(); a++) {
-            for (int b = 0; b < structure.height(); b++) {
+        for (int column = 0; column < structure.width(); column++) {
+            for (int row = 0; row < structure.height(); row++) {
 
-                BlockPos pos = structure.getPosition(a, b);
+                BlockPos pos = structure.getPosition(column, row);
 
                 // Ne charge pas automatiquement
                 // un chunk manquant.
@@ -194,13 +196,7 @@ public final class AirlockStructureManager {
                     return false;
                 }
 
-                boolean border =
-                    a == 0 ||
-                    b == 0 ||
-                    a == structure.width() - 1 ||
-                    b == structure.height() - 1;
-
-                if (border) {
+                if (structure.isBorder(column, row)) {
                     if (pos.equals(controllerPos)) {
                         if (!isController(level, pos)) {
                             return false;
@@ -210,9 +206,9 @@ public final class AirlockStructureManager {
                         return false;
                     }
                 } else {
-                    // Pour ce premier test, l'intérieur
-                    // doit être complètement vide.
-                    if (!level.getBlockState(pos).isAir() && !(allowSeals && level.getBlockState(pos).is(fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks.AIRLOCK_SEAL.get()))) {
+                    // L'affichage du statut reconnaît également un sas fermé.
+                    BlockState state = level.getBlockState(pos);
+                    if (!state.isAir() && !(allowSeals && state.is(IndustrialFacilitiesModBlocks.AIRLOCK_SEAL.get()))) {
                         return false;
                     }
                 }
@@ -238,5 +234,3 @@ public final class AirlockStructureManager {
         return state.getBlock() instanceof AirlockControllerBlock;
     }
 }
-
-
