@@ -7,7 +7,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
+import fr.vengelis.industrialfacilities.door.DoorMotionConfig;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorEntity;
+import fr.vengelis.industrialfacilities.door.IndustrialDoorManager;
+import fr.vengelis.industrialfacilities.door.IndustrialDoorStyle;
+import fr.vengelis.industrialfacilities.item.BadgeWalletItem;
 import fr.vengelis.industrialfacilities.security.AutomationOutputs;
 import fr.vengelis.industrialfacilities.security.CameraTerminalEntity;
 import net.minecraft.core.BlockPos;
@@ -107,6 +111,13 @@ public final class AccessDoorService {
         return true;
     }
 
+    public static boolean setHalfOpening(Player player, IndustrialDoorEntity door, boolean enabled) {
+        if (door.style() != IndustrialDoorStyle.MESH || !canChangeSettings(player, door)) return false;
+        door.halfOpening = enabled;
+        door.sync();
+        return true;
+    }
+
     private static boolean canChangeSettings(Player player, IndustrialDoorEntity door) {
         return player.isAlive() && !outsideInteractionRange(player, door.getBlockPos()) && canConfigure(player, door);
     }
@@ -116,6 +127,7 @@ public final class AccessDoorService {
     }
 
     public static boolean shouldOpen(ServerLevel level, IndustrialDoorEntity door) {
+        if (IndustrialDoorManager.fireAlarmActive(level, door)) return false;
         if (level.getGameTime() < door.accessOpenUntil) {
             return true;
         }
@@ -266,6 +278,14 @@ public final class AccessDoorService {
     }
 
     public static AccessBadges.Result activate(Player player, AccessTerminalEntity terminal, ItemStack badge) {
+        return activate(player, terminal, List.of(badge), false);
+    }
+
+    public static AccessBadges.Result activateFromWallet(Player player, AccessTerminalEntity terminal, List<ItemStack> badges) {
+        return activate(player, terminal, badges, true);
+    }
+
+    private static AccessBadges.Result activate(Player player, AccessTerminalEntity terminal, List<ItemStack> badges, boolean wallet) {
         if (!(player instanceof ServerPlayer serverPlayer) || !(terminal.getLevel() instanceof ServerLevel level)
             || terminal.encoder || terminal.bank || terminal instanceof KeypassTerminalEntity || terminal.terminalId == null) {
             return AccessBadges.Result.fail("Ce lecteur n'est pas configuré.");
@@ -280,12 +300,15 @@ public final class AccessDoorService {
         if (TerminalLinks.loadedReader(level, reader) != terminal) {
             return AccessBadges.Result.fail("Ce lecteur n'est plus enregistré.");
         }
-        if (!AccessBadges.canUse(badge, terminal)) {
-            return AccessBadges.Result.fail(AccessBadges.remaining(badge) == 0
-                ? "Ce badge est épuisé."
-                : "Accès refusé : badge ou niveau insuffisant.");
+        for (ItemStack badge : badges) {
+            if (!AccessBadges.canUse(badge, terminal)) continue;
+            if (wallet && !AccessBadges.read(badge).hasUUID("BadgeId")) continue;
+            return openDoors(level, registry, reader, terminal, () -> AccessBadges.consume(serverPlayer, badge));
         }
-        return openDoors(level, registry, reader, terminal, () -> AccessBadges.consume(serverPlayer, badge));
+        if (wallet) return AccessBadges.Result.fail(BadgeWalletItem.DENIED);
+        return AccessBadges.Result.fail(AccessBadges.remaining(badges.getFirst()) == 0
+            ? "Ce badge est épuisé."
+            : "Accès refusé : badge ou niveau insuffisant.");
     }
 
     public static String activateKeypass(ServerPlayer player, KeypassTerminalEntity terminal, String pin) {
@@ -309,28 +332,36 @@ public final class AccessDoorService {
     private static AccessBadges.Result openDoors(ServerLevel level, AccessRegistry registry, AccessRegistry.Entry reader,
         AccessTerminalEntity terminal, BooleanSupplier consumeAccess) {
         List<IndustrialDoorEntity> doorsToOpen = new ArrayList<>();
+        boolean fireAlarmActive = false;
         for (var link : reader.doors()) {
             if (!TerminalLinks.admissible(level, terminal.getBlockPos(), link)) {
                 continue;
             }
             var door = TerminalLinks.loadedDoor(level, link);
-            if (door != null && door.accessOpenUntil <= level.getGameTime() && !door.targetOpen) {
+            if (door == null) continue;
+            if (IndustrialDoorManager.fireAlarmActive(level, door)) {
+                fireAlarmActive = true;
+            } else if (door.accessOpenUntil <= level.getGameTime() && !door.targetOpen) {
                 doorsToOpen.add(door);
             }
         }
 
         // Le badge n'est débité qu'une fois, après avoir trouvé au moins une porte à ouvrir.
         if (doorsToOpen.isEmpty()) {
-            return AccessBadges.Result.fail("Aucune porte liée disponible à ouvrir.");
+            return AccessBadges.Result.fail(fireAlarmActive
+                ? "Porte verrouillée par une alarme incendie." : "Aucune porte liée disponible à ouvrir.");
         }
         if (!consumeAccess.getAsBoolean()) {
             return AccessBadges.Result.fail("Ce badge est épuisé.");
         }
+        long end = level.getGameTime();
         for (var door : doorsToOpen) {
-            door.accessOpenUntil = door.getLevel().getGameTime() + ACCESS_DURATION_TICKS;
+            int duration = ACCESS_DURATION_TICKS + Math.max(0, door.motionTicks(true) - DoorMotionConfig.DEFAULT_TICKS);
+            door.accessOpenUntil = level.getGameTime() + duration;
+            end = Math.max(end, door.accessOpenUntil);
             door.sync();
         }
-        terminal.grantedUntil = level.getGameTime() + ACCESS_DURATION_TICKS;
+        terminal.grantedUntil = end;
         terminal.accessGranted = true;
         terminal.sync();
         refreshLinkedReaders(level, registry, reader.id, doorsToOpen);

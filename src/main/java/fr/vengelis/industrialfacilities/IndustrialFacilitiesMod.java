@@ -37,6 +37,8 @@ public class IndustrialFacilitiesMod {
 
 	public IndustrialFacilitiesMod(IEventBus modEventBus) {
 		// Start of user code block mod constructor
+		net.neoforged.fml.ModLoadingContext.get().getActiveContainer().registerConfig(net.neoforged.fml.config.ModConfig.Type.SERVER, fr.vengelis.industrialfacilities.door.DoorMotionConfig.SPEC,
+				fr.vengelis.industrialfacilities.door.DoorMotionConfig.FILE);
 		// End of user code block mod constructor
 		NeoForge.EVENT_BUS.register(this);
 		modEventBus.addListener(this::registerNetworking);

@@ -3,6 +3,7 @@ package fr.vengelis.industrialfacilities.access;
 import java.util.Objects;
 import fr.vengelis.industrialfacilities.access.ui.AccessMenus;
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModSounds;
+import fr.vengelis.industrialfacilities.item.BadgeWalletItem;
 import net.minecraft.core.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -95,17 +96,20 @@ public class AccessTerminalBlock extends Block implements EntityBlock {
         return InteractionResult.CONSUME;
     }
     @Override protected ItemInteractionResult useItemOn(ItemStack stack,BlockState state,Level level,BlockPos pos,Player player,InteractionHand hand,BlockHitResult hit){
-        if(!AccessBadges.isBadge(stack))return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        boolean wallet=stack.getItem() instanceof BadgeWalletItem;
+        if(!AccessBadges.isBadge(stack)&&!wallet)return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if(level.isClientSide||hand!=InteractionHand.MAIN_HAND)return ItemInteractionResult.SUCCESS;
         var terminal=AccessTerminalEntity.resolve(level,pos);
         if(terminal==null)player.displayClientMessage(Component.literal("Empilez deux blocs de terminal du même type."),true);
         else if(terminal.encoder||terminal.bank)AccessMenus.open(player,terminal);
         else {
-            var result=AccessDoorService.activate(player,terminal,stack);player.displayClientMessage(Component.literal(result.message()),true);
+            var result=wallet?BadgeWalletItem.activate(player,terminal,stack):AccessDoorService.activate(player,terminal,stack);
+            player.displayClientMessage(result.message().equals(BadgeWalletItem.DENIED)
+                ? Component.translatable(result.message()) : Component.literal(result.message()),true);
             BlockPos base=terminal.getBlockPos();
             level.playSound(null,base.getX()+.5,base.getY()+1.3,base.getZ()+.5,
                 result.ok()?IndustrialFacilitiesModSounds.TERMINAL_ACCESS_GRANTED.get():IndustrialFacilitiesModSounds.TERMINAL_ACCESS_DENIED.get(),SoundSource.BLOCKS,.6f,1f);
-            if(result.ok())player.setItemInHand(hand,AccessBadges.normalize(stack));
+            if(result.ok()&&!wallet)player.setItemInHand(hand,AccessBadges.normalize(stack));
             player.getInventory().setChanged();player.containerMenu.broadcastChanges();
         }
         return ItemInteractionResult.CONSUME;

@@ -34,7 +34,7 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
     public IndustrialDoorBlock(boolean controller) { this(controller,false); }
     public IndustrialDoorBlock(boolean controller,boolean dark) { this(controller,dark?IndustrialDoorStyle.DARK:IndustrialDoorStyle.LIGHT); }
     public IndustrialDoorBlock(boolean controller,IndustrialDoorStyle style) {
-        super(Properties.of().strength(4, 30).sound(SoundType.METAL).requiresCorrectToolForDrops()
+        super(Properties.of().strength(4, style.blastResistance()).sound(SoundType.METAL).requiresCorrectToolForDrops()
             .lightLevel(s -> s.getValue(ACTIVE) && s.getValue(RAIL) ? 12 : 0));
         this.controller = controller;
         this.style = style;

@@ -20,6 +20,7 @@ import java.util.Objects;
 @EventBusSubscriber(modid=IndustrialFacilitiesMod.MODID,value=Dist.CLIENT)
 public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoorEntity> {
     private static final ResourceLocation FRAME=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"textures/block/industrial_door_frame_32.png");
+    private static final double MESH_RAIL_HEIGHT = 1 / 16.0;
     private static ResourceLocation texture(IndustrialDoorStyle style,String part) {
         return ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,style.texturePath(part));
     }
@@ -48,14 +49,34 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             quad(pose,out,new float[][]{{.15625f,.15625f,1.0703125f},{.84375f,.15625f,1.0703125f},{.84375f,.84375f,1.0703125f},{.15625f,.84375f,1.0703125f}},0,0,1,1,lighting,0,0,1);
         }
         if(be.size>0) {
-            out=buffers.getBuffer(block.style==IndustrialDoorStyle.GLASS?RenderType.entityTranslucent(texture(block.style,"panel")):RenderType.entityCutoutNoCull(texture(block.style,"panel")));
+            var panel = texture(block.style, "panel");
+            out = buffers.getBuffer(switch (block.style) {
+                case GLASS -> RenderType.entityTranslucent(panel);
+                case MESH -> RenderType.entityCutout(panel);
+                default -> RenderType.entityCutoutNoCull(panel);
+            });
             BlockPos origin=be.doorOrigin(),controller=be.getBlockPos();Direction right=f.getCounterClockWise();
             pose.translate((origin.getX()-controller.getX())*right.getStepX()+(origin.getZ()-controller.getZ())*right.getStepZ(),origin.getY()-controller.getY(),0);
             float p=be.previousProgress+(be.progress-be.previousProgress)*partial;
-            double h=be.size-2,half=h/2,travel=half*p;
+            double h=be.size-2;
             lighting=new IndustrialDoorLighting(be.getLevel(),origin,f,true);
-            segment(pose,out,0,half,-travel,h,lighting);
-            segment(pose,out,half,h,travel,h,lighting);
+            if (block.style == IndustrialDoorStyle.MESH) {
+                var lower = IndustrialMeshDoorMotion.lower(h, p);
+                var upper = IndustrialMeshDoorMotion.upper(h, p);
+                meshPanel(pose, out, (int) h, lower, IndustrialMeshDoorMotion.HAZARD_HEIGHT, MESH_RAIL_HEIGHT, lighting);
+                meshPanel(pose, out, (int) h, upper, MESH_RAIL_HEIGHT, 0, lighting);
+                var rail = buffers.getBuffer(RenderType.entityCutoutNoCull(texture(block.style, "frame_middle")));
+                meshRail(pose, rail, (int) h, upper.bottom(), upper.depth(), lighting);
+                meshRail(pose, rail, (int) h, lower.end() + lower.rise() - MESH_RAIL_HEIGHT, lower.depth(), lighting);
+                var hazard = buffers.getBuffer(RenderType.entityCutout(texture(block.style, "hazard")));
+                meshHazardBand(pose, hazard, (int) h, IndustrialMeshDoorMotion.hazardBeam(lower), lighting);
+            } else if (block.style.lifts()) {
+                segment(pose,out,0,h,h*p,h,lighting);
+            } else {
+                double half=h/2,travel=half*p;
+                segment(pose,out,0,half,-travel,h,lighting);
+                segment(pose,out,half,h,travel,h,lighting);
+            }
         }
         pose.popPose();
     }
@@ -92,9 +113,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         int row=be.getBlockPos().getY()-d.doorOrigin().getY();
         float y0=(float)IndustrialDoorVisualState.railStart(d.size,row),y1=(float)IndustrialDoorVisualState.railEnd(d.size,row);
         if(y1<=y0)return;
-        float p=d.progress;
-        boolean target=d!=null?d.targetOpen:p>=1;
-        int color=IndustrialDoorVisualState.lampColor(p,target,be.getLevel().getGameTime());
+        int color=IndustrialDoorVisualState.lampColor(d.progress,d.targetProgress(),be.getLevel().getGameTime());
         // Decorative housings stand proud of the full cube by one eighth of a block.
         // Its face, dark recess and opaque lens have distinct depths; no additive overlay.
         VertexConsumer out=buffers.getBuffer(RenderType.entityCutoutNoCull(FRAME));
@@ -158,6 +177,66 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         float[][] points={{x0,y0,z},{x1,y0,z},{x1,y1,z},{x0,y1,z}};
         for(float[] p:points)out.addVertex(pose.last(),p[0],p[1],p[2]).setColor(color>>16&255,color>>8&255,color&255,255)
             .setUv(.171875f,.515625f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose.last(),0,0,z<0?-1:1);
+    }
+    private static void meshPanel(PoseStack pose, VertexConsumer out, int height,
+                                  IndustrialMeshDoorMotion.Panel panel, double footHeight, double headHeight, IndustrialDoorLighting light) {
+        // Tile the lattice per block and clip the moving texture at the lintel.
+        double start = panel.start() + footHeight;
+        double end = Math.min(panel.end() - headHeight, height - panel.rise());
+        if (start >= end) return;
+        float z = (float) panel.depth();
+        for (int row = (int) start; row < end; row++) {
+            double from = Math.max(row, start);
+            double to = Math.min(row + 1, end);
+            float bottom = (float) (1 + from + panel.rise());
+            float top = (float) (1 + to + panel.rise());
+            float topV = (float) (row + 1 - to);
+            float bottomV = (float) (row + 1 - from);
+            for (int column = 0; column < height; column++) {
+                float left = column + 1, right = left + 1;
+                // Opposite winding on the same plane keeps holes aligned from either side.
+                panelQuad(pose, out, new float[][]{{left,bottom,z},{right,bottom,z},{right,top,z},{left,top,z}},
+                    0, topV, 1, bottomV, light, 0, 0, 1);
+                panelQuad(pose, out, new float[][]{{right,bottom,z},{left,bottom,z},{left,top,z},{right,top,z}},
+                    1, topV, 0, bottomV, light, 0, 0, -1);
+            }
+        }
+    }
+
+    private static void meshRail(PoseStack pose, VertexConsumer out, int height, double bottom, double depth,
+                                 IndustrialDoorLighting light) {
+        if (bottom >= height) return;
+        float z = (float) depth;
+        box(pose, out, 1, (float) (1 + bottom), z - .04f, height + 1,
+            (float) (1 + Math.min(height, bottom + MESH_RAIL_HEIGHT)), z + .04f,
+            9.5f / 32, 10.5f / 32, light);
+    }
+
+    private static void meshHazardBand(PoseStack pose, VertexConsumer out, int height,
+                                       IndustrialMeshDoorMotion.Panel beam, IndustrialDoorLighting light) {
+        double bottom = beam.bottom();
+        if (bottom >= height) return;
+        double top = Math.min(height, beam.end() + beam.rise());
+        float y0 = (float) (1 + bottom), y1 = (float) (1 + top);
+        float topV = (float) (1 - (top - bottom) / IndustrialMeshDoorMotion.HAZARD_HEIGHT);
+        float front = (float) beam.farDepth(), back = (float) beam.nearDepth();
+        float left = 1, right = height + 1;
+        for (int col = 0; col < height; col++) {
+            float x0 = col + 1, x1 = x0 + 1;
+            panelQuad(pose, out, new float[][]{{x0,y0,front},{x1,y0,front},{x1,y1,front},{x0,y1,front}},
+                0, topV, 1, 1, light, 0, 0, 1);
+            panelQuad(pose, out, new float[][]{{x1,y0,back},{x0,y0,back},{x0,y1,back},{x1,y1,back}},
+                0, topV, 1, 1, light, 0, 0, -1);
+        }
+        float u = .5f / 32, v = 1.5f / 8;
+        panelQuad(pose, out, new float[][]{{left,y1,front},{right,y1,front},{right,y1,back},{left,y1,back}},
+            u, v, u, v, light, 0, 1, 0);
+        panelQuad(pose, out, new float[][]{{left,y0,back},{right,y0,back},{right,y0,front},{left,y0,front}},
+            u, v, u, v, light, 0, -1, 0);
+        panelQuad(pose, out, new float[][]{{left,y0,back},{left,y0,front},{left,y1,front},{left,y1,back}},
+            u, v, u, v, light, -1, 0, 0);
+        panelQuad(pose, out, new float[][]{{right,y0,front},{right,y0,back},{right,y1,back},{right,y1,front}},
+            u, v, u, v, light, 1, 0, 0);
     }
     private static void segment(PoseStack pose,VertexConsumer out,double start,double end,double offset,double height,IndustrialDoorLighting light) {
         double a=Math.max(0,start+offset),b=Math.min(height,end+offset);

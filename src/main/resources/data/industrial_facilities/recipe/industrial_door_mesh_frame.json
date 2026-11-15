@@ -1,0 +1,22 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "industrial_facilities:industrial_door_dark_frame",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_bars",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:industrial_door_mesh_frame",
+    "count": 1
+  }
+}

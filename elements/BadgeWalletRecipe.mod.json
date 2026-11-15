@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 1,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:BadgeWallet"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.LEATHER",
+      "Items.LEATHER",
+      "Items.LEATHER",
+      "Items.IRON_NUGGET",
+      "Items.IRON_NUGGET",
+      "Items.STRING",
+      "",
+      "",
+      ""
+    ],
+    "recipeReturnStack": "CUSTOM:BadgeWallet",
+    "name": "badge_wallet",
+    "namespace": "mod"
+  }
+}

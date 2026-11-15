@@ -13,6 +13,7 @@ import java.util.*;
 
 public class AlarmScreen extends AbstractContainerScreen<AlarmMenu> {
     private int selected,offset,radius;
+    private boolean fireAlarm;
     private final List<Button> rows=new ArrayList<>();
     private SimpleSoundInstance preview;
     private int previewTicks;
@@ -20,6 +21,7 @@ public class AlarmScreen extends AbstractContainerScreen<AlarmMenu> {
         super(menu,inv,title); imageWidth=300; imageHeight=252;
         for (int i=0;i<menu.choices.size();i++) if (menu.choices.get(i).id().equals(menu.selected)) selected=i;
         offset=Math.max(0,Math.min(selected,menu.choices.size()-6)); radius=menu.range;
+        fireAlarm=menu.fireAlarm;
     }
     private static Component tr(String key,Object... args) { return Component.translatable("gui.industrial_facilities.alarm."+key,args); }
     @Override protected void init() {
@@ -30,17 +32,25 @@ public class AlarmScreen extends AbstractContainerScreen<AlarmMenu> {
         }
         addRenderableWidget(Button.builder(Component.literal("▲"),b->{ offset=Math.max(0,offset-1); refresh(); }).bounds(leftPos+264,topPos+43,22,20).build());
         addRenderableWidget(Button.builder(Component.literal("▼"),b->{ offset=Math.min(Math.max(0,menu.choices.size()-6),offset+1); refresh(); }).bounds(leftPos+264,topPos+143,22,20).build());
-        addRenderableWidget(new AbstractSliderButton(leftPos+14,topPos+181,272,20,Component.empty(),(radius-1)/127.0) {
+        var mode = addRenderableWidget(Button.builder(fireModeLabel(), b -> {
+            fireAlarm = !fireAlarm;
+            b.setMessage(fireModeLabel());
+        }).bounds(leftPos+14,topPos+168,272,20).build());
+        mode.setTooltip(Tooltip.create(tr("fire_mode_hint")));
+        addRenderableWidget(new AbstractSliderButton(leftPos+14,topPos+191,272,20,Component.empty(),(radius-1)/127.0) {
             { updateMessage(); }
             @Override protected void updateMessage() { setMessage(tr("range",radius)); }
             @Override protected void applyValue() { radius=1+(int)Math.round(value*127); updateMessage(); }
         });
-        addRenderableWidget(Button.builder(tr("preview"),b->preview()).bounds(leftPos+14,topPos+218,84,20).build());
-        addRenderableWidget(Button.builder(tr("cancel"),b->onClose()).bounds(leftPos+102,topPos+218,84,20).build());
+        addRenderableWidget(Button.builder(tr("preview"),b->preview()).bounds(leftPos+14,topPos+228,84,20).build());
+        addRenderableWidget(Button.builder(tr("cancel"),b->onClose()).bounds(leftPos+102,topPos+228,84,20).build());
         addRenderableWidget(Button.builder(tr("save"),b->{
-            stopPreview(); PacketDistributor.sendToServer(new AlarmSettings(menu.containerId,menu.choices.get(selected).id(),radius));
-        }).bounds(leftPos+190,topPos+218,96,20).build());
+            stopPreview(); PacketDistributor.sendToServer(new AlarmSettings(menu.containerId,menu.choices.get(selected).id(),radius,fireAlarm));
+        }).bounds(leftPos+190,topPos+228,96,20).build());
         refresh();
+    }
+    private Component fireModeLabel() {
+        return tr(fireAlarm ? "fire_mode_on" : "fire_mode_off");
     }
     private void refresh() {
         for (int i=0;i<rows.size();i++) {
@@ -73,7 +83,7 @@ public class AlarmScreen extends AbstractContainerScreen<AlarmMenu> {
         g.drawString(font,title,14,11,0xFFFFFF,false);
         g.drawString(font,tr("sounds"),14,32,0xB9C9D1,false);
         boolean missing=minecraft.getSoundManager().getSoundEvent(menu.choices.get(selected).sound())==null;
-        g.drawString(font,tr(missing?"missing":"redstone"),14,205,missing?0xFFAA66:0xB9C9D1,false);
+        g.drawString(font,tr(missing?"missing":"redstone"),14,215,missing?0xFFAA66:0xB9C9D1,false);
     }
     @Override public void render(GuiGraphics g,int x,int y,float partial) { super.render(g,x,y,partial); renderTooltip(g,x,y); }
 }

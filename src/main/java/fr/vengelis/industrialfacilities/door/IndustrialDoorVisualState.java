@@ -11,8 +11,11 @@ public final class IndustrialDoorVisualState {
         return targetOpen ? progress<1 : progress>0;
     }
     public static int lampColor(float progress,boolean targetOpen,long ticks) {
-        if(transitioning(progress,targetOpen))return Math.floorMod(ticks,10)<5 ? ORANGE : OFF;
-        return progress>=1 ? GREEN : RED;
+        return lampColor(progress,targetOpen?1f:0f,ticks);
+    }
+    public static int lampColor(float progress,float target,long ticks) {
+        if(progress!=target)return Math.floorMod(ticks,10)<5 ? ORANGE : OFF;
+        return progress>0 ? GREEN : RED;
     }
     /** Continuous samples of a single strip, with no per-block end caps. */
     public static float stripV(int index,int length) { return (float)index/length*.5f; }

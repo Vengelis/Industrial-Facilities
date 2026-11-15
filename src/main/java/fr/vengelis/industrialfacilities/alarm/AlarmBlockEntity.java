@@ -24,6 +24,7 @@ public class AlarmBlockEntity extends BlockEntity {
     public UUID automationInstanceId = UUID.randomUUID();
     private String soundId = "";
     private int range = AlarmConfig.defaultRange();
+    private boolean fireAlarm;
     private int ticks;
     private final Set<UUID> listeners = new HashSet<>();
 
@@ -39,6 +40,10 @@ public class AlarmBlockEntity extends BlockEntity {
         return range;
     }
 
+    public boolean fireAlarm() {
+        return fireAlarm;
+    }
+
     public boolean powered() {
         return level != null && (level.hasNeighborSignal(worldPosition)
             || level instanceof ServerLevel server
@@ -46,20 +51,26 @@ public class AlarmBlockEntity extends BlockEntity {
     }
 
     public void configure(String id, int radius) {
+        configure(id, radius, fireAlarm);
+    }
+
+    public void configure(String id, int radius, boolean fireAlarm) {
         if (AlarmConfig.find(id) == null) {
             return;
         }
         soundId = id;
         range = Math.clamp(radius, 1, AlarmConfig.MAX_RANGE);
+        this.fireAlarm = fireAlarm;
         setChanged();
-        broadcast();
+        updatePower();
     }
 
     public void updatePower() {
-        if (!(level instanceof ServerLevel)) {
+        if (!(level instanceof ServerLevel server)) {
             return;
         }
         boolean active = powered();
+        FireAlarmControls.update(server, worldPosition, range, active && fireAlarm);
         if (getBlockState().getValue(AlarmBlock.POWERED) != active) {
             level.setBlock(worldPosition, getBlockState().setValue(AlarmBlock.POWERED, active), 3);
         }
@@ -117,14 +128,26 @@ public class AlarmBlockEntity extends BlockEntity {
 
     @Override
     public void setRemoved() {
+        unregisterFireAlarm();
         stopListeners();
         super.setRemoved();
+    }
+
+    @Override
+    public void onChunkUnloaded() {
+        unregisterFireAlarm();
+        super.onChunkUnloaded();
+    }
+
+    private void unregisterFireAlarm() {
+        if (level instanceof ServerLevel server) FireAlarmControls.update(server, worldPosition, range, false);
     }
 
     public void writeMenu(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(worldPosition);
         buffer.writeUtf(soundId(), 48);
         buffer.writeVarInt(range);
+        buffer.writeBoolean(fireAlarm);
 
         var entries = AlarmConfig.entries();
         buffer.writeVarInt(entries.size());
@@ -140,6 +163,7 @@ public class AlarmBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.putString("AlarmSound", soundId);
         tag.putInt("AlarmRange", range);
+        tag.putBoolean("FireAlarm", fireAlarm);
         if (automationOwner != null) {
             tag.putUUID("AutomationOwner", automationOwner);
         }
@@ -150,6 +174,7 @@ public class AlarmBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         soundId = tag.getString("AlarmSound");
+        fireAlarm = tag.getBoolean("FireAlarm");
         automationOwner = tag.hasUUID("AutomationOwner") ? tag.getUUID("AutomationOwner") : null;
         automationInstanceId = tag.hasUUID("AutomationInstanceId") ? tag.getUUID("AutomationInstanceId") : UUID.randomUUID();
         range = tag.contains("AlarmRange")

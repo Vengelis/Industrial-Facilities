@@ -120,7 +120,13 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_BLAST_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_MESH_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FIRE_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_BLAST_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_MESH_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FIRE_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ALARM.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL_THIN.get().asItem());
@@ -134,6 +140,7 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_ENCODED.get());
 				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_MASTER.get());
 				tabData.accept(IndustrialFacilitiesModItems.ACCESS_BADGE_LIMITED.get());
+				tabData.accept(IndustrialFacilitiesModItems.BADGE_WALLET.get());
 				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.SECURITY_CAMERA.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get().asItem());

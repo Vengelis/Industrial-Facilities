@@ -119,7 +119,13 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_SAFE_FRAME;
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_SAFE_CONTROLLER;
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_BLAST_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_MESH_FRAME;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_FIRE_FRAME;
 	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_BLAST_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_MESH_CONTROLLER;
+	public static final DeferredBlock<Block> INDUSTRIAL_DOOR_FIRE_CONTROLLER;
 	public static final DeferredBlock<Block> ALARM;
 	public static final DeferredBlock<Block> LUMINOUS_PANEL;
 	public static final DeferredBlock<Block> LUMINOUS_PANEL_THIN;
@@ -239,7 +245,13 @@ public class IndustrialFacilitiesModBlocks {
 		INDUSTRIAL_DOOR_SAFE_FRAME = REGISTRY.register("industrial_door_safe_frame", IndustrialDoorSafeFrameBlock::new);
 		INDUSTRIAL_DOOR_SAFE_CONTROLLER = REGISTRY.register("industrial_door_safe_controller", IndustrialDoorSafeControllerBlock::new);
 		INDUSTRIAL_DOOR_RADIATION_FRAME = REGISTRY.register("industrial_door_radiation_frame", IndustrialDoorRadiationFrameBlock::new);
+		INDUSTRIAL_DOOR_BLAST_FRAME = REGISTRY.register("industrial_door_blast_frame", IndustrialDoorBlastFrameBlock::new);
+		INDUSTRIAL_DOOR_MESH_FRAME = REGISTRY.register("industrial_door_mesh_frame", IndustrialDoorMeshFrameBlock::new);
+		INDUSTRIAL_DOOR_FIRE_FRAME = REGISTRY.register("industrial_door_fire_frame", IndustrialDoorFireFrameBlock::new);
 		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = REGISTRY.register("industrial_door_radiation_controller", IndustrialDoorRadiationControllerBlock::new);
+		INDUSTRIAL_DOOR_BLAST_CONTROLLER = REGISTRY.register("industrial_door_blast_controller", IndustrialDoorBlastControllerBlock::new);
+		INDUSTRIAL_DOOR_MESH_CONTROLLER = REGISTRY.register("industrial_door_mesh_controller", IndustrialDoorMeshControllerBlock::new);
+		INDUSTRIAL_DOOR_FIRE_CONTROLLER = REGISTRY.register("industrial_door_fire_controller", IndustrialDoorFireControllerBlock::new);
 		ALARM = REGISTRY.register("alarm", AlarmBlock::new);
 		LUMINOUS_PANEL = REGISTRY.register("luminous_panel", LuminousPanelBlock::new);
 		LUMINOUS_PANEL_THIN = REGISTRY.register("luminous_panel_thin", LuminousPanelThinBlock::new);

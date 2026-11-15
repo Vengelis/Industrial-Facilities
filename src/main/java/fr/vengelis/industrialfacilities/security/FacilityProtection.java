@@ -14,6 +14,9 @@ import fr.vengelis.industrialfacilities.access.AccessRegistry;
 import fr.vengelis.industrialfacilities.access.AccessTerminalBlock;
 import fr.vengelis.industrialfacilities.access.AccessTerminalEntity;
 import fr.vengelis.industrialfacilities.access.TerminalLinks;
+import fr.vengelis.industrialfacilities.block.IndustrialDoorPartBlock;
+import fr.vengelis.industrialfacilities.block.IndustrialLiftDoorBlock;
+import fr.vengelis.industrialfacilities.door.BlastDoorShielding;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorBlock;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorEntity;
 import net.minecraft.commands.CommandSourceStack;
@@ -122,8 +125,18 @@ public final class FacilityProtection {
         player.displayClientMessage(Component.translatable(MESSAGE+(owner==null?"unowned":"owner_only")),true);
     }
     @SubscribeEvent public static void detonate(ExplosionEvent.Detonate event){
-        if(event.getLevel() instanceof ServerLevel level)
-            event.getAffectedBlocks().removeIf(pos->level.hasChunkAt(pos)&&protectedBlock(level.getBlockState(pos).getBlock()));
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        event.getAffectedBlocks().removeIf(pos->level.hasChunkAt(pos)&&resistsExplosion(level,pos));
+        event.getAffectedEntities().removeIf(entity->BlastDoorShielding.protects(level,event.getExplosion(),entity));
+    }
+    private static boolean resistsExplosion(ServerLevel level, net.minecraft.core.BlockPos pos) {
+        Block block = level.getBlockState(pos).getBlock();
+        if (block instanceof IndustrialDoorBlock door) return door.style.reinforced();
+        if (block instanceof IndustrialDoorPartBlock) {
+            var door = IndustrialDoorPartBlock.controller(level,pos);
+            return door != null && door.style().reinforced();
+        }
+        return block instanceof IndustrialLiftDoorBlock || block instanceof AccessTerminalBlock || block instanceof SecurityCameraBlock;
     }
     private FacilityProtection(){}
 }

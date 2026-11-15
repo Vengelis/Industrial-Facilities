@@ -5,7 +5,9 @@ import java.util.function.Supplier;
 
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorBlock;
+import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorBlastBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorDarkBlock;
+import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorFireBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorGlassBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorRadiationBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialMetalDoorRestrictedBlock;
@@ -18,6 +20,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -39,8 +42,12 @@ public final class IndustrialMetalDoorContent {
         new Door("_glass", IndustrialMetalDoorGlassBlock::new),
         new Door("_rusty", IndustrialMetalDoorRustyBlock::new),
         new Door("_safe", IndustrialMetalDoorSafeBlock::new),
-        new Door("_radiation", IndustrialMetalDoorRadiationBlock::new)
+        new Door("_radiation", IndustrialMetalDoorRadiationBlock::new),
+        new Door("_fire", IndustrialMetalDoorFireBlock::new),
+        new Door("_blast", IndustrialMetalDoorBlastBlock::new)
     );
+    public static BlockEntityType<IndustrialLiftDoorEntity> LIFT_TYPE;
+    public static BlockEntityType<IndustrialHingedDoorEntity> HINGE_TYPE;
     private static final ResourceLocation TAB = id("industrial_facilities");
     private static final ResourceLocation MULTIBLOCK_ANCHOR = id("industrial_door_radiation_controller");
 
@@ -58,9 +65,23 @@ public final class IndustrialMetalDoorContent {
         event.register(Registries.ITEM, helper -> {
             for (Door door : DOORS) {
                 if (!BuiltInRegistries.ITEM.containsKey(door.id())) {
-                    helper.register(door.id(), new DoubleHighBlockItem(BuiltInRegistries.BLOCK.get(door.id()), new Item.Properties()));
+                    var block = BuiltInRegistries.BLOCK.get(door.id());
+                    var properties = new Item.Properties();
+                    if (block instanceof IndustrialMetalDoorFireBlock) properties.fireResistant();
+                    helper.register(door.id(), new DoubleHighBlockItem(block, properties));
                 }
             }
+        });
+        event.register(Registries.BLOCK_ENTITY_TYPE, helper -> {
+            LIFT_TYPE = BlockEntityType.Builder.of(IndustrialLiftDoorEntity::new,
+                BuiltInRegistries.BLOCK.get(id("industrial_metal_door_radiation")),
+                BuiltInRegistries.BLOCK.get(id("industrial_metal_door_blast"))).build(null);
+            helper.register(id("industrial_lift_door"), LIFT_TYPE);
+            var hinges = DOORS.stream().map(door -> BuiltInRegistries.BLOCK.get(door.id()))
+                .filter(block -> block instanceof IndustrialMetalDoorBlock metal && !metal.style.lifts())
+                .toArray(net.minecraft.world.level.block.Block[]::new);
+            HINGE_TYPE = BlockEntityType.Builder.of(IndustrialHingedDoorEntity::new, hinges).build(null);
+            helper.register(id("industrial_hinged_door"), HINGE_TYPE);
         });
     }
 

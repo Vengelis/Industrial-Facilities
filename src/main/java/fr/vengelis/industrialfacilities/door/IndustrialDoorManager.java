@@ -1,10 +1,12 @@
 package fr.vengelis.industrialfacilities.door;
 
 import fr.vengelis.industrialfacilities.access.AccessDoorService;
+import fr.vengelis.industrialfacilities.alarm.FireAlarmControls;
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -31,6 +33,14 @@ public final class IndustrialDoorManager {
 
     private static boolean isSideColumn(int column, int size) {
         return column == 0 || column == size - 1;
+    }
+
+    public static boolean fireAlarmActive(ServerLevel level, IndustrialDoorEntity door) {
+        if (door.size == 0 || !(door.getBlockState().getBlock() instanceof IndustrialDoorBlock block)
+            || block.style != IndustrialDoorStyle.FIRE) return false;
+        BlockPos origin = door.doorOrigin();
+        int last = door.size - 1;
+        return FireAlarmControls.blocksOpening(level, origin, at(origin, door.getBlockState().getValue(IndustrialDoorBlock.FACING), last, last));
     }
 
     public static boolean assemble(ServerLevel level, BlockPos controller) {
@@ -173,7 +183,10 @@ public final class IndustrialDoorManager {
             door.sync();
         }
 
-        float nextProgress = IndustrialDoorEntity.advance(door.progress, door.targetOpen);
+        float target = door.targetProgress();
+        boolean opening = target > door.progress;
+        int motionTicks = door.motionTicks(opening);
+        float nextProgress = IndustrialDoorEntity.advance(door.progress, target, motionTicks);
         boolean blocked = nextProgress < door.progress && obstructed(level, door, nextProgress);
         if (door.paused != blocked) {
             door.paused = blocked;
@@ -183,10 +196,14 @@ public final class IndustrialDoorManager {
             return;
         }
         if (nextProgress != door.progress) {
+            // A complete movement can arrive at the client as a single block entity update.
+            if (motionTicks == 1) level.playSound(null, at(door.doorOrigin(), 
+                door.getBlockState().getValue(IndustrialDoorBlock.FACING), door.size / 2, door.size / 2),
+                IndustrialDoorSounds.event(door.style(), false, opening), SoundSource.BLOCKS, .8F, 1F);
             door.progress = nextProgress;
             door.sync();
         }
-        if (door.getBlockState().getValue(IndustrialDoorBlock.OPEN) != (door.progress >= 1)) {
+        if (door.getBlockState().getValue(IndustrialDoorBlock.OPEN) != (door.progress == door.openLimit())) {
             updateAppearance(level, door);
         }
     }
@@ -212,6 +229,7 @@ public final class IndustrialDoorManager {
             return;
         }
         Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        boolean open = door.progress == door.openLimit();
         for (int column = 0; column < size; column++) {
             for (int row = 0; row < size; row++) {
                 if (!edge(column, row, size)) {
@@ -222,7 +240,7 @@ public final class IndustrialDoorManager {
                 if (state.getBlock() instanceof IndustrialDoorBlock) {
                     boolean rail = isSideColumn(column, size) && IndustrialDoorVisualState.hasRail(size, row);
                     BlockState next = state.setValue(IndustrialDoorBlock.RAIL, rail)
-                        .setValue(IndustrialDoorBlock.OPEN, door.progress >= 1);
+                        .setValue(IndustrialDoorBlock.OPEN, open);
                     if (next != state) {
                         level.setBlock(pos, next, 3);
                     }
@@ -240,6 +258,17 @@ public final class IndustrialDoorManager {
         double maxX = Math.max(first.getX(), last.getX()) + 1;
         double minZ = Math.min(first.getZ(), last.getZ());
         double maxZ = Math.max(first.getZ(), last.getZ()) + 1;
+        double bottom = first.getY();
+
+        if (door.style() == IndustrialDoorStyle.MESH) {
+            var lowerPanel = IndustrialMeshDoorMotion.lower(innerSize, nextProgress);
+            AABB lower = lowerPanel.bounds(innerSize, innerSize, facing);
+            AABB upper = IndustrialMeshDoorMotion.upper(innerSize, nextProgress).bounds(innerSize, innerSize, facing);
+            AABB beam = IndustrialMeshDoorMotion.hazardBeam(lowerPanel).bounds(innerSize, innerSize, facing);
+            return lower != null && hasObstruction(level, lower.move(minX, bottom, minZ))
+                || upper != null && hasObstruction(level, upper.move(minX, bottom, minZ))
+                || beam != null && hasObstruction(level, beam.move(minX, bottom, minZ));
+        }
 
         // Les vantaux occupent l'épaisseur centrale du cadre. Réduire uniquement l'axe normal à la porte.
         if (facing.getAxis() == Direction.Axis.Z) {
@@ -251,7 +280,10 @@ public final class IndustrialDoorManager {
         }
 
         // La progression règle la demi-hauteur du passage libre entre les deux vantaux.
-        double bottom = first.getY();
+        if (door.lifts()) {
+            double lowerEdge = bottom + innerSize * nextProgress;
+            return hasObstruction(level, new AABB(minX, lowerEdge, minZ, maxX, bottom + innerSize, maxZ));
+        }
         double halfHeight = innerSize / 2.0;
         double halfGap = halfHeight * nextProgress;
         AABB lowerPanel = new AABB(minX, bottom, minZ, maxX, bottom + halfHeight - halfGap, maxZ);

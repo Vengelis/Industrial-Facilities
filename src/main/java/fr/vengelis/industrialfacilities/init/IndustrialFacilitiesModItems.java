@@ -129,7 +129,13 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_SAFE_FRAME;
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_SAFE_CONTROLLER;
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_BLAST_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_MESH_FRAME;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_FIRE_FRAME;
 	public static final DeferredItem<Item> INDUSTRIAL_DOOR_RADIATION_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_BLAST_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_MESH_CONTROLLER;
+	public static final DeferredItem<Item> INDUSTRIAL_DOOR_FIRE_CONTROLLER;
 	public static final DeferredItem<Item> ALARM;
 	public static final DeferredItem<Item> LUMINOUS_PANEL;
 	public static final DeferredItem<Item> LUMINOUS_PANEL_THIN;
@@ -143,6 +149,7 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> ACCESS_BADGE_ENCODED;
 	public static final DeferredItem<Item> ACCESS_BADGE_MASTER;
 	public static final DeferredItem<Item> ACCESS_BADGE_LIMITED;
+	public static final DeferredItem<Item> BADGE_WALLET;
 	public static final DeferredItem<Item> TERMINAL_BADGE_BANK;
 	public static final DeferredItem<Item> SECURITY_CAMERA;
 	public static final DeferredItem<Item> CAMERA_TERMINAL;
@@ -256,7 +263,13 @@ public class IndustrialFacilitiesModItems {
 		INDUSTRIAL_DOOR_SAFE_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_FRAME);
 		INDUSTRIAL_DOOR_SAFE_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_SAFE_CONTROLLER);
 		INDUSTRIAL_DOOR_RADIATION_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME);
+		INDUSTRIAL_DOOR_BLAST_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_BLAST_FRAME);
+		INDUSTRIAL_DOOR_MESH_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_MESH_FRAME);
+		INDUSTRIAL_DOOR_FIRE_FRAME = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FIRE_FRAME, new Item.Properties().fireResistant());
 		INDUSTRIAL_DOOR_RADIATION_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER);
+		INDUSTRIAL_DOOR_BLAST_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_BLAST_CONTROLLER);
+		INDUSTRIAL_DOOR_MESH_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_MESH_CONTROLLER);
+		INDUSTRIAL_DOOR_FIRE_CONTROLLER = block(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FIRE_CONTROLLER, new Item.Properties().fireResistant());
 		ALARM = block(IndustrialFacilitiesModBlocks.ALARM);
 		LUMINOUS_PANEL = block(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL);
 		LUMINOUS_PANEL_THIN = block(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL_THIN);
@@ -270,6 +283,7 @@ public class IndustrialFacilitiesModItems {
 		ACCESS_BADGE_ENCODED = REGISTRY.register("access_badge_encoded", AccessBadgeEncodedItem::new);
 		ACCESS_BADGE_MASTER = REGISTRY.register("access_badge_master", AccessBadgeMasterItem::new);
 		ACCESS_BADGE_LIMITED = REGISTRY.register("access_badge_limited", AccessBadgeLimitedItem::new);
+		BADGE_WALLET = REGISTRY.register("badge_wallet", BadgeWalletItem::new);
 		TERMINAL_BADGE_BANK = block(IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK);
 		SECURITY_CAMERA = block(IndustrialFacilitiesModBlocks.SECURITY_CAMERA);
 		CAMERA_TERMINAL = block(IndustrialFacilitiesModBlocks.CAMERA_TERMINAL);

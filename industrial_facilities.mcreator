@@ -4543,6 +4543,60 @@
       "path": "~/Blocks/IndustrialDoors"
     },
     {
+      "name": "IndustrialDoorBlastFrame",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_blast_frame",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialDoorBlastFrameBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_door_blast_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_blast_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_blast_frame_inventory.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_door_blast_frame.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_door_blast_frame.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorMeshFrame",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_mesh_frame",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialDoorMeshFrameBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_door_mesh_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_mesh_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_mesh_frame_inventory.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_door_mesh_frame.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_door_mesh_frame.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorFireFrame",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_fire_frame",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialDoorFireFrameBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_door_fire_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_fire_frame.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_fire_frame_inventory.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_door_fire_frame.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_door_fire_frame.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
       "name": "IndustrialDoorRadiationFrameRecipe",
       "type": "recipe",
       "compiles": true,
@@ -4552,6 +4606,48 @@
         "files": [
           "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_radiation_frame.json",
           "src/main/resources/data/industrial_facilities/recipe/industrial_door_radiation_frame.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorBlastFrameRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_blast_frame",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_blast_frame.json",
+          "src/main/resources/data/industrial_facilities/recipe/industrial_door_blast_frame.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorMeshFrameRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_mesh_frame",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_mesh_frame.json",
+          "src/main/resources/data/industrial_facilities/recipe/industrial_door_mesh_frame.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorFireFrameRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_fire_frame",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_fire_frame.json",
+          "src/main/resources/data/industrial_facilities/recipe/industrial_door_fire_frame.json"
         ]
       },
       "path": "~/Blocks/IndustrialDoors"
@@ -4572,6 +4668,60 @@
       "path": "~/Blocks/IndustrialDoors"
     },
     {
+      "name": "IndustrialDoorBlastController",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_blast_controller",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialDoorBlastControllerBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_door_blast_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_blast_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_blast_controller_inventory.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_door_blast_controller.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_door_blast_controller.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorMeshController",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_mesh_controller",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialDoorMeshControllerBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_door_mesh_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_mesh_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_mesh_controller_inventory.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_door_mesh_controller.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_door_mesh_controller.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorFireController",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_fire_controller",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialDoorFireControllerBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_door_fire_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_fire_controller.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_door_fire_controller_inventory.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_door_fire_controller.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_door_fire_controller.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
       "name": "IndustrialDoorRadiationControllerRecipe",
       "type": "recipe",
       "compiles": true,
@@ -4581,6 +4731,48 @@
         "files": [
           "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_radiation_controller.json",
           "src/main/resources/data/industrial_facilities/recipe/industrial_door_radiation_controller.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorBlastControllerRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_blast_controller",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_blast_controller.json",
+          "src/main/resources/data/industrial_facilities/recipe/industrial_door_blast_controller.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorMeshControllerRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_mesh_controller",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_mesh_controller.json",
+          "src/main/resources/data/industrial_facilities/recipe/industrial_door_mesh_controller.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialDoorFireControllerRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_door_fire_controller",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/advancement/recipes/industrial_door_fire_controller.json",
+          "src/main/resources/data/industrial_facilities/recipe/industrial_door_fire_controller.json"
         ]
       },
       "path": "~/Blocks/IndustrialDoors"
@@ -4832,6 +5024,54 @@
       "path": "~/Blocks/IndustrialDoors"
     },
     {
+      "name": "IndustrialMetalDoorBlast",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_metal_door_blast",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialMetalDoorBlastBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_metal_door_blast.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_top_left.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_top_right.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_top_left_open.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_top_right_open.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_bottom_left.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_bottom_right.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_bottom_left_open.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_blast_bottom_right_open.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_metal_door_blast.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_metal_door_blast.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialMetalDoorFire",
+      "type": "block",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_metal_door_fire",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/block/IndustrialMetalDoorFireBlock.java",
+          "src/main/resources/assets/industrial_facilities/blockstates/industrial_metal_door_fire.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_top_left.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_top_right.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_top_left_open.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_top_right_open.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_bottom_left.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_bottom_right.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_bottom_left_open.json",
+          "src/main/resources/assets/industrial_facilities/models/block/industrial_metal_door_fire_bottom_right_open.json",
+          "src/main/resources/assets/industrial_facilities/models/item/industrial_metal_door_fire.json",
+          "src/main/resources/data/industrial_facilities/loot_table/blocks/industrial_metal_door_fire.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
       "name": "IndustrialMetalDoorRadiationRecipe",
       "type": "recipe",
       "compiles": true,
@@ -4840,6 +5080,32 @@
       "metadata": {
         "files": [
           "src/main/resources/data/industrial_facilities/recipe/industrial_metal_door_radiation.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialMetalDoorBlastRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_metal_door_blast",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/industrial_metal_door_blast.json"
+        ]
+      },
+      "path": "~/Blocks/IndustrialDoors"
+    },
+    {
+      "name": "IndustrialMetalDoorFireRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "industrial_metal_door_fire",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/industrial_metal_door_fire.json"
         ]
       },
       "path": "~/Blocks/IndustrialDoors"
@@ -5398,6 +5664,35 @@
       "path": "~/Blocks/AccessControl"
     },
     {
+      "name": "BadgeWallet",
+      "type": "item",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "badge_wallet",
+      "metadata": {
+        "files": [
+          "src/main/java/fr/vengelis/industrialfacilities/item/BadgeWalletItem.java",
+          "elements/BadgeWallet.mod.json",
+          "src/main/resources/assets/industrial_facilities/models/item/badge_wallet.json",
+          "src/main/resources/assets/industrial_facilities/textures/item/badge_wallet.png"
+        ]
+      },
+      "path": "~/Blocks/AccessControl"
+    },
+    {
+      "name": "BadgeWalletRecipe",
+      "type": "recipe",
+      "compiles": true,
+      "locked_code": true,
+      "registry_name": "badge_wallet",
+      "metadata": {
+        "files": [
+          "src/main/resources/data/industrial_facilities/recipe/badge_wallet.json"
+        ]
+      },
+      "path": "~/Blocks/AccessControl"
+    },
+    {
       "name": "TerminalBadgeBank",
       "type": "block",
       "compiles": true,
@@ -5537,7 +5832,10 @@
           "src/main/resources/assets/industrial_facilities/models/item/signal_emitter.json",
           "src/main/resources/assets/industrial_facilities/models/block/signal_emitter.json",
           "src/main/resources/data/industrial_facilities/loot_table/blocks/signal_emitter.json",
-          "src/main/resources/assets/industrial_facilities/models/block/signal_emitter_on.json"
+          "src/main/resources/assets/industrial_facilities/models/block/signal_emitter_on.json",
+          "src/main/resources/assets/industrial_facilities/textures/block/signal_emitter_casing.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/signal_emitter_off.png",
+          "src/main/resources/assets/industrial_facilities/textures/block/signal_emitter_on.png"
         ]
       },
       "path": "~/Blocks/Camera"
@@ -5696,6 +5994,310 @@
       "subtitle": ""
     },
     {
+      "name": "industrial_door_multiblock_light_open",
+      "files": [
+        "industrial_door_multiblock_light_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_light_close",
+      "files": [
+        "industrial_door_multiblock_light_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_dark_open",
+      "files": [
+        "industrial_door_multiblock_dark_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_dark_close",
+      "files": [
+        "industrial_door_multiblock_dark_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_restricted_open",
+      "files": [
+        "industrial_door_multiblock_restricted_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_restricted_close",
+      "files": [
+        "industrial_door_multiblock_restricted_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_glass_open",
+      "files": [
+        "industrial_door_multiblock_glass_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_glass_close",
+      "files": [
+        "industrial_door_multiblock_glass_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_rusty_open",
+      "files": [
+        "industrial_door_multiblock_rusty_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_rusty_close",
+      "files": [
+        "industrial_door_multiblock_rusty_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_safe_open",
+      "files": [
+        "industrial_door_multiblock_safe_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_safe_close",
+      "files": [
+        "industrial_door_multiblock_safe_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_radiation_open",
+      "files": [
+        "industrial_door_multiblock_radiation_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_radiation_close",
+      "files": [
+        "industrial_door_multiblock_radiation_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_fire_open",
+      "files": [
+        "industrial_door_multiblock_fire_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_fire_close",
+      "files": [
+        "industrial_door_multiblock_fire_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_blast_open",
+      "files": [
+        "industrial_door_multiblock_blast_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_mesh_open",
+      "files": [
+        "industrial_door_multiblock_mesh_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_blast_close",
+      "files": [
+        "industrial_door_multiblock_blast_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_multiblock_mesh_close",
+      "files": [
+        "industrial_door_multiblock_mesh_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_light_open",
+      "files": [
+        "industrial_door_classic_light_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_light_close",
+      "files": [
+        "industrial_door_classic_light_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_dark_open",
+      "files": [
+        "industrial_door_classic_dark_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_dark_close",
+      "files": [
+        "industrial_door_classic_dark_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_restricted_open",
+      "files": [
+        "industrial_door_classic_restricted_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_restricted_close",
+      "files": [
+        "industrial_door_classic_restricted_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_glass_open",
+      "files": [
+        "industrial_door_classic_glass_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_glass_close",
+      "files": [
+        "industrial_door_classic_glass_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_rusty_open",
+      "files": [
+        "industrial_door_classic_rusty_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_rusty_close",
+      "files": [
+        "industrial_door_classic_rusty_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_safe_open",
+      "files": [
+        "industrial_door_classic_safe_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_safe_close",
+      "files": [
+        "industrial_door_classic_safe_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_radiation_open",
+      "files": [
+        "industrial_door_classic_radiation_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_radiation_close",
+      "files": [
+        "industrial_door_classic_radiation_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_fire_open",
+      "files": [
+        "industrial_door_classic_fire_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_fire_close",
+      "files": [
+        "industrial_door_classic_fire_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_blast_open",
+      "files": [
+        "industrial_door_classic_blast_open"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
+      "name": "industrial_door_classic_blast_close",
+      "files": [
+        "industrial_door_classic_blast_close"
+      ],
+      "category": "block",
+      "subtitle": ""
+    },
+    {
       "name": "industrial_door_open_stop",
       "files": [
         "industrial_door_open_stop"
@@ -5754,6 +6356,14 @@
   ],
   "tag_elements": {
     "BLOCKS:minecraft:mineable/pickaxe": [
+      "~IndustrialDoorMeshFrame@CUSTOM:IndustrialDoorMeshFrame",
+      "~IndustrialDoorMeshController@CUSTOM:IndustrialDoorMeshController",
+      "~IndustrialDoorBlastFrame@CUSTOM:IndustrialDoorBlastFrame",
+      "~IndustrialDoorBlastController@CUSTOM:IndustrialDoorBlastController",
+      "~IndustrialMetalDoorBlast@CUSTOM:IndustrialMetalDoorBlast",
+      "~IndustrialDoorFireFrame@CUSTOM:IndustrialDoorFireFrame",
+      "~IndustrialDoorFireController@CUSTOM:IndustrialDoorFireController",
+      "~IndustrialMetalDoorFire@CUSTOM:IndustrialMetalDoorFire",
       "~AirlockFrame@CUSTOM:AirlockFrame",
       "~Fabricator@CUSTOM:Fabricator",
       "~RoadAsphalt@CUSTOM:RoadAsphalt",
@@ -5879,6 +6489,12 @@
       "~IndustrialMetalDoorRadiation@CUSTOM:IndustrialMetalDoorRadiation"
     ],
     "BLOCKS:minecraft:needs_iron_tool": [
+      "~IndustrialDoorMeshFrame@CUSTOM:IndustrialDoorMeshFrame",
+      "~IndustrialDoorMeshController@CUSTOM:IndustrialDoorMeshController",
+      "~IndustrialDoorBlastFrame@CUSTOM:IndustrialDoorBlastFrame",
+      "~IndustrialDoorBlastController@CUSTOM:IndustrialDoorBlastController",
+      "~IndustrialDoorFireFrame@CUSTOM:IndustrialDoorFireFrame",
+      "~IndustrialDoorFireController@CUSTOM:IndustrialDoorFireController",
       "~AirlockFrame@CUSTOM:AirlockFrame",
       "~Fabricator@CUSTOM:Fabricator",
       "~EnergyBarrierBase@CUSTOM:EnergyBarrierBase",
@@ -6006,6 +6622,8 @@
       "~NetworkTablet@CUSTOM:NetworkTablet"
     ],
     "BLOCKS:minecraft:doors": [
+      "~IndustrialMetalDoorBlast@CUSTOM:IndustrialMetalDoorBlast",
+      "~IndustrialMetalDoorFire@CUSTOM:IndustrialMetalDoorFire",
       "~IndustrialMetalDoor@CUSTOM:IndustrialMetalDoor",
       "~IndustrialMetalDoorDark@CUSTOM:IndustrialMetalDoorDark",
       "~IndustrialMetalDoorRestricted@CUSTOM:IndustrialMetalDoorRestricted",
@@ -6171,9 +6789,18 @@
       "block.industrial_facilities.industrial_door_safe_frame": "Safe Zone Door Frame",
       "block.industrial_facilities.industrial_door_safe_controller": "Safe Zone Door Controller",
       "block.industrial_facilities.industrial_door_radiation_frame": "Radioactive Door Frame",
+      "block.industrial_facilities.industrial_door_blast_frame": "Blast Door Frame",
+      "block.industrial_facilities.industrial_door_mesh_frame": "Mesh Door Frame",
+      "block.industrial_facilities.industrial_door_fire_frame": "Fire Door Frame",
       "block.industrial_facilities.industrial_door_radiation_controller": "Radioactive Door Controller",
+      "block.industrial_facilities.industrial_door_blast_controller": "Blast Door Controller",
+      "block.industrial_facilities.industrial_door_mesh_controller": "Mesh Door Controller",
+      "block.industrial_facilities.industrial_door_fire_controller": "Fire Door Controller",
       "block.industrial_facilities.alarm": "Industrial Alarm",
       "gui.industrial_facilities.alarm.sounds": "Alarm sound",
+      "gui.industrial_facilities.alarm.fire_mode_on": "Fire alarm: on",
+      "gui.industrial_facilities.alarm.fire_mode_off": "Fire alarm: off",
+      "gui.industrial_facilities.alarm.fire_mode_hint": "Closes fire doors within this alarm’s range while it sounds.",
       "gui.industrial_facilities.alarm.range": "Range: %s blocks",
       "gui.industrial_facilities.alarm.preview": "Preview",
       "gui.industrial_facilities.alarm.cancel": "Cancel",
@@ -6206,6 +6833,11 @@
       "item.industrial_facilities.access_badge_encoded": "Programmable Access Badge",
       "item.industrial_facilities.access_badge_master": "Master Access Badge",
       "item.industrial_facilities.access_badge_limited": "Limited-use Access Badge",
+      "item.industrial_facilities.badge_wallet": "Badge Wallet",
+      "gui.industrial_facilities.badge_wallet.title": "Badge Wallet",
+      "gui.industrial_facilities.badge_wallet.capacity": "%s / %s badges",
+      "gui.industrial_facilities.badge_wallet.hint": "Right-click in the air to open.",
+      "gui.industrial_facilities.badge_wallet.denied": "Access denied. The wallet contains no valid badge for this reader.",
       "gui.industrial_facilities.access.reader": "Door Reader Terminal",
       "gui.industrial_facilities.access.encoder": "Badge Encoder Terminal",
       "gui.industrial_facilities.access.door": "Door Control",
@@ -6245,6 +6877,9 @@
       "gui.industrial_facilities.access.door_redstone_hint": "An authorized badge or a redstone signal can open this door.",
       "gui.industrial_facilities.access.door_badge_hint": "An authorized badge is required. Redstone signals are ignored.",
       "gui.industrial_facilities.access.door_unsecured_hint": "With no linked terminal, the door continues to use redstone. This option applies once the door is protected.",
+      "gui.industrial_facilities.access.opening_height_full": "Full opening",
+      "gui.industrial_facilities.access.opening_height_half": "Half-height opening",
+      "gui.industrial_facilities.access.opening_height_hint": "Click to change the opening height. At half height, the lower panel stops behind the upper panel.",
       "gui.industrial_facilities.access.next_code": "Code \u003e",
       "gui.industrial_facilities.access.next_code_hint": "Load the next stored terminal code into the code field.",
       "gui.industrial_facilities.access.invalid_limit": "Invalid count: use 0 (unlimited) or 1 to 1,000,000.",
@@ -6610,7 +7245,9 @@
       "block.industrial_facilities.industrial_metal_door_glass": "Glazed Metal Door",
       "block.industrial_facilities.industrial_metal_door_rusty": "Rusty Metal Door",
       "block.industrial_facilities.industrial_metal_door_safe": "SAFE ZONE Metal Door",
-      "block.industrial_facilities.industrial_metal_door_radiation": "Radioactive Metal Door"
+      "block.industrial_facilities.industrial_metal_door_radiation": "Radioactive Metal Door",
+      "block.industrial_facilities.industrial_metal_door_blast": "Blast Door",
+      "block.industrial_facilities.industrial_metal_door_fire": "Fire Door"
     },
     "fr_fr": {
       "item.industrial_facilities.extinguisher": "Extincteur",
@@ -6766,9 +7403,18 @@
       "block.industrial_facilities.industrial_door_safe_frame": "Cadre de porte SAFE ZONE",
       "block.industrial_facilities.industrial_door_safe_controller": "Contrôleur de porte SAFE ZONE",
       "block.industrial_facilities.industrial_door_radiation_frame": "Cadre de porte radioactive",
+      "block.industrial_facilities.industrial_door_blast_frame": "Cadre de porte blindée",
+      "block.industrial_facilities.industrial_door_mesh_frame": "Cadre de porte grillagée",
+      "block.industrial_facilities.industrial_door_fire_frame": "Cadre de porte coupe-feu",
       "block.industrial_facilities.industrial_door_radiation_controller": "Contrôleur de porte radioactive",
+      "block.industrial_facilities.industrial_door_blast_controller": "Contrôleur de porte blindée",
+      "block.industrial_facilities.industrial_door_mesh_controller": "Contrôleur de porte grillagée",
+      "block.industrial_facilities.industrial_door_fire_controller": "Contrôleur de porte coupe-feu",
       "block.industrial_facilities.alarm": "Alarme industrielle",
       "gui.industrial_facilities.alarm.sounds": "Son de l’alarme",
+      "gui.industrial_facilities.alarm.fire_mode_on": "Mode incendie : activé",
+      "gui.industrial_facilities.alarm.fire_mode_off": "Mode incendie : désactivé",
+      "gui.industrial_facilities.alarm.fire_mode_hint": "Ferme les portes coupe-feu à portée tant que cette alarme est active.",
       "gui.industrial_facilities.alarm.range": "Portée : %s blocs",
       "gui.industrial_facilities.alarm.preview": "Écouter",
       "gui.industrial_facilities.alarm.cancel": "Annuler",
@@ -6801,6 +7447,11 @@
       "item.industrial_facilities.access_badge_encoded": "Badge d’accès programmable",
       "item.industrial_facilities.access_badge_master": "Badge passe-partout",
       "item.industrial_facilities.access_badge_limited": "Badge à utilisations limitées",
+      "item.industrial_facilities.badge_wallet": "Portefeuille de badges",
+      "gui.industrial_facilities.badge_wallet.title": "Portefeuille de badges",
+      "gui.industrial_facilities.badge_wallet.capacity": "%s / %s badges",
+      "gui.industrial_facilities.badge_wallet.hint": "Clic droit dans le vide pour ouvrir.",
+      "gui.industrial_facilities.badge_wallet.denied": "Accès refusé. Aucun badge du portefeuille ne donne accès à ce lecteur.",
       "gui.industrial_facilities.access.reader": "Terminal lecteur",
       "gui.industrial_facilities.access.encoder": "Terminal encodeur",
       "gui.industrial_facilities.access.door": "Contrôle de porte",
@@ -6840,6 +7491,9 @@
       "gui.industrial_facilities.access.door_redstone_hint": "Un badge autorisé ou un signal redstone peut ouvrir cette porte.",
       "gui.industrial_facilities.access.door_badge_hint": "Un badge autorisé est obligatoire. Les signaux redstone sont ignorés.",
       "gui.industrial_facilities.access.door_unsecured_hint": "Sans terminal lié, la porte continue de fonctionner avec la redstone. Ce choix s’applique quand elle sera protégée.",
+      "gui.industrial_facilities.access.opening_height_full": "Ouverture complète",
+      "gui.industrial_facilities.access.opening_height_half": "Ouverture à mi-hauteur",
+      "gui.industrial_facilities.access.opening_height_hint": "Cliquez pour changer la hauteur d’ouverture. À mi-hauteur, le panneau inférieur s’arrête derrière le panneau supérieur.",
       "gui.industrial_facilities.access.next_code": "Code \u003e",
       "gui.industrial_facilities.access.next_code_hint": "Charger le code enregistré suivant dans le champ de saisie.",
       "gui.industrial_facilities.access.invalid_limit": "Nombre invalide : utilisez 0 (illimité) ou de 1 à 1 000 000.",
@@ -7205,7 +7859,9 @@
       "block.industrial_facilities.industrial_metal_door_glass": "Porte métallique vitrée",
       "block.industrial_facilities.industrial_metal_door_rusty": "Porte métallique rouillée",
       "block.industrial_facilities.industrial_metal_door_safe": "Porte métallique SAFE ZONE",
-      "block.industrial_facilities.industrial_metal_door_radiation": "Porte métallique radioactive"
+      "block.industrial_facilities.industrial_metal_door_radiation": "Porte métallique radioactive",
+      "block.industrial_facilities.industrial_metal_door_blast": "Porte blindée",
+      "block.industrial_facilities.industrial_metal_door_fire": "Porte coupe-feu"
     }
   },
   "metadata": {

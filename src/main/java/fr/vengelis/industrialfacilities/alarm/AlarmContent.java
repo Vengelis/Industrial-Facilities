@@ -31,7 +31,7 @@ public final class AlarmContent {
         var r = event.registrar("1");
         r.playToServer(AlarmSettings.TYPE, AlarmSettings.CODEC, (data, context) -> context.enqueueWork(() -> {
             if (context.player().containerMenu instanceof AlarmMenu menu && menu.containerId == data.menuId()
-                && menu.stillValid(context.player())) menu.apply(data.soundId(), data.range(), context.player());
+                && menu.stillValid(context.player())) menu.apply(data.soundId(), data.range(), data.fireAlarm(), context.player());
         }));
         // The client receiver is registered from client-only code. No client classes load on servers.
         r.playToClient(AlarmSignal.TYPE, AlarmSignal.CODEC, (data, context) -> context.enqueueWork(() -> AlarmSignal.receiver.accept(data)));

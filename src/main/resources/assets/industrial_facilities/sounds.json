@@ -39,6 +39,310 @@
       }
     ]
   },
+  "industrial_door_multiblock_light_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_light_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_light_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_light_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_dark_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_dark_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_dark_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_dark_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_restricted_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_restricted_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_restricted_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_restricted_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_glass_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_glass_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_glass_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_glass_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_rusty_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_rusty_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_rusty_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_rusty_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_safe_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_safe_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_safe_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_safe_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_radiation_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_radiation_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_radiation_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_radiation_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_fire_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_fire_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_fire_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_fire_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_blast_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_blast_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_mesh_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_mesh_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_blast_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_blast_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_mesh_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_mesh_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_light_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_light_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_light_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_light_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_dark_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_dark_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_dark_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_dark_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_restricted_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_restricted_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_restricted_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_restricted_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_glass_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_glass_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_glass_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_glass_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_rusty_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_rusty_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_rusty_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_rusty_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_safe_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_safe_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_safe_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_safe_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_radiation_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_radiation_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_radiation_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_radiation_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_fire_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_fire_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_fire_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_fire_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_blast_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_blast_open",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_classic_blast_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_classic_blast_close",
+        "stream": false
+      }
+    ]
+  },
   "industrial_door_open_stop": {
     "sounds": [
       {

@@ -2,7 +2,6 @@ package fr.vengelis.industrialfacilities.door.client;
 
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import fr.vengelis.industrialfacilities.door.*;
-import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.*;
 import net.minecraft.sounds.SoundSource;
@@ -23,7 +22,8 @@ public final class IndustrialDoorAudio {
     }
     private static int direction(IndustrialDoorEntity door) {
         if(door.isRemoved()||door.size==0||door.paused||door.tearingDown||door.getLevel()!=Minecraft.getInstance().level)return 0;
-        return door.targetOpen ? door.progress<1?1:0 : door.progress>0?-1:0;
+        int direction = Float.compare(door.targetProgress(), door.progress);
+        return door.motionTicks(direction > 0) == 1 ? 0 : direction;
     }
     public static void update(IndustrialDoorEntity door) {
         int direction=direction(door);Minecraft mc=Minecraft.getInstance();
@@ -47,7 +47,7 @@ public final class IndustrialDoorAudio {
         private final IndustrialDoorEntity door;
         private final int direction;
         MovementSound(IndustrialDoorEntity door,int direction) {
-            super((direction>0?IndustrialFacilitiesModSounds.INDUSTRIAL_DOOR_OPEN:IndustrialFacilitiesModSounds.INDUSTRIAL_DOOR_CLOSE).get(),SoundSource.BLOCKS,SoundInstance.createUnseededRandom());
+            super(IndustrialDoorSounds.event(door.style(), false, direction > 0), SoundSource.BLOCKS, SoundInstance.createUnseededRandom());
             this.door=door;this.direction=direction;
             looping=false;delay=0;volume=.8f;pitch=1f;
             Vec3 center=center(door);x=center.x;y=center.y;z=center.z;

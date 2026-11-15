@@ -19,11 +19,13 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 public final class AccessMenus {
     public static MenuType<AccessMenu> TYPE;
     public static MenuType<BadgeBankMenu> BANK_TYPE;
+    public static MenuType<BadgeWalletMenu> WALLET_TYPE;
     public static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,path);}
     @SubscribeEvent public static void register(RegisterEvent event){
         event.register(Registries.MENU,helper->{
             TYPE=IMenuTypeExtension.create(AccessMenu::new);helper.register(id("terminal_control"),TYPE);
             BANK_TYPE=IMenuTypeExtension.create(BadgeBankMenu::new);helper.register(id("badge_bank"),BANK_TYPE);
+            WALLET_TYPE=IMenuTypeExtension.create(BadgeWalletMenu::new);helper.register(id("badge_wallet"),WALLET_TYPE);
         });
     }
     public static void open(Player player,AccessTerminalEntity terminal){

@@ -1,29 +1,83 @@
 package fr.vengelis.industrialfacilities.block;
 
 import javax.annotation.Nullable;
+import fr.vengelis.industrialfacilities.alarm.FireAlarmControls;
+import fr.vengelis.industrialfacilities.door.DoorMotionConfig;
+import fr.vengelis.industrialfacilities.door.IndustrialDoorSounds;
+import fr.vengelis.industrialfacilities.door.IndustrialDoorStyle;
+import fr.vengelis.industrialfacilities.door.IndustrialHingedDoorEntity;
+import fr.vengelis.industrialfacilities.door.IndustrialMetalDoorContent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
-public class IndustrialMetalDoorBlock extends DoorBlock {
+public class IndustrialMetalDoorBlock extends DoorBlock implements EntityBlock {
+    public final IndustrialDoorStyle style;
+
     public IndustrialMetalDoorBlock() {
-        super(BlockSetType.IRON, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-            .strength(5.0F).sound(SoundType.METAL).requiresCorrectToolForDrops()
-            .noOcclusion().pushReaction(PushReaction.DESTROY));
+        this(IndustrialDoorStyle.LIGHT);
+    }
+
+    protected IndustrialMetalDoorBlock(IndustrialDoorStyle style) {
+        this(style, properties(style.blastResistance()));
+    }
+
+    protected IndustrialMetalDoorBlock(IndustrialDoorStyle style, BlockBehaviour.Properties properties) {
+        super(BlockSetType.IRON, properties);
+        this.style = style;
+    }
+
+    public static boolean isMetalDoorBase(BlockState state) {
+        return state.getBlock() instanceof IndustrialMetalDoorBlock && state.getValue(HALF) == DoubleBlockHalf.LOWER;
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return isMetalDoorBase(state) ? new IndustrialHingedDoorEntity(pos, state) : null;
+    }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (!(level instanceof ServerLevel server) || type != IndustrialMetalDoorContent.HINGE_TYPE || !isMetalDoorBase(state)) return null;
+        return (world, pos, current, be) -> ((IndustrialHingedDoorEntity) be).tick(server, current);
+    }
+
+    @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        // Doors already in a save may not have a movement block entity yet.
+        if (isMetalDoorBase(state)) level.getChunkAt(pos).getBlockEntity(pos, LevelChunk.EntityCreationType.IMMEDIATE);
+    }
+
+    @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockState state = super.getStateForPlacement(context);
+        return state == null ? null : state.setValue(OPEN, false).setValue(POWERED, false);
+    }
+
+    protected static BlockBehaviour.Properties properties(float blastResistance) {
+        return BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+            .strength(5.0F, blastResistance).sound(SoundType.METAL).requiresCorrectToolForDrops()
+            .noOcclusion().pushReaction(PushReaction.DESTROY);
     }
 
     @Override
@@ -81,33 +135,66 @@ public class IndustrialMetalDoorBlock extends DoorBlock {
         return true;
     }
 
-    private static void updatePower(Level level, BlockPos pos) {
+    protected static void updatePower(Level level, BlockPos pos) {
         BlockState lower = lowerHalf(level, pos);
         if (lower == null) return;
         BlockPos other = partner(level, pos, lower);
         // Read the redstone inputs directly so an open partner cannot keep the pair powered.
         boolean powered = receivesSignal(level, pos) || other != null && receivesSignal(level, other);
-        applyPower(level, pos, powered);
-        if (other != null) applyPower(level, other, powered);
+        if (powered && level instanceof ServerLevel server
+            && (lockedByAlarm(server, pos, lower) || other != null && lockedByAlarm(server, other, level.getBlockState(other)))) {
+            powered = false;
+        }
+        int ticks = motionTicks(level, pos, lower, powered);
+        applyPower(level, pos, powered, ticks);
+        if (other != null) applyPower(level, other, powered, ticks);
+    }
+
+    public static int motionTicks(Level level, BlockPos pos, BlockState state, boolean opening) {
+        var block = (IndustrialMetalDoorBlock) state.getBlock();
+        int own = DoorMotionConfig.ticks(block.style, true, opening);
+        BlockPos adjacent = partner(level, pos, state);
+        if (adjacent == null) return own;
+        var other = (IndustrialMetalDoorBlock) level.getBlockState(adjacent).getBlock();
+        return Math.max(own, DoorMotionConfig.ticks(other.style, true, opening));
+    }
+
+    public static boolean finishPivot(Level level, BlockPos pos, boolean opening) {
+        BlockState lower = lowerHalf(level, pos);
+        if (lower == null || lower.getValue(POWERED) != opening) return false;
+        BlockState updated = lower.setValue(OPEN, opening);
+        if (!level.setBlock(pos, updated, Block.UPDATE_CLIENTS)) return false;
+        doorGameEvent(level, pos, updated, opening);
+        return true;
+    }
+
+    private static boolean lockedByAlarm(ServerLevel level, BlockPos pos, BlockState state) {
+        return state.getBlock() instanceof IndustrialMetalDoorFireBlock
+            && FireAlarmControls.blocksOpening(level, pos, pos.above());
     }
 
     private static boolean receivesSignal(Level level, BlockPos pos) {
         return level.hasNeighborSignal(pos) || level.hasNeighborSignal(pos.above());
     }
 
-    private static void applyPower(Level level, BlockPos pos, boolean powered) {
+    private static void applyPower(Level level, BlockPos pos, boolean powered, int ticks) {
         BlockState lower = level.getBlockState(pos);
-        if (!(lower.getBlock() instanceof IndustrialMetalDoorBlock) || lower.getValue(HALF) != DoubleBlockHalf.LOWER) return;
+        if (!(lower.getBlock() instanceof IndustrialMetalDoorBlock door) || lower.getValue(HALF) != DoubleBlockHalf.LOWER) return;
         boolean moved = lower.getValue(OPEN) != powered;
-        if (!moved && lower.getValue(POWERED) == powered) return;
+        boolean changesTarget = lower.getValue(POWERED) != powered;
+        if (!changesTarget) return;
 
         // DoorBlock.updateShape copies the lower state to the upper half.
-        BlockState updated = lower.setValue(OPEN, powered).setValue(POWERED, powered);
+        BlockState updated = lower.setValue(POWERED, powered);
+        if (door.style.lifts() || ticks == 0) updated = updated.setValue(OPEN, powered);
         if (level.setBlock(pos, updated, Block.UPDATE_CLIENTS) && moved) {
-            BlockSetType metal = BlockSetType.IRON;
-            level.playSound(null, pos, powered ? metal.doorOpen() : metal.doorClose(), SoundSource.BLOCKS,
-                1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
-            level.gameEvent(powered ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos, GameEvent.Context.of(updated));
+            if (ticks > 0 && level.getBlockEntity(pos) instanceof IndustrialHingedDoorEntity hinge) hinge.begin(powered, ticks);
+            level.playSound(null, pos, IndustrialDoorSounds.event(door.style, true, powered), SoundSource.BLOCKS, .8F, 1F);
+            if (updated.getValue(OPEN) == powered) doorGameEvent(level, pos, updated, powered);
         }
+    }
+
+    private static void doorGameEvent(Level level, BlockPos pos, BlockState state, boolean opening) {
+        level.gameEvent(opening ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos, GameEvent.Context.of(state));
     }
 }

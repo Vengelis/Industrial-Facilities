@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 /** État du contrôleur et référence au contrôleur pour chaque bloc de la porte assemblée. */
 public class IndustrialDoorEntity extends BlockEntity {
     private static final int ORPHAN_CHECK_INTERVAL = 20;
-    private static final float ANIMATION_STEP = 1f / 40;
 
     // Le client installe ce callback. Le serveur dédié peut charger cette classe sans les classes audio.
     public static Consumer<IndustrialDoorEntity> clientSoundTick = door -> {};
@@ -30,6 +29,7 @@ public class IndustrialDoorEntity extends BlockEntity {
     public UUID placedBy;
     public boolean allowLinkedRedstone;
     public boolean allowCameraAutomation;
+    public boolean halfOpening;
     public UUID automationOwner;
     public long accessOpenUntil;
     public float progress;
@@ -45,6 +45,26 @@ public class IndustrialDoorEntity extends BlockEntity {
     public BlockPos doorOrigin() {
         // Les premières sauvegardes prenaient le contrôleur comme coin de référence.
         return origin != null ? origin : getBlockPos();
+    }
+
+    public boolean lifts() {
+        return getBlockState().getBlock() instanceof IndustrialDoorBlock block && block.style.lifts();
+    }
+
+    public IndustrialDoorStyle style() {
+        return getBlockState().getBlock() instanceof IndustrialDoorBlock block ? block.style : IndustrialDoorStyle.LIGHT;
+    }
+
+    public int motionTicks(boolean opening) {
+        return DoorMotionConfig.ticks(style(), false, opening);
+    }
+
+    public float openLimit() {
+        return halfOpening && style() == IndustrialDoorStyle.MESH ? .5f : 1f;
+    }
+
+    public float targetProgress() {
+        return targetOpen ? openLimit() : 0f;
     }
 
     @Override
@@ -118,6 +138,7 @@ public class IndustrialDoorEntity extends BlockEntity {
         }
         tag.putBoolean("AllowCameraAutomation", allowCameraAutomation);
         tag.putBoolean("AllowLinkedRedstone", allowLinkedRedstone);
+        tag.putBoolean("HalfOpening", halfOpening);
         tag.putLong("AccessOpenUntil", accessOpenUntil);
 
         if (owner != null) {
@@ -140,6 +161,7 @@ public class IndustrialDoorEntity extends BlockEntity {
         automationOwner = tag.hasUUID("AutomationOwner") ? tag.getUUID("AutomationOwner") : null;
         allowCameraAutomation = tag.getBoolean("AllowCameraAutomation");
         allowLinkedRedstone = tag.getBoolean("AllowLinkedRedstone");
+        halfOpening = tag.getBoolean("HalfOpening");
         accessOpenUntil = tag.getLong("AccessOpenUntil");
 
         owner = tag.contains("Owner") ? BlockPos.of(tag.getLong("Owner")) : null;
@@ -174,21 +196,27 @@ public class IndustrialDoorEntity extends BlockEntity {
             return;
         }
         if (level.isClientSide) {
-            if (!door.paused) {
-                door.progress = advance(door.progress, door.targetOpen);
-            }
             clientSoundTick.accept(door);
+            if (!door.paused) {
+                float target = door.targetProgress();
+                door.progress = advance(door.progress, target, door.motionTicks(target > door.progress));
+            }
             return;
         }
         IndustrialDoorManager.tick((ServerLevel) level, door);
     }
 
     public static float advance(float progress, boolean open) {
-        float next = Math.clamp(progress + (open ? ANIMATION_STEP : -ANIMATION_STEP), 0, 1);
-        // Ramener les valeurs proches des extrémités à 0 ou 1 malgré les arrondis du flottant.
-        if (next > .99999f) {
-            return 1;
-        }
-        return next < .00001f ? 0 : next;
+        return advance(progress, open, DoorMotionConfig.DEFAULT_TICKS);
+    }
+
+    public static float advance(float progress, boolean open, int ticks) {
+        return advance(progress, open ? 1f : 0f, ticks);
+    }
+
+    public static float advance(float progress, float target, int ticks) {
+        float remaining = target - progress;
+        if (ticks == 0 || Math.abs(remaining) <= 1f / ticks + .0001f) return target;
+        return progress + Math.copySign(1f / ticks, remaining);
     }
 }

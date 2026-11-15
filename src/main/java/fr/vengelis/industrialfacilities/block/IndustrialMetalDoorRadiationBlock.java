@@ -1,4 +1,9 @@
 package fr.vengelis.industrialfacilities.block;
 
-public class IndustrialMetalDoorRadiationBlock extends IndustrialMetalDoorBlock {
+import fr.vengelis.industrialfacilities.door.IndustrialDoorStyle;
+
+public class IndustrialMetalDoorRadiationBlock extends IndustrialLiftDoorBlock {
+    public IndustrialMetalDoorRadiationBlock() {
+        super(IndustrialDoorStyle.RADIATION);
+    }
 }
