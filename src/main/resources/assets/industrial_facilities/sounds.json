@@ -183,6 +183,14 @@
       }
     ]
   },
+  "industrial_door_multiblock_iris_open": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_iris_open",
+        "stream": false
+      }
+    ]
+  },
   "industrial_door_multiblock_blast_close": {
     "sounds": [
       {
@@ -195,6 +203,14 @@
     "sounds": [
       {
         "name": "industrial_facilities:industrial_door_multiblock_mesh_close",
+        "stream": false
+      }
+    ]
+  },
+  "industrial_door_multiblock_iris_close": {
+    "sounds": [
+      {
+        "name": "industrial_facilities:industrial_door_multiblock_iris_close",
         "stream": false
       }
     ]

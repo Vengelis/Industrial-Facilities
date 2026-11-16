@@ -19,6 +19,7 @@ public class AccessMenu extends AbstractContainerMenu {
     public static final int READER=0,ENCODER=1,DOOR=2;
     public static final int SET_LEVEL=0,CLEAR_LINKS=1,ADD_CODE=2,REMOVE_CODE=3,CLEAR_BADGE=4,MASTER=5,LIMIT=6,REDSTONE=7,RENAME=8,SET_BANK_SHARING=9,CAMERA_AUTOMATION=10;
     public static final int HALF_OPENING=11;
+    public static final int IRIS_OPENING=12;
     public final Inventory inventory;
     public final BlockPos position;
     public final int mode;
@@ -28,6 +29,7 @@ public class AccessMenu extends AbstractContainerMenu {
     public int accessLevel=1,links;
     public boolean editable,allowRedstone,secured,allowCameraAutomation;
     public boolean meshDoor,halfOpening;
+    public int irisOpeningPercent=-1;
     private final AccessTerminalEntity terminal;
     private final IndustrialDoorEntity door;
     private final UUID instanceId;
@@ -96,18 +98,20 @@ public class AccessMenu extends AbstractContainerMenu {
             secured=AccessDoorService.isSecured(door);
             meshDoor=door.style()==IndustrialDoorStyle.MESH;
             halfOpening=meshDoor&&door.halfOpening;
+            irisOpeningPercent=door.style()==IndustrialDoorStyle.IRIS?door.irisOpeningPercent:-1;
         }
     }
     @Override public void broadcastChanges(){
         super.broadcastChanges();if(!(inventory.player instanceof ServerPlayer server))return;
         refresh();var current=new AccessMessages.State(containerId,code,accessLevel,links,editable,
-            allowRedstone,secured,allowCameraAutomation,meshDoor,halfOpening,status);
+            allowRedstone,secured,allowCameraAutomation,meshDoor,halfOpening,irisOpeningPercent,status);
         if(!current.equals(lastState)){lastState=current;PacketDistributor.sendToPlayer(server,current);}
     }
     public void receive(AccessMessages.State state){
         if(state.menuId()!=containerId)return;
         code=state.code();accessLevel=Math.clamp(state.level(),1,5);links=Math.max(0,state.links());editable=state.editable();allowRedstone=state.redstone();secured=state.secured();allowCameraAutomation=state.cameraAutomation();status=state.status();
         meshDoor=state.meshDoor();halfOpening=state.halfOpening();
+        irisOpeningPercent=state.irisOpeningPercent();
     }
     public void apply(Player player,int action,String enteredCode,int value){
         if(player.level().isClientSide()||player.containerMenu!=this||!stillValid(player)||enteredCode==null||enteredCode.length()>64)return;
@@ -118,11 +122,12 @@ public class AccessMenu extends AbstractContainerMenu {
             else return;
             status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";
         }else if(mode==DOOR){
-            if(value!=0&&value!=1)return;
+            if(action!=IRIS_OPENING&&value!=0&&value!=1)return;
             switch(action){
                 case REDSTONE -> changed=AccessDoorService.setAllowRedstone(player,door,value==1);
                 case CAMERA_AUTOMATION -> changed=AccessDoorService.setAllowCameraAutomation(player,door,value==1);
                 case HALF_OPENING -> changed=AccessDoorService.setHalfOpening(player,door,value==1);
+                case IRIS_OPENING -> changed=AccessDoorService.setIrisOpening(player,door,value);
                 default -> {return;}
             }
             status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";

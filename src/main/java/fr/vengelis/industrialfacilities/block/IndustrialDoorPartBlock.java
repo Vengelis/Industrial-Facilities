@@ -37,7 +37,13 @@ public class IndustrialDoorPartBlock extends Block implements EntityBlock {
     private static VoxelShape collision(IndustrialDoorEntity door, BlockPos p) {
         double height=door.size-2, half=height/2, travel=half*door.progress;
         double row=p.getY()-door.doorOrigin().getY()-1;
-        var facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        var facing = IndustrialDoorBlock.facing(door.getBlockState());
+        if (door.style() == IndustrialDoorStyle.IRIS) {
+            BlockPos origin = IndustrialDoorManager.at(door.doorOrigin(), facing, 1, 1);
+            int column = IndustrialDoorPlane.offset(origin, p, IndustrialDoorPlane.across(facing));
+            int line = IndustrialDoorPlane.offset(origin, p, IndustrialDoorPlane.up(facing));
+            return IndustrialIrisDoorMotion.collision((int) height, door.progress, facing, column, line);
+        }
         if (door.style() == IndustrialDoorStyle.MESH) {
             var lower = IndustrialMeshDoorMotion.lower(height, door.progress);
             return Shapes.or(meshShape(lower.bounds(1, height, facing), row),

@@ -118,6 +118,13 @@ public final class AccessDoorService {
         return true;
     }
 
+    public static boolean setIrisOpening(Player player, IndustrialDoorEntity door, int percent) {
+        if (percent < 0 || percent > 100 || door.style() != IndustrialDoorStyle.IRIS || !canChangeSettings(player, door)) return false;
+        door.irisOpeningPercent = percent;
+        door.sync();
+        return true;
+    }
+
     private static boolean canChangeSettings(Player player, IndustrialDoorEntity door) {
         return player.isAlive() && !outsideInteractionRange(player, door.getBlockPos()) && canConfigure(player, door);
     }

@@ -24,7 +24,7 @@ public final class IndustrialDoorManager {
 
     /** Convertit une colonne et une ligne du cadre en coordonnées du monde. */
     public static BlockPos at(BlockPos origin, Direction facing, int column, int row) {
-        return origin.relative(facing.getCounterClockWise(), column).above(row);
+        return origin.relative(IndustrialDoorPlane.across(facing), column).relative(IndustrialDoorPlane.up(facing), row);
     }
 
     public static boolean edge(int column, int row, int size) {
@@ -40,7 +40,7 @@ public final class IndustrialDoorManager {
             || block.style != IndustrialDoorStyle.FIRE) return false;
         BlockPos origin = door.doorOrigin();
         int last = door.size - 1;
-        return FireAlarmControls.blocksOpening(level, origin, at(origin, door.getBlockState().getValue(IndustrialDoorBlock.FACING), last, last));
+        return FireAlarmControls.blocksOpening(level, origin, at(origin, IndustrialDoorBlock.facing(door.getBlockState()), last, last));
     }
 
     public static boolean assemble(ServerLevel level, BlockPos controller) {
@@ -50,7 +50,7 @@ public final class IndustrialDoorManager {
             return false;
         }
 
-        Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
         // Le contrôleur peut occuper toute case du contour. Tester les petits cadres en premier
         // conserve le choix du cadre si plusieurs carrés valides partagent le même contrôleur.
         for (int size = MIN_FRAME_SIZE; size <= MAX_FRAME_SIZE; size++) {
@@ -72,7 +72,7 @@ public final class IndustrialDoorManager {
 
     private static boolean isValidFrame(ServerLevel level, BlockPos controller, BlockPos origin,
                                         Direction facing, int size, IndustrialDoorBlock controllerBlock) {
-        if (origin.getY() < level.getMinBuildHeight() || origin.getY() + size > level.getMaxBuildHeight()) {
+        if (level.isOutsideBuildHeight(origin) || level.isOutsideBuildHeight(at(origin, facing, size - 1, size - 1))) {
             return false;
         }
         for (int column = 0; column < size; column++) {
@@ -124,8 +124,7 @@ public final class IndustrialDoorManager {
                 BlockPos pos = at(origin, facing, column, row);
                 if (edge(column, row, size)) {
                     boolean sideColumn = isSideColumn(column, size);
-                    BlockState frame = level.getBlockState(pos)
-                        .setValue(IndustrialDoorBlock.FACING, facing)
+                    BlockState frame = IndustrialDoorBlock.withFacing(level.getBlockState(pos), facing)
                         .setValue(IndustrialDoorBlock.ACTIVE, true)
                         .setValue(IndustrialDoorBlock.OPEN, false)
                         .setValue(IndustrialDoorBlock.RAIL, sideColumn && IndustrialDoorVisualState.hasRail(size, row))
@@ -144,7 +143,7 @@ public final class IndustrialDoorManager {
     }
 
     public static boolean allLoaded(ServerLevel level, IndustrialDoorEntity door) {
-        Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
         BlockPos origin = door.doorOrigin();
         for (int column = 0; column < door.size; column++) {
             for (int row = 0; row < door.size; row++) {
@@ -198,18 +197,18 @@ public final class IndustrialDoorManager {
         if (nextProgress != door.progress) {
             // A complete movement can arrive at the client as a single block entity update.
             if (motionTicks == 1) level.playSound(null, at(door.doorOrigin(), 
-                door.getBlockState().getValue(IndustrialDoorBlock.FACING), door.size / 2, door.size / 2),
+                IndustrialDoorBlock.facing(door.getBlockState()), door.size / 2, door.size / 2),
                 IndustrialDoorSounds.event(door.style(), false, opening), SoundSource.BLOCKS, .8F, 1F);
             door.progress = nextProgress;
             door.sync();
         }
-        if (door.getBlockState().getValue(IndustrialDoorBlock.OPEN) != (door.progress == door.openLimit())) {
+        if (door.getBlockState().getValue(IndustrialDoorBlock.OPEN) != door.isAtOpenLimit()) {
             updateAppearance(level, door);
         }
     }
 
     private static boolean hasAllMembers(ServerLevel level, IndustrialDoorEntity door) {
-        Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
         BlockPos origin = door.doorOrigin();
         for (int column = 0; column < door.size; column++) {
             for (int row = 0; row < door.size; row++) {
@@ -228,8 +227,8 @@ public final class IndustrialDoorManager {
         if (size == 0) {
             return;
         }
-        Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
-        boolean open = door.progress == door.openLimit();
+        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
+        boolean open = door.isAtOpenLimit();
         for (int column = 0; column < size; column++) {
             for (int row = 0; row < size; row++) {
                 if (!edge(column, row, size)) {
@@ -251,8 +250,13 @@ public final class IndustrialDoorManager {
 
     private static boolean obstructed(ServerLevel level, IndustrialDoorEntity door, float nextProgress) {
         int innerSize = door.size - 2;
-        Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
         BlockPos first = at(door.doorOrigin(), facing, 1, 1);
+        if (door.style() == IndustrialDoorStyle.IRIS) {
+            AABB slab = IndustrialDoorPlane.worldBox(first, facing, IndustrialIrisDoorMotion.slab(innerSize));
+            return !level.getEntities((Entity) null, slab, entity -> entity.isAlive() && !entity.isSpectator()
+                && !IndustrialIrisDoorMotion.isClear(innerSize, nextProgress, IndustrialDoorPlane.localBox(first, facing, entity.getBoundingBox()))).isEmpty();
+        }
         BlockPos last = at(door.doorOrigin(), facing, innerSize, innerSize);
         double minX = Math.min(first.getX(), last.getX());
         double maxX = Math.max(first.getX(), last.getX()) + 1;
@@ -313,7 +317,7 @@ public final class IndustrialDoorManager {
         AccessDoorService.dismantle(level, door);
         door.tearingDown = true;
         int size = door.size;
-        Direction facing = door.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
         BlockPos origin = door.doorOrigin();
 
         for (int column = 0; column < size; column++) {

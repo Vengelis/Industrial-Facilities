@@ -26,6 +26,9 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private ItemStack observedNameBadge=ItemStack.EMPTY;
     private Button clearLinks,clearBadge,redstone,nextCode,renameBadge,bankSharing,cameraAutomation;
     private Button openingHeight;
+    private EditBox irisPercent;
+    private Button applyIrisPercent;
+    private int lastIrisPercent = -1;
     private final List<Button> readerLevels=new ArrayList<>(),masterLevels=new ArrayList<>(),ownerButtons=new ArrayList<>(),encodingButtons=new ArrayList<>();
     public AccessScreen(AccessMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=340;imageHeight=menu.mode==AccessMenu.ENCODER?284:218;}
     private static Component tr(String key,Object... args){return Component.translatable("gui.industrial_facilities.access."+key,args);}
@@ -93,6 +96,14 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         cameraAutomation=button(14,88,imageWidth-28,22,Component.empty(),b->send(AccessMenu.CAMERA_AUTOMATION,"",menu.allowCameraAutomation?0:1));ownerButtons.add(cameraAutomation);
         openingHeight=button(14,114,imageWidth-28,22,Component.empty(),b->send(AccessMenu.HALF_OPENING,"",menu.halfOpening?0:1));
         openingHeight.setTooltip(Tooltip.create(tr("opening_height_hint")));
+        irisPercent=field(138,116,52,18,tr("iris_opening"));
+        irisPercent.setMaxLength(3);
+        irisPercent.setFilter(value->value.matches("[0-9]{0,3}"));
+        irisPercent.setResponder(value->refreshIrisControls());
+        applyIrisPercent=button(imageWidth-100,114,86,22,tr("apply_iris_opening"),
+            b->send(AccessMenu.IRIS_OPENING,"",Integer.parseInt(irisPercent.getValue())));
+        irisPercent.setTooltip(Tooltip.create(tr("iris_opening_hint")));
+        lastIrisPercent=-1;
         button(imageWidth-88,172,74,20,tr("close"),b->onClose());
     }
     @Override protected void containerTick(){super.containerTick();refresh();}
@@ -108,6 +119,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             openingHeight.active=menu.meshDoor&&menu.editable;
             openingHeight.setMessage(tr(menu.halfOpening?"opening_height_half":"opening_height_full"));
         }
+        refreshIrisControls();
         if(nextCode!=null)nextCode.active=!AccessBadges.codes(menu.input.getItem(0)).isEmpty();
         if(nameInput!=null&&menu.mode==AccessMenu.ENCODER){
             boolean canEncode=AccessMenu.badge(menu.input.getItem(0));
@@ -118,6 +130,19 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             for(Button b:masterLevels)b.active=canEncode;
             codeInput.setEditable(canEncode);limitInput.setEditable(canEncode);refreshName();
         }
+    }
+    private void refreshIrisControls(){
+        if(irisPercent==null||applyIrisPercent==null)return;
+        boolean shown=menu.irisOpeningPercent>=0;
+        if(shown&&menu.irisOpeningPercent!=lastIrisPercent){
+            lastIrisPercent=menu.irisOpeningPercent;
+            irisPercent.setValue(Integer.toString(lastIrisPercent));
+        }
+        irisPercent.visible=shown;
+        irisPercent.setEditable(shown&&menu.editable);
+        applyIrisPercent.visible=shown;
+        String value=irisPercent.getValue();
+        applyIrisPercent.active=shown&&menu.editable&&!value.isEmpty()&&Integer.parseInt(value)<=100;
     }
     private void refreshName(){
         ItemStack badge=menu.input.getItem(0);Component custom=badge.get(DataComponents.CUSTOM_NAME);
@@ -164,8 +189,10 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             g.drawString(font,tr("card_slot"),14,invY+10,ACCENT,false);if(!compact)g.drawString(font,playerInventoryTitle,89,invY-11,MUTED,false);
         }else{
             g.drawString(font,tr(menu.secured?"secured":"unsecured"),14,41,ACCENT,false);
-            wrapped(g,tr(menu.secured?(menu.allowRedstone?"door_redstone_hint":"door_badge_hint"):"door_unsecured_hint"),14,menu.meshDoor?141:120,imageWidth-28,MUTED);
-            if(!menu.editable)drawFit(g,tr("read_only"),14,menu.meshDoor?173:149,imageWidth-110,0xD6A97B);
+            boolean hasOpeningOption=menu.meshDoor||menu.irisOpeningPercent>=0;
+            if(menu.irisOpeningPercent>=0)g.drawString(font,tr("iris_opening"),14,121,TEXT,false);
+            wrapped(g,tr(menu.secured?(menu.allowRedstone?"door_redstone_hint":"door_badge_hint"):"door_unsecured_hint"),14,hasOpeningOption?141:120,imageWidth-28,MUTED);
+            if(!menu.editable)drawFit(g,tr("read_only"),14,hasOpeningOption?173:149,imageWidth-110,0xD6A97B);
             drawFit(g,status(menu.status),14,197,imageWidth-28,TEXT);
         }
     }

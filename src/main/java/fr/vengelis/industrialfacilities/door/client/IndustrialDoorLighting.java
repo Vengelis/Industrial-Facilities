@@ -1,5 +1,6 @@
 package fr.vengelis.industrialfacilities.door.client;
 
+import fr.vengelis.industrialfacilities.door.IndustrialDoorPlane;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -13,7 +14,7 @@ public final class IndustrialDoorLighting {
     private static final double EPSILON = .001;
     private final Level level;
     private final BlockPos origin;
-    private final Direction facing, right;
+    private final Direction facing, right, up;
     private final boolean panel;
     private final Map<BlockPos,Integer> samples = new HashMap<>();
 
@@ -25,7 +26,8 @@ public final class IndustrialDoorLighting {
         this.level = level;
         this.origin = origin;
         this.facing = facing;
-        this.right = facing.getCounterClockWise();
+        this.right = IndustrialDoorPlane.across(facing);
+        this.up = IndustrialDoorPlane.up(facing);
         this.panel = panel;
     }
 
@@ -56,8 +58,9 @@ public final class IndustrialDoorLighting {
     }
 
     private int sample(double x,double y,double z) {
-        BlockPos pos=BlockPos.containing(origin.getX()+.5+right.getStepX()*(x-.5)+facing.getStepX()*(z-.5),
-            origin.getY()+y,origin.getZ()+.5+right.getStepZ()*(x-.5)+facing.getStepZ()*(z-.5));
+        BlockPos pos=BlockPos.containing(origin.getX()+.5+right.getStepX()*(x-.5)+up.getStepX()*(y-.5)+facing.getStepX()*(z-.5),
+            origin.getY()+.5+right.getStepY()*(x-.5)+up.getStepY()*(y-.5)+facing.getStepY()*(z-.5),
+            origin.getZ()+.5+right.getStepZ()*(x-.5)+up.getStepZ()*(y-.5)+facing.getStepZ()*(z-.5));
         return samples.computeIfAbsent(pos,p->LevelRenderer.getLightColor(level,p));
     }
 }

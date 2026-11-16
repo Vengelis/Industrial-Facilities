@@ -65,7 +65,7 @@ public final class NetworkTabletModels {
     }
     private static boolean door(ClientLevel level,IndustrialDoorEntity root,float partial,PoseStack pose,MultiBufferSource buffers){
         if(root.size<5||root.size>15||!(root.getBlockState().getBlock() instanceof IndustrialDoorBlock))return false;
-        BlockPos origin=root.doorOrigin();Direction facing=root.getBlockState().getValue(IndustrialDoorBlock.FACING);
+        BlockPos origin=root.doorOrigin();Direction facing=IndustrialDoorBlock.facing(root.getBlockState());
         // Validate the complete loaded structure before emitting any vertices. No partial
         // outline is fabricated for a large multiblock whose far cells are still unloaded.
         for(int x=0;x<root.size;x++)for(int y=0;y<root.size;y++)if(!level.hasChunkAt(IndustrialDoorManager.at(origin,facing,x,y)))return false;

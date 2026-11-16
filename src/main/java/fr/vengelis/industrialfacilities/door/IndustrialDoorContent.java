@@ -7,6 +7,8 @@ import fr.vengelis.industrialfacilities.block.IndustrialDoorBlastControllerBlock
 import fr.vengelis.industrialfacilities.block.IndustrialDoorBlastFrameBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialDoorFireControllerBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialDoorFireFrameBlock;
+import fr.vengelis.industrialfacilities.block.IndustrialDoorIrisControllerBlock;
+import fr.vengelis.industrialfacilities.block.IndustrialDoorIrisFrameBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialDoorMeshControllerBlock;
 import fr.vengelis.industrialfacilities.block.IndustrialDoorMeshFrameBlock;
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks;
@@ -31,8 +33,10 @@ public final class IndustrialDoorContent {
     private static final ResourceLocation BLAST_CONTROLLER = id("industrial_door_blast_controller");
     private static final ResourceLocation MESH_FRAME = id("industrial_door_mesh_frame");
     private static final ResourceLocation MESH_CONTROLLER = id("industrial_door_mesh_controller");
+    private static final ResourceLocation IRIS_FRAME = id("industrial_door_iris_frame");
+    private static final ResourceLocation IRIS_CONTROLLER = id("industrial_door_iris_controller");
     private static final List<ResourceLocation> CUSTOM_PARTS = List.of(FIRE_FRAME, FIRE_CONTROLLER, BLAST_FRAME, BLAST_CONTROLLER,
-        MESH_FRAME, MESH_CONTROLLER);
+        MESH_FRAME, MESH_CONTROLLER, IRIS_FRAME, IRIS_CONTROLLER);
     public static BlockEntityType<IndustrialDoorEntity> TYPE;
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -44,6 +48,8 @@ public final class IndustrialDoorContent {
             if (!BuiltInRegistries.BLOCK.containsKey(BLAST_CONTROLLER)) helper.register(BLAST_CONTROLLER, new IndustrialDoorBlastControllerBlock());
             if (!BuiltInRegistries.BLOCK.containsKey(MESH_FRAME)) helper.register(MESH_FRAME, new IndustrialDoorMeshFrameBlock());
             if (!BuiltInRegistries.BLOCK.containsKey(MESH_CONTROLLER)) helper.register(MESH_CONTROLLER, new IndustrialDoorMeshControllerBlock());
+            if (!BuiltInRegistries.BLOCK.containsKey(IRIS_FRAME)) helper.register(IRIS_FRAME, new IndustrialDoorIrisFrameBlock());
+            if (!BuiltInRegistries.BLOCK.containsKey(IRIS_CONTROLLER)) helper.register(IRIS_CONTROLLER, new IndustrialDoorIrisControllerBlock());
         });
         event.register(Registries.ITEM, helper -> {
             for (var id : CUSTOM_PARTS) {
@@ -88,7 +94,9 @@ public final class IndustrialDoorContent {
                 BuiltInRegistries.BLOCK.get(BLAST_FRAME),
                 BuiltInRegistries.BLOCK.get(BLAST_CONTROLLER),
                 BuiltInRegistries.BLOCK.get(MESH_FRAME),
-                BuiltInRegistries.BLOCK.get(MESH_CONTROLLER)).build(null);
+                BuiltInRegistries.BLOCK.get(MESH_CONTROLLER),
+                BuiltInRegistries.BLOCK.get(IRIS_FRAME),
+                BuiltInRegistries.BLOCK.get(IRIS_CONTROLLER)).build(null);
             helper.register(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID, "industrial_door"), TYPE);
         });
     }

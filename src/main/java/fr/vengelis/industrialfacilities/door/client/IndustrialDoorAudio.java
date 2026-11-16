@@ -36,7 +36,7 @@ public final class IndustrialDoorAudio {
         Minecraft.getInstance().getSoundManager().play(sound);
     }
     private static Vec3 center(IndustrialDoorEntity door) {
-        Vec3 a=Vec3.atCenterOf(door.doorOrigin()),b=Vec3.atCenterOf(IndustrialDoorManager.at(door.doorOrigin(),door.getBlockState().getValue(IndustrialDoorBlock.FACING),door.size-1,door.size-1));
+        Vec3 a=Vec3.atCenterOf(door.doorOrigin()),b=Vec3.atCenterOf(IndustrialDoorManager.at(door.doorOrigin(),IndustrialDoorBlock.facing(door.getBlockState()),door.size-1,door.size-1));
         return a.add(b).scale(.5);
     }
     @SubscribeEvent public static void cleanup(ClientTickEvent.Post event) {

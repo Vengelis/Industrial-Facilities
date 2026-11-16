@@ -34,19 +34,26 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
     public IndustrialDoorBlock(boolean controller) { this(controller,false); }
     public IndustrialDoorBlock(boolean controller,boolean dark) { this(controller,dark?IndustrialDoorStyle.DARK:IndustrialDoorStyle.LIGHT); }
     public IndustrialDoorBlock(boolean controller,IndustrialDoorStyle style) {
-        super(Properties.of().strength(4, style.blastResistance()).sound(SoundType.METAL).requiresCorrectToolForDrops()
+        super(Properties.of().strength(4, style.blastResistance()).sound(style == IndustrialDoorStyle.IRIS ? SoundType.STONE : SoundType.METAL).requiresCorrectToolForDrops()
             .lightLevel(s -> s.getValue(ACTIVE) && s.getValue(RAIL) ? 12 : 0));
         this.controller = controller;
         this.style = style;
         this.dark = style==IndustrialDoorStyle.DARK;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.SOUTH).setValue(ACTIVE,false)
+        registerDefaultState(stateDefinition.any().setValue(facingProperty(), Direction.SOUTH).setValue(ACTIVE,false)
             .setValue(OPEN,false).setValue(RAIL,false).setValue(VERTICAL,true));
     }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b) {
-        b.add(FACING,ACTIVE,OPEN,RAIL,VERTICAL);
+        b.add(facingProperty(),ACTIVE,OPEN,RAIL,VERTICAL);
+    }
+    protected DirectionProperty facingProperty() { return FACING; }
+    public static Direction facing(BlockState state) {
+        return state.getValue(((IndustrialDoorBlock) state.getBlock()).facingProperty());
+    }
+    static BlockState withFacing(BlockState state, Direction facing) {
+        return state.setValue(((IndustrialDoorBlock) state.getBlock()).facingProperty(), facing);
     }
     @Override public BlockState getStateForPlacement(BlockPlaceContext c) {
-        return defaultBlockState().setValue(FACING,c.getHorizontalDirection().getOpposite());
+        return defaultBlockState().setValue(facingProperty(),c.getHorizontalDirection().getOpposite());
     }
     @Override protected RenderShape getRenderShape(BlockState s) { return RenderShape.INVISIBLE; }
     @Override public BlockEntity newBlockEntity(BlockPos p, BlockState s) { return new IndustrialDoorEntity(p,s); }

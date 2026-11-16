@@ -30,6 +30,7 @@ public class IndustrialDoorEntity extends BlockEntity {
     public boolean allowLinkedRedstone;
     public boolean allowCameraAutomation;
     public boolean halfOpening;
+    public int irisOpeningPercent = 100;
     public UUID automationOwner;
     public long accessOpenUntil;
     public float progress;
@@ -60,7 +61,12 @@ public class IndustrialDoorEntity extends BlockEntity {
     }
 
     public float openLimit() {
+        if (style() == IndustrialDoorStyle.IRIS) return irisOpeningPercent / 100f;
         return halfOpening && style() == IndustrialDoorStyle.MESH ? .5f : 1f;
+    }
+
+    public boolean isAtOpenLimit() {
+        return progress > 0 && progress == openLimit();
     }
 
     public float targetProgress() {
@@ -102,16 +108,13 @@ public class IndustrialDoorEntity extends BlockEntity {
     }
 
     private boolean fitsFrame(IndustrialDoorEntity controller) {
-        Direction facing = controller.getBlockState().getValue(IndustrialDoorBlock.FACING);
-        Direction across = facing.getCounterClockWise();
+        Direction facing = IndustrialDoorBlock.facing(controller.getBlockState());
         BlockPos base = controller.doorOrigin();
-        int dx = worldPosition.getX() - base.getX();
-        int dz = worldPosition.getZ() - base.getZ();
 
         // Projeter le décalage sur le plan du cadre, puis vérifier contour et intérieur.
-        int depth = dx * facing.getStepX() + dz * facing.getStepZ();
-        int column = dx * across.getStepX() + dz * across.getStepZ();
-        int row = worldPosition.getY() - base.getY();
+        int depth = IndustrialDoorPlane.offset(base, worldPosition, facing);
+        int column = IndustrialDoorPlane.offset(base, worldPosition, IndustrialDoorPlane.across(facing));
+        int row = IndustrialDoorPlane.offset(base, worldPosition, IndustrialDoorPlane.up(facing));
         boolean isFrameBlock = getBlockState().getBlock() instanceof IndustrialDoorBlock;
         return depth == 0 && column >= 0 && column < controller.size && row >= 0 && row < controller.size
             && IndustrialDoorManager.edge(column, row, controller.size) == isFrameBlock;
@@ -139,6 +142,7 @@ public class IndustrialDoorEntity extends BlockEntity {
         tag.putBoolean("AllowCameraAutomation", allowCameraAutomation);
         tag.putBoolean("AllowLinkedRedstone", allowLinkedRedstone);
         tag.putBoolean("HalfOpening", halfOpening);
+        if (style() == IndustrialDoorStyle.IRIS) tag.putInt("IrisOpeningPercent", irisOpeningPercent);
         tag.putLong("AccessOpenUntil", accessOpenUntil);
 
         if (owner != null) {
@@ -162,6 +166,7 @@ public class IndustrialDoorEntity extends BlockEntity {
         allowCameraAutomation = tag.getBoolean("AllowCameraAutomation");
         allowLinkedRedstone = tag.getBoolean("AllowLinkedRedstone");
         halfOpening = tag.getBoolean("HalfOpening");
+        irisOpeningPercent = tag.contains("IrisOpeningPercent") ? Math.clamp(tag.getInt("IrisOpeningPercent"), 0, 100) : 100;
         accessOpenUntil = tag.getLong("AccessOpenUntil");
 
         owner = tag.contains("Owner") ? BlockPos.of(tag.getLong("Owner")) : null;

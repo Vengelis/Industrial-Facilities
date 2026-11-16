@@ -122,6 +122,8 @@
     "industrial_facilities:road_diagonal_red",
     "industrial_facilities:stop_sign",
     "industrial_facilities:industrial_door_blast_frame",
-    "industrial_facilities:security_camera"
+    "industrial_facilities:security_camera",
+    "industrial_facilities:industrial_door_iris_frame",
+    "industrial_facilities:industrial_door_iris_controller"
   ]
 }

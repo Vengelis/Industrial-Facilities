@@ -27,7 +27,7 @@ public final class NetworkTabletOutlines {
         return box.move(root.getX(),root.getY(),root.getZ());
     }
     public static AABB doorBounds(BlockPos origin,Direction facing,int size){
-        if(!facing.getAxis().isHorizontal()||size<5||size>15)throw new IllegalArgumentException("Invalid assembled door");
+        if(size<5||size>15)throw new IllegalArgumentException("Invalid assembled door");
         BlockPos far=IndustrialDoorManager.at(origin,facing,size-1,size-1);
         return new AABB(origin).minmax(new AABB(far));
     }
@@ -61,7 +61,7 @@ public final class NetworkTabletOutlines {
         AABB box;
         if(link.targetKind().equals("door")){
             if(!(entity instanceof IndustrialDoorEntity door)||door.size<5||door.size>15||!link.targetId().equals(door.doorInstanceId))return null;
-            box=doorBounds(door.doorOrigin(),door.getBlockState().getValue(IndustrialDoorBlock.FACING),door.size);
+            box=doorBounds(door.doorOrigin(),IndustrialDoorBlock.facing(door.getBlockState()),door.size);
         }else if(link.targetKind().equals("panel")){
             if(!(entity instanceof fr.vengelis.industrialfacilities.panel.PanelBlockEntity))return null;
             var group=fr.vengelis.industrialfacilities.panel.PanelStructure.find(level,pos);if(!group.valid())return null;
