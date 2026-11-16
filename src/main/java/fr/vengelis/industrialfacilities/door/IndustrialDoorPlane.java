@@ -6,51 +6,85 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /** Local X follows the columns, Y follows the rows and Z faces out of the door. */
-public final class IndustrialDoorPlane {
-    public static Direction across(Direction facing) {
-        return facing.getAxis().isVertical() ? Direction.EAST : facing.getCounterClockWise();
+public enum IndustrialDoorPlane {
+    NORTH(Direction.NORTH, Direction.WEST, Direction.UP),
+    SOUTH(Direction.SOUTH, Direction.EAST, Direction.UP),
+    EAST(Direction.EAST, Direction.NORTH, Direction.UP),
+    WEST(Direction.WEST, Direction.SOUTH, Direction.UP),
+    UP(Direction.UP, Direction.EAST, Direction.NORTH),
+    DOWN(Direction.DOWN, Direction.EAST, Direction.SOUTH),
+    UP_ROTATED(Direction.UP, Direction.NORTH, Direction.WEST),
+    DOWN_ROTATED(Direction.DOWN, Direction.SOUTH, Direction.WEST);
+
+    private final Direction facing, across, up;
+
+    IndustrialDoorPlane(Direction facing, Direction across, Direction up) {
+        this.facing = facing;
+        this.across = across;
+        this.up = up;
     }
 
-    public static Direction up(Direction facing) {
+    public static IndustrialDoorPlane of(Direction facing) {
+        return of(facing, false);
+    }
+
+    public static IndustrialDoorPlane of(Direction facing, boolean rotated) {
         return switch (facing) {
-            case UP -> Direction.NORTH;
-            case DOWN -> Direction.SOUTH;
-            default -> Direction.UP;
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case EAST -> EAST;
+            case WEST -> WEST;
+            case UP -> rotated ? UP_ROTATED : UP;
+            case DOWN -> rotated ? DOWN_ROTATED : DOWN;
         };
     }
+
+    public Direction facing() { return facing; }
+    public Direction across() { return across; }
+    public Direction up() { return up; }
+    public boolean rotated() { return this == UP_ROTATED || this == DOWN_ROTATED; }
+
+    public BlockPos at(BlockPos origin, int column, int row) {
+        return origin.relative(across, column).relative(up, row);
+    }
+
+    public AABB bounds(BlockPos origin, int width, int height) {
+        return new AABB(origin).minmax(new AABB(at(origin, width - 1, height - 1)));
+    }
+
+    public int column(BlockPos origin, BlockPos pos) { return offset(origin, pos, across); }
+    public int row(BlockPos origin, BlockPos pos) { return offset(origin, pos, up); }
 
     public static int offset(BlockPos origin, BlockPos pos, Direction axis) {
         return (pos.getX() - origin.getX()) * axis.getStepX() + (pos.getY() - origin.getY()) * axis.getStepY()
             + (pos.getZ() - origin.getZ()) * axis.getStepZ();
     }
 
-    public static AABB worldBox(BlockPos origin, Direction facing, AABB box) {
-        return new AABB(worldPoint(origin, facing, box.minX, box.minY, box.minZ),
-            worldPoint(origin, facing, box.maxX, box.maxY, box.maxZ));
+    public AABB worldBox(BlockPos origin, AABB box) {
+        return new AABB(worldPoint(origin, box.minX, box.minY, box.minZ),
+            worldPoint(origin, box.maxX, box.maxY, box.maxZ));
     }
 
-    public static AABB localBox(BlockPos origin, Direction facing, AABB box) {
-        return new AABB(localPoint(origin, facing, box.minX, box.minY, box.minZ),
-            localPoint(origin, facing, box.maxX, box.maxY, box.maxZ));
+    public AABB localBox(BlockPos origin, AABB box) {
+        return new AABB(localPoint(origin, box.minX, box.minY, box.minZ),
+            localPoint(origin, box.maxX, box.maxY, box.maxZ));
     }
 
-    private static Vec3 worldPoint(BlockPos origin, Direction facing, double x, double y, double z) {
-        Direction across = across(facing), up = up(facing);
+    private Vec3 worldPoint(BlockPos origin, double x, double y, double z) {
         return new Vec3(origin.getX() + .5 + across.getStepX() * (x - .5) + up.getStepX() * (y - .5) + facing.getStepX() * (z - .5),
             origin.getY() + .5 + across.getStepY() * (x - .5) + up.getStepY() * (y - .5) + facing.getStepY() * (z - .5),
             origin.getZ() + .5 + across.getStepZ() * (x - .5) + up.getStepZ() * (y - .5) + facing.getStepZ() * (z - .5));
     }
 
-    private static Vec3 localPoint(BlockPos origin, Direction facing, double x, double y, double z) {
+    private Vec3 localPoint(BlockPos origin, double x, double y, double z) {
         x -= origin.getX() + .5;
         y -= origin.getY() + .5;
         z -= origin.getZ() + .5;
-        return new Vec3(project(x, y, z, across(facing)) + .5, project(x, y, z, up(facing)) + .5, project(x, y, z, facing) + .5);
+        return new Vec3(project(x, y, z, across) + .5, project(x, y, z, up) + .5, project(x, y, z, facing) + .5);
     }
 
     private static double project(double x, double y, double z, Direction axis) {
         return x * axis.getStepX() + y * axis.getStepY() + z * axis.getStepZ();
     }
 
-    private IndustrialDoorPlane() {}
 }

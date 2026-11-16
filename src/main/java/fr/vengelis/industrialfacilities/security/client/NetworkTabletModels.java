@@ -64,15 +64,15 @@ public final class NetworkTabletModels {
         return mount||head;
     }
     private static boolean door(ClientLevel level,IndustrialDoorEntity root,float partial,PoseStack pose,MultiBufferSource buffers){
-        if(root.size<5||root.size>15||!(root.getBlockState().getBlock() instanceof IndustrialDoorBlock))return false;
-        BlockPos origin=root.doorOrigin();Direction facing=IndustrialDoorBlock.facing(root.getBlockState());
+        if(root.size==0||!(root.getBlockState().getBlock() instanceof IndustrialDoorBlock))return false;
+        BlockPos origin=root.doorOrigin();IndustrialDoorPlane plane=root.plane();
         // Validate the complete loaded structure before emitting any vertices. No partial
         // outline is fabricated for a large multiblock whose far cells are still unloaded.
-        for(int x=0;x<root.size;x++)for(int y=0;y<root.size;y++)if(!level.hasChunkAt(IndustrialDoorManager.at(origin,facing,x,y)))return false;
+        for(int x=0;x<root.size;x++)for(int y=0;y<root.height();y++)if(!level.hasChunkAt(plane.at(origin,x,y)))return false;
         List<IndustrialDoorEntity> frames=new ArrayList<>();boolean includesController=false;
-        for(int x=0;x<root.size;x++)for(int y=0;y<root.size;y++){
-            if(!IndustrialDoorManager.edge(x,y,root.size))continue;
-            BlockPos pos=IndustrialDoorManager.at(origin,facing,x,y);BlockState state=level.getBlockState(pos);
+        for(int x=0;x<root.size;x++)for(int y=0;y<root.height();y++){
+            if(!IndustrialDoorManager.edge(x,y,root.size,root.height()))continue;
+            BlockPos pos=plane.at(origin,x,y);BlockState state=level.getBlockState(pos);
             if(!(state.getBlock() instanceof IndustrialDoorBlock)||!(level.getBlockEntity(pos) instanceof IndustrialDoorEntity frame)
                 ||frame.isRemoved()||!frame.getBlockPos().equals(pos)||!Objects.equals(frame.owner,root.getBlockPos())||renderer(frame)==null)return false;
             if(frame==root)includesController=true;else if(frame.size!=0)return false;

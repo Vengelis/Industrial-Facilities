@@ -58,10 +58,18 @@ public class IndustrialFacilitiesModSounds {
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_blast_open")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_MESH_OPEN = REGISTRY.register("industrial_door_multiblock_mesh_open",
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_mesh_open")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_IRIS_OPEN = REGISTRY.register("industrial_door_multiblock_iris_open",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_iris_open")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_JAW_OPEN = REGISTRY.register("industrial_door_multiblock_jaw_open",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_jaw_open")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_BLAST_CLOSE = REGISTRY.register("industrial_door_multiblock_blast_close",
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_blast_close")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_MESH_CLOSE = REGISTRY.register("industrial_door_multiblock_mesh_close",
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_mesh_close")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_IRIS_CLOSE = REGISTRY.register("industrial_door_multiblock_iris_close",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_iris_close")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_MULTIBLOCK_JAW_CLOSE = REGISTRY.register("industrial_door_multiblock_jaw_close",
+			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_multiblock_jaw_close")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_CLASSIC_LIGHT_OPEN = REGISTRY.register("industrial_door_classic_light_open",
 			() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("industrial_facilities", "industrial_door_classic_light_open")));
 	public static final DeferredHolder<SoundEvent, SoundEvent> INDUSTRIAL_DOOR_CLASSIC_LIGHT_CLOSE = REGISTRY.register("industrial_door_classic_light_close",

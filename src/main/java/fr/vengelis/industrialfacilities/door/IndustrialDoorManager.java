@@ -17,6 +17,8 @@ import java.util.UUID;
 public final class IndustrialDoorManager {
     static final int MIN_FRAME_SIZE = 5;
     static final int MAX_FRAME_SIZE = 15;
+    private static final int MAX_JAW_WIDTH = 25;
+    private static final int MAX_JAW_HEIGHT = 10;
     private static final int FRAME_CHECK_INTERVAL = 10;
     private static final double PANEL_INSET = 3.0 / 8.0;
 
@@ -24,11 +26,26 @@ public final class IndustrialDoorManager {
 
     /** Convertit une colonne et une ligne du cadre en coordonnées du monde. */
     public static BlockPos at(BlockPos origin, Direction facing, int column, int row) {
-        return origin.relative(IndustrialDoorPlane.across(facing), column).relative(IndustrialDoorPlane.up(facing), row);
+        return IndustrialDoorPlane.of(facing).at(origin, column, row);
+    }
+
+    public static AABB frameBounds(BlockPos origin, Direction facing, int width, int height) {
+        return IndustrialDoorPlane.of(facing).bounds(origin, width, height);
     }
 
     public static boolean edge(int column, int row, int size) {
-        return isSideColumn(column, size) || row == 0 || row == size - 1;
+        return edge(column, row, size, size);
+    }
+
+    public static boolean edge(int column, int row, int width, int height) {
+        return isSideColumn(column, width) || row == 0 || row == height - 1;
+    }
+
+    static boolean isSavedFrameSizeValid(IndustrialDoorStyle style, int width, int height) {
+        if (width < MIN_FRAME_SIZE || height < MIN_FRAME_SIZE) return false;
+        // Earlier versions allowed square jaw doors up to 15 blocks on each side.
+        if (width == height && width <= MAX_FRAME_SIZE) return true;
+        return style == IndustrialDoorStyle.JAW && width <= MAX_JAW_WIDTH && height <= MAX_JAW_HEIGHT;
     }
 
     private static boolean isSideColumn(int column, int size) {
@@ -39,8 +56,8 @@ public final class IndustrialDoorManager {
         if (door.size == 0 || !(door.getBlockState().getBlock() instanceof IndustrialDoorBlock block)
             || block.style != IndustrialDoorStyle.FIRE) return false;
         BlockPos origin = door.doorOrigin();
-        int last = door.size - 1;
-        return FireAlarmControls.blocksOpening(level, origin, at(origin, IndustrialDoorBlock.facing(door.getBlockState()), last, last));
+        return FireAlarmControls.blocksOpening(level, origin,
+            door.plane().at(origin, door.size - 1, door.height() - 1));
     }
 
     public static boolean assemble(ServerLevel level, BlockPos controller) {
@@ -50,19 +67,42 @@ public final class IndustrialDoorManager {
             return false;
         }
 
-        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
-        // Le contrôleur peut occuper toute case du contour. Tester les petits cadres en premier
-        // conserve le choix du cadre si plusieurs carrés valides partagent le même contrôleur.
-        for (int size = MIN_FRAME_SIZE; size <= MAX_FRAME_SIZE; size++) {
-            for (int controllerColumn = 0; controllerColumn < size; controllerColumn++) {
-                for (int controllerRow = 0; controllerRow < size; controllerRow++) {
-                    if (!edge(controllerColumn, controllerRow, size)) {
-                        continue;
-                    }
-                    BlockPos origin = at(controller, facing, -controllerColumn, -controllerRow);
-                    if (isValidFrame(level, controller, origin, facing, size, block)) {
-                        assembleFrame(level, door, origin, facing, size);
-                        return true;
+        Direction preferred = IndustrialDoorBlock.facing(door.getBlockState());
+        if (tryFacing(level, door, block, preferred)) return true;
+        if (block.style != IndustrialDoorStyle.JAW && block.style != IndustrialDoorStyle.IRIS) return false;
+
+        // The supporting face only gives a preference. A wall controller is often placed on the floor
+        // or against a frame block in the plane of the opening.
+        for (Direction facing : new Direction[]{Direction.SOUTH, Direction.WEST, Direction.UP}) {
+            if (facing.getAxis() != preferred.getAxis() && tryFacing(level, door, block, facing)) return true;
+        }
+        return false;
+    }
+
+    private static boolean tryFacing(ServerLevel level, IndustrialDoorEntity door, IndustrialDoorBlock block, Direction facing) {
+        if (tryAssemble(level, door, block, IndustrialDoorPlane.of(facing))) return true;
+        return block.style == IndustrialDoorStyle.JAW && facing.getAxis().isVertical()
+            && tryAssemble(level, door, block, IndustrialDoorPlane.of(facing, true));
+    }
+
+    private static boolean tryAssemble(ServerLevel level, IndustrialDoorEntity door, IndustrialDoorBlock block,
+                                       IndustrialDoorPlane plane) {
+        BlockPos controller = door.getBlockPos();
+        boolean jaw = block.style == IndustrialDoorStyle.JAW;
+        int maxWidth = jaw ? MAX_JAW_WIDTH : MAX_FRAME_SIZE;
+        // Le contrôleur peut occuper toute case du contour. Tester les petits cadres en premier.
+        for (int width = MIN_FRAME_SIZE; width <= maxWidth; width++) {
+            int minHeight = jaw ? MIN_FRAME_SIZE : width;
+            int maxHeight = jaw ? MAX_JAW_HEIGHT : width;
+            for (int height = minHeight; height <= maxHeight; height++) {
+                for (int column = 0; column < width; column++) {
+                    for (int row = 0; row < height; row++) {
+                        if (!edge(column, row, width, height)) continue;
+                        BlockPos origin = plane.at(controller, -column, -row);
+                        if (isValidFrame(level, controller, origin, plane, width, height, block)) {
+                            assembleFrame(level, door, origin, plane, width, height);
+                            return true;
+                        }
                     }
                 }
             }
@@ -71,13 +111,13 @@ public final class IndustrialDoorManager {
     }
 
     private static boolean isValidFrame(ServerLevel level, BlockPos controller, BlockPos origin,
-                                        Direction facing, int size, IndustrialDoorBlock controllerBlock) {
-        if (level.isOutsideBuildHeight(origin) || level.isOutsideBuildHeight(at(origin, facing, size - 1, size - 1))) {
+                                        IndustrialDoorPlane plane, int width, int height, IndustrialDoorBlock controllerBlock) {
+        if (level.isOutsideBuildHeight(origin) || level.isOutsideBuildHeight(plane.at(origin, width - 1, height - 1))) {
             return false;
         }
-        for (int column = 0; column < size; column++) {
-            for (int row = 0; row < size; row++) {
-                BlockPos pos = at(origin, facing, column, row);
+        for (int column = 0; column < width; column++) {
+            for (int row = 0; row < height; row++) {
+                BlockPos pos = plane.at(origin, column, row);
                 if (!level.hasChunkAt(pos)) {
                     return false;
                 }
@@ -86,7 +126,7 @@ public final class IndustrialDoorManager {
                 }
 
                 BlockState state = level.getBlockState(pos);
-                if (edge(column, row, size)) {
+                if (edge(column, row, width, height)) {
                     if (!(state.getBlock() instanceof IndustrialDoorBlock frame) || frame.controller
                             || frame.style != controllerBlock.style
                             || !(level.getBlockEntity(pos) instanceof IndustrialDoorEntity member)
@@ -102,10 +142,10 @@ public final class IndustrialDoorManager {
     }
 
     private static void assembleFrame(ServerLevel level, IndustrialDoorEntity door, BlockPos origin,
-                                      Direction facing, int size) {
+                                      IndustrialDoorPlane plane, int width, int height) {
         BlockPos controller = door.getBlockPos().immutable();
         door.origin = origin.immutable();
-        door.size = size;
+        door.setDimensions(width, height);
         door.owner = controller;
         // Chaque assemblage reçoit une nouvelle identité pour les liaisons des lecteurs.
         door.doorInstanceId = UUID.randomUUID();
@@ -119,15 +159,15 @@ public final class IndustrialDoorManager {
         door.targetOpen = false;
         door.paused = false;
 
-        for (int column = 0; column < size; column++) {
-            for (int row = 0; row < size; row++) {
-                BlockPos pos = at(origin, facing, column, row);
-                if (edge(column, row, size)) {
-                    boolean sideColumn = isSideColumn(column, size);
-                    BlockState frame = IndustrialDoorBlock.withFacing(level.getBlockState(pos), facing)
+        for (int column = 0; column < width; column++) {
+            for (int row = 0; row < height; row++) {
+                BlockPos pos = plane.at(origin, column, row);
+                if (edge(column, row, width, height)) {
+                    boolean sideColumn = isSideColumn(column, width);
+                    BlockState frame = IndustrialDoorBlock.withPlane(level.getBlockState(pos), plane)
                         .setValue(IndustrialDoorBlock.ACTIVE, true)
                         .setValue(IndustrialDoorBlock.OPEN, false)
-                        .setValue(IndustrialDoorBlock.RAIL, sideColumn && IndustrialDoorVisualState.hasRail(size, row))
+                        .setValue(IndustrialDoorBlock.RAIL, sideColumn && IndustrialDoorVisualState.hasRail(height, row))
                         .setValue(IndustrialDoorBlock.VERTICAL, sideColumn);
                     level.setBlock(pos, frame, 3);
                 } else {
@@ -143,11 +183,11 @@ public final class IndustrialDoorManager {
     }
 
     public static boolean allLoaded(ServerLevel level, IndustrialDoorEntity door) {
-        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
+        IndustrialDoorPlane plane = door.plane();
         BlockPos origin = door.doorOrigin();
         for (int column = 0; column < door.size; column++) {
-            for (int row = 0; row < door.size; row++) {
-                if (!level.hasChunkAt(at(origin, facing, column, row))) {
+            for (int row = 0; row < door.height(); row++) {
+                if (!level.hasChunkAt(plane.at(origin, column, row))) {
                     return false;
                 }
             }
@@ -196,8 +236,7 @@ public final class IndustrialDoorManager {
         }
         if (nextProgress != door.progress) {
             // A complete movement can arrive at the client as a single block entity update.
-            if (motionTicks == 1) level.playSound(null, at(door.doorOrigin(), 
-                IndustrialDoorBlock.facing(door.getBlockState()), door.size / 2, door.size / 2),
+            if (motionTicks == 1) level.playSound(null, door.plane().at(door.doorOrigin(), door.size / 2, door.height() / 2),
                 IndustrialDoorSounds.event(door.style(), false, opening), SoundSource.BLOCKS, .8F, 1F);
             door.progress = nextProgress;
             door.sync();
@@ -208,11 +247,11 @@ public final class IndustrialDoorManager {
     }
 
     private static boolean hasAllMembers(ServerLevel level, IndustrialDoorEntity door) {
-        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
+        IndustrialDoorPlane plane = door.plane();
         BlockPos origin = door.doorOrigin();
         for (int column = 0; column < door.size; column++) {
-            for (int row = 0; row < door.size; row++) {
-                BlockPos pos = at(origin, facing, column, row);
+            for (int row = 0; row < door.height(); row++) {
+                BlockPos pos = plane.at(origin, column, row);
                 if (!(level.getBlockEntity(pos) instanceof IndustrialDoorEntity member)
                         || !door.getBlockPos().equals(member.owner)) {
                     return false;
@@ -223,21 +262,22 @@ public final class IndustrialDoorManager {
     }
 
     public static void updateAppearance(ServerLevel level, IndustrialDoorEntity door) {
-        int size = door.size;
-        if (size == 0) {
+        int width = door.size;
+        int height = door.height();
+        if (width == 0) {
             return;
         }
-        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
+        IndustrialDoorPlane plane = door.plane();
         boolean open = door.isAtOpenLimit();
-        for (int column = 0; column < size; column++) {
-            for (int row = 0; row < size; row++) {
-                if (!edge(column, row, size)) {
+        for (int column = 0; column < width; column++) {
+            for (int row = 0; row < height; row++) {
+                if (!edge(column, row, width, height)) {
                     continue;
                 }
-                BlockPos pos = at(door.doorOrigin(), facing, column, row);
+                BlockPos pos = plane.at(door.doorOrigin(), column, row);
                 BlockState state = level.getBlockState(pos);
                 if (state.getBlock() instanceof IndustrialDoorBlock) {
-                    boolean rail = isSideColumn(column, size) && IndustrialDoorVisualState.hasRail(size, row);
+                    boolean rail = isSideColumn(column, width) && IndustrialDoorVisualState.hasRail(height, row);
                     BlockState next = state.setValue(IndustrialDoorBlock.RAIL, rail)
                         .setValue(IndustrialDoorBlock.OPEN, open);
                     if (next != state) {
@@ -250,14 +290,23 @@ public final class IndustrialDoorManager {
 
     private static boolean obstructed(ServerLevel level, IndustrialDoorEntity door, float nextProgress) {
         int innerSize = door.size - 2;
-        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
-        BlockPos first = at(door.doorOrigin(), facing, 1, 1);
-        if (door.style() == IndustrialDoorStyle.IRIS) {
-            AABB slab = IndustrialDoorPlane.worldBox(first, facing, IndustrialIrisDoorMotion.slab(innerSize));
-            return !level.getEntities((Entity) null, slab, entity -> entity.isAlive() && !entity.isSpectator()
-                && !IndustrialIrisDoorMotion.isClear(innerSize, nextProgress, IndustrialDoorPlane.localBox(first, facing, entity.getBoundingBox()))).isEmpty();
+        int innerHeight = door.height() - 2;
+        IndustrialDoorPlane plane = door.plane();
+        Direction facing = plane.facing();
+        BlockPos first = plane.at(door.doorOrigin(), 1, 1);
+        var style = door.style();
+        if (style == IndustrialDoorStyle.IRIS || style == IndustrialDoorStyle.JAW) {
+            var jaws = style == IndustrialDoorStyle.JAW ? IndustrialJawDoorMotion.layout(door, plane) : null;
+            AABB slab = jaws == null ? IndustrialIrisDoorMotion.slab(innerSize)
+                : IndustrialJawDoorMotion.slab(innerSize, innerHeight);
+            return !level.getEntities((Entity) null, plane.worldBox(first, slab), entity -> {
+                if (!entity.isAlive() || entity.isSpectator()) return false;
+                AABB local = plane.localBox(first, entity.getBoundingBox());
+                return !(jaws == null ? IndustrialIrisDoorMotion.isClear(innerSize, nextProgress, local)
+                    : jaws.isClear(nextProgress, local));
+            }).isEmpty();
         }
-        BlockPos last = at(door.doorOrigin(), facing, innerSize, innerSize);
+        BlockPos last = plane.at(door.doorOrigin(), innerSize, innerSize);
         double minX = Math.min(first.getX(), last.getX());
         double maxX = Math.max(first.getX(), last.getX()) + 1;
         double minZ = Math.min(first.getZ(), last.getZ());
@@ -316,13 +365,14 @@ public final class IndustrialDoorManager {
         }
         AccessDoorService.dismantle(level, door);
         door.tearingDown = true;
-        int size = door.size;
-        Direction facing = IndustrialDoorBlock.facing(door.getBlockState());
+        int width = door.size;
+        int height = door.height();
+        IndustrialDoorPlane plane = door.plane();
         BlockPos origin = door.doorOrigin();
 
-        for (int column = 0; column < size; column++) {
-            for (int row = 0; row < size; row++) {
-                BlockPos pos = at(origin, facing, column, row);
+        for (int column = 0; column < width; column++) {
+            for (int row = 0; row < height; row++) {
+                BlockPos pos = plane.at(origin, column, row);
                 if (!level.hasChunkAt(pos)) {
                     continue;
                 }
@@ -351,7 +401,7 @@ public final class IndustrialDoorManager {
     }
 
     private static void resetAssembly(IndustrialDoorEntity member) {
-        member.size = 0;
+        member.setDimensions(0, 0);
         member.origin = null;
         member.owner = null;
         member.progress = 0;

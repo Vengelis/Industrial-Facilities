@@ -122,10 +122,14 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_BLAST_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_MESH_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_IRIS_FRAME.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_JAW_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FIRE_FRAME.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_RADIATION_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_BLAST_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_MESH_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_IRIS_CONTROLLER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_JAW_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.INDUSTRIAL_DOOR_FIRE_CONTROLLER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.ALARM.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.LUMINOUS_PANEL.get().asItem());

@@ -28,8 +28,7 @@ public final class NetworkTabletOutlines {
     }
     public static AABB doorBounds(BlockPos origin,Direction facing,int size){
         if(size<5||size>15)throw new IllegalArgumentException("Invalid assembled door");
-        BlockPos far=IndustrialDoorManager.at(origin,facing,size-1,size-1);
-        return new AABB(origin).minmax(new AABB(far));
+        return IndustrialDoorManager.frameBounds(origin,facing,size,size);
     }
     static AccessTerminalEntity terminalAt(ClientLevel level,BlockPos pos,UUID id,String kind){
         if(!level.hasChunkAt(pos))return null;
@@ -60,8 +59,8 @@ public final class NetworkTabletOutlines {
         var entity=level.getBlockEntity(pos);if(entity==null||entity.isRemoved())return null;
         AABB box;
         if(link.targetKind().equals("door")){
-            if(!(entity instanceof IndustrialDoorEntity door)||door.size<5||door.size>15||!link.targetId().equals(door.doorInstanceId))return null;
-            box=doorBounds(door.doorOrigin(),IndustrialDoorBlock.facing(door.getBlockState()),door.size);
+            if(!(entity instanceof IndustrialDoorEntity door)||door.size==0||!link.targetId().equals(door.doorInstanceId))return null;
+            box=door.plane().bounds(door.doorOrigin(),door.size,door.height());
         }else if(link.targetKind().equals("panel")){
             if(!(entity instanceof fr.vengelis.industrialfacilities.panel.PanelBlockEntity))return null;
             var group=fr.vengelis.industrialfacilities.panel.PanelStructure.find(level,pos);if(!group.valid())return null;

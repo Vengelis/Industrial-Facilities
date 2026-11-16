@@ -28,6 +28,7 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
     public static final BooleanProperty OPEN = BooleanProperty.create("open");
     public static final BooleanProperty RAIL = BooleanProperty.create("rail");
     public static final BooleanProperty VERTICAL = BooleanProperty.create("vertical");
+    protected static final BooleanProperty FRAME_ROTATED = BooleanProperty.create("frame_rotated");
     public final boolean controller;
     public final boolean dark;
     public final IndustrialDoorStyle style;
@@ -49,8 +50,12 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
     public static Direction facing(BlockState state) {
         return state.getValue(((IndustrialDoorBlock) state.getBlock()).facingProperty());
     }
-    static BlockState withFacing(BlockState state, Direction facing) {
-        return state.setValue(((IndustrialDoorBlock) state.getBlock()).facingProperty(), facing);
+    public static IndustrialDoorPlane plane(BlockState state) {
+        return IndustrialDoorPlane.of(facing(state), state.hasProperty(FRAME_ROTATED) && state.getValue(FRAME_ROTATED));
+    }
+    static BlockState withPlane(BlockState state, IndustrialDoorPlane plane) {
+        state = state.setValue(((IndustrialDoorBlock) state.getBlock()).facingProperty(), plane.facing());
+        return state.hasProperty(FRAME_ROTATED) ? state.setValue(FRAME_ROTATED, plane.rotated()) : state;
     }
     @Override public BlockState getStateForPlacement(BlockPlaceContext c) {
         return defaultBlockState().setValue(facingProperty(),c.getHorizontalDirection().getOpposite());
@@ -75,7 +80,8 @@ public class IndustrialDoorBlock extends Block implements EntityBlock {
             }
             int size = door.size;
             boolean ok = size>0 || IndustrialDoorManager.assemble((ServerLevel)l,p);
-            player.displayClientMessage(Component.translatable(size>0 ? "door.industrial_facilities.busy" : ok ? "door.industrial_facilities.assembled" : "door.industrial_facilities.invalid",door.size,door.size),true);
+            String message = size > 0 ? "busy" : ok ? "assembled" : style == IndustrialDoorStyle.JAW ? "jaw_invalid" : "invalid";
+            player.displayClientMessage(Component.translatable("door.industrial_facilities." + message, door.size, door.height()), true);
         }
         return controller ? InteractionResult.sidedSuccess(l.isClientSide) : InteractionResult.PASS;
     }

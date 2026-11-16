@@ -18,16 +18,16 @@ public final class IndustrialDoorLighting {
     private final boolean panel;
     private final Map<BlockPos,Integer> samples = new HashMap<>();
 
-    public IndustrialDoorLighting(Level level, BlockPos origin, Direction facing) {
-        this(level,origin,facing,false);
+    IndustrialDoorLighting(Level level, BlockPos origin, IndustrialDoorPlane plane, boolean panel) {
+        this(level, origin, plane.facing(), plane.across(), plane.up(), panel);
     }
 
-    public IndustrialDoorLighting(Level level, BlockPos origin, Direction facing, boolean panel) {
+    IndustrialDoorLighting(Level level, BlockPos origin, Direction facing, Direction right, Direction up, boolean panel) {
         this.level = level;
         this.origin = origin;
         this.facing = facing;
-        this.right = IndustrialDoorPlane.across(facing);
-        this.up = IndustrialDoorPlane.up(facing);
+        this.right = right;
+        this.up = up;
         this.panel = panel;
     }
 

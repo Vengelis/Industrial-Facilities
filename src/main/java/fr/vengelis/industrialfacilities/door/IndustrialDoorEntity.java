@@ -2,7 +2,6 @@ package fr.vengelis.industrialfacilities.door;
 
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -24,7 +23,9 @@ public class IndustrialDoorEntity extends BlockEntity {
     // owner pointe vers le contrôleur. origin désigne le coin inférieur du cadre.
     public BlockPos owner;
     public BlockPos origin;
+    // Width of the assembled frame. The legacy NBT key for it is "Size".
     public int size;
+    private int height;
     public UUID doorInstanceId;
     public UUID placedBy;
     public boolean allowLinkedRedstone;
@@ -46,6 +47,19 @@ public class IndustrialDoorEntity extends BlockEntity {
     public BlockPos doorOrigin() {
         // Les premières sauvegardes prenaient le contrôleur comme coin de référence.
         return origin != null ? origin : getBlockPos();
+    }
+
+    public int height() {
+        return height == 0 ? size : height;
+    }
+
+    public IndustrialDoorPlane plane() {
+        return IndustrialDoorBlock.plane(getBlockState());
+    }
+
+    void setDimensions(int width, int height) {
+        this.size = width;
+        this.height = height;
     }
 
     public boolean lifts() {
@@ -108,16 +122,16 @@ public class IndustrialDoorEntity extends BlockEntity {
     }
 
     private boolean fitsFrame(IndustrialDoorEntity controller) {
-        Direction facing = IndustrialDoorBlock.facing(controller.getBlockState());
+        IndustrialDoorPlane plane = controller.plane();
         BlockPos base = controller.doorOrigin();
 
         // Projeter le décalage sur le plan du cadre, puis vérifier contour et intérieur.
-        int depth = IndustrialDoorPlane.offset(base, worldPosition, facing);
-        int column = IndustrialDoorPlane.offset(base, worldPosition, IndustrialDoorPlane.across(facing));
-        int row = IndustrialDoorPlane.offset(base, worldPosition, IndustrialDoorPlane.up(facing));
+        int depth = IndustrialDoorPlane.offset(base, worldPosition, plane.facing());
+        int column = plane.column(base, worldPosition);
+        int row = plane.row(base, worldPosition);
         boolean isFrameBlock = getBlockState().getBlock() instanceof IndustrialDoorBlock;
-        return depth == 0 && column >= 0 && column < controller.size && row >= 0 && row < controller.size
-            && IndustrialDoorManager.edge(column, row, controller.size) == isFrameBlock;
+        return depth == 0 && column >= 0 && column < controller.size && row >= 0 && row < controller.height()
+            && IndustrialDoorManager.edge(column, row, controller.size, controller.height()) == isFrameBlock;
     }
 
     public void sync() {
@@ -150,6 +164,7 @@ public class IndustrialDoorEntity extends BlockEntity {
         }
         if (size > 0) {
             tag.putLong("Origin", doorOrigin().asLong());
+            tag.putInt("Height", height());
         }
         tag.putInt("Size", size);
         tag.putFloat("Progress", progress);
@@ -171,9 +186,12 @@ public class IndustrialDoorEntity extends BlockEntity {
 
         owner = tag.contains("Owner") ? BlockPos.of(tag.getLong("Owner")) : null;
         origin = tag.contains("Origin") ? BlockPos.of(tag.getLong("Origin")) : null;
-        size = tag.getInt("Size");
-        if (size < IndustrialDoorManager.MIN_FRAME_SIZE || size > IndustrialDoorManager.MAX_FRAME_SIZE) {
-            size = 0;
+        int width = tag.getInt("Size");
+        int savedHeight = tag.contains("Height") ? tag.getInt("Height") : width;
+        if (IndustrialDoorManager.isSavedFrameSizeValid(style(), width, savedHeight)) {
+            setDimensions(width, savedHeight);
+        } else {
+            setDimensions(0, 0);
         }
         progress = Math.clamp(tag.getFloat("Progress"), 0, 1);
         previousProgress = progress;

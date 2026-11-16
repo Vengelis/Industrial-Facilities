@@ -31,18 +31,21 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
     @Override public boolean shouldRenderOffScreen(IndustrialDoorEntity be) { return be.size>0; }
     @Override public int getViewDistance() { return 128; }
     @Override public AABB getRenderBoundingBox(IndustrialDoorEntity be) {
-        return be.size>0 ? new AABB(be.getBlockPos()).inflate(16) : new AABB(be.getBlockPos()).inflate(.125);
+        if (be.size == 0) return new AABB(be.getBlockPos()).inflate(.125);
+        return be.plane().bounds(be.doorOrigin(), be.size, be.height()).inflate(.125);
     }
     @Override public void render(IndustrialDoorEntity be,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay) {
         if(!(be.getBlockState().getBlock() instanceof IndustrialDoorBlock block)||be.getLevel()==null)return;
-        Direction f=IndustrialDoorBlock.facing(be.getBlockState());
-        IndustrialDoorLighting lighting=new IndustrialDoorLighting(be.getLevel(),be.getBlockPos(),f);
+        IndustrialDoorPlane plane=be.plane();
+        Direction f=plane.facing();
+        IndustrialDoorLighting lighting=new IndustrialDoorLighting(be.getLevel(),be.getBlockPos(),plane,false);
         pose.pushPose();pose.translate(.5,.5,.5);
         if(f.getAxis().isVertical())pose.mulPose(Axis.XP.rotationDegrees(f==Direction.UP?-90:90));
         else pose.mulPose(Axis.YP.rotationDegrees(rotationDegrees(f)));
+        if (plane.rotated()) pose.mulPose(Axis.ZP.rotationDegrees(90));
         pose.translate(-.5,-.5,-.5);
         VertexConsumer out;
-        frame(be,f,pose,buffers,lighting);
+        frame(be,plane,pose,buffers,lighting);
         if(((IndustrialDoorBlock)be.getBlockState().getBlock()).controller && !be.getBlockState().getValue(IndustrialDoorBlock.ACTIVE)) {
             out=buffers.getBuffer(RenderType.entityCutoutNoCull(texture(block.style,"frame")));
             box(pose,out,.125f,.125f,1f,.875f,.875f,1.0625f,.328125f,.515625f,lighting);
@@ -53,31 +56,39 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             var panel = texture(block.style, "panel");
             out = buffers.getBuffer(switch (block.style) {
                 case GLASS -> RenderType.entityTranslucent(panel);
-                case MESH, IRIS -> RenderType.entityCutout(panel);
+                case MESH, IRIS, JAW -> RenderType.entityCutout(panel);
                 default -> RenderType.entityCutoutNoCull(panel);
             });
             BlockPos origin=be.doorOrigin(),controller=be.getBlockPos();
-            pose.translate(IndustrialDoorPlane.offset(controller,origin,IndustrialDoorPlane.across(f)),
-                IndustrialDoorPlane.offset(controller,origin,IndustrialDoorPlane.up(f)),0);
+            pose.translate(plane.column(controller,origin),plane.row(controller,origin),0);
             float p=be.previousProgress+(be.progress-be.previousProgress)*partial;
-            double h=be.size-2;
-            lighting=new IndustrialDoorLighting(be.getLevel(),origin,f,true);
+            int h=be.height()-2;
+            lighting=new IndustrialDoorLighting(be.getLevel(),origin,plane,true);
             if (block.style == IndustrialDoorStyle.IRIS) {
-                IndustrialIrisDoorRenderer.render(pose, buffers, out, (int) h, p, lighting, texture(block.style, "hazard"));
+                IndustrialIrisDoorRenderer.render(pose, out, h, p, lighting);
+            } else if (block.style == IndustrialDoorStyle.JAW) {
+                var jaws = IndustrialJawDoorMotion.layout(be, plane);
+                if (jaws.sideways()) {
+                    pose.translate(be.size, 0, 0);
+                    pose.mulPose(Axis.ZP.rotationDegrees(90));
+                    lighting = new IndustrialDoorLighting(be.getLevel(), plane.at(origin, be.size - 1, 0),
+                        f, plane.up(), plane.across().getOpposite(), true);
+                }
+                IndustrialJawDoorRenderer.render(pose, buffers, out, jaws, p, lighting, texture(block.style, "hazard"));
             } else if (block.style == IndustrialDoorStyle.MESH) {
                 var lower = IndustrialMeshDoorMotion.lower(h, p);
                 var upper = IndustrialMeshDoorMotion.upper(h, p);
-                meshPanel(pose, out, (int) h, lower, IndustrialMeshDoorMotion.HAZARD_HEIGHT, MESH_RAIL_HEIGHT, lighting);
-                meshPanel(pose, out, (int) h, upper, MESH_RAIL_HEIGHT, 0, lighting);
+                meshPanel(pose, out, h, lower, IndustrialMeshDoorMotion.HAZARD_HEIGHT, MESH_RAIL_HEIGHT, lighting);
+                meshPanel(pose, out, h, upper, MESH_RAIL_HEIGHT, 0, lighting);
                 var rail = buffers.getBuffer(RenderType.entityCutoutNoCull(texture(block.style, "frame_middle")));
-                meshRail(pose, rail, (int) h, upper.bottom(), upper.depth(), lighting);
-                meshRail(pose, rail, (int) h, lower.end() + lower.rise() - MESH_RAIL_HEIGHT, lower.depth(), lighting);
+                meshRail(pose, rail, h, upper.bottom(), upper.depth(), lighting);
+                meshRail(pose, rail, h, lower.end() + lower.rise() - MESH_RAIL_HEIGHT, lower.depth(), lighting);
                 var hazard = buffers.getBuffer(RenderType.entityCutout(texture(block.style, "hazard")));
-                meshHazardBand(pose, hazard, (int) h, IndustrialMeshDoorMotion.hazardBeam(lower), lighting);
+                meshHazardBand(pose, hazard, h, IndustrialMeshDoorMotion.hazardBeam(lower), lighting);
             } else if (block.style.lifts()) {
                 segment(pose,out,0,h,h*p,h,lighting);
             } else {
-                double half=h/2,travel=half*p;
+                double half=h/2.0,travel=half*p;
                 segment(pose,out,0,half,-travel,h,lighting);
                 segment(pose,out,half,h,travel,h,lighting);
             }
@@ -87,36 +98,39 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
     public static float rotationDegrees(Direction facing) {
         return switch(facing){case EAST->90;case NORTH->180;case WEST->270;default->0;};
     }
-    public static IndustrialDoorFrameLayout.Tile frameTile(IndustrialDoorEntity be,Direction f) {
-        return IndustrialDoorFrameLayout.tile(frameMask(be,f));
+    public static IndustrialDoorFrameLayout.Tile frameTile(IndustrialDoorEntity be) {
+        IndustrialDoorPlane plane = be.plane();
+        if (be.style().hasHazardFrame()) return hazardFrameTile(be, plane);
+        return IndustrialDoorFrameLayout.tile(frameMask(be,plane));
     }
-    private static int frameMask(IndustrialDoorEntity be,Direction f) {
+    private static int frameMask(IndustrialDoorEntity be,IndustrialDoorPlane plane) {
         int mask=0;
-        Direction up=IndustrialDoorPlane.up(f),right=IndustrialDoorPlane.across(f);
-        if(compatible(be,be.getBlockPos().relative(up),f))mask|=1;
-        if(compatible(be,be.getBlockPos().relative(right),f))mask|=2;
-        if(compatible(be,be.getBlockPos().relative(up.getOpposite()),f))mask|=4;
-        if(compatible(be,be.getBlockPos().relative(right.getOpposite()),f))mask|=8;
+        Direction up=plane.up(),right=plane.across();
+        if(compatible(be,be.getBlockPos().relative(up),plane))mask|=1;
+        if(compatible(be,be.getBlockPos().relative(right),plane))mask|=2;
+        if(compatible(be,be.getBlockPos().relative(up.getOpposite()),plane))mask|=4;
+        if(compatible(be,be.getBlockPos().relative(right.getOpposite()),plane))mask|=8;
         return mask;
     }
-    private static boolean compatible(IndustrialDoorEntity be,BlockPos pos,Direction f) {
+    private static boolean compatible(IndustrialDoorEntity be,BlockPos pos,IndustrialDoorPlane plane) {
         if(!be.getLevel().hasChunkAt(pos))return false;
         BlockState state=be.getLevel().getBlockState(pos);
         return state.getBlock() instanceof IndustrialDoorBlock nextBlock
-            && nextBlock.style==((IndustrialDoorBlock)be.getBlockState().getBlock()).style && IndustrialDoorBlock.facing(state)==f
+            && nextBlock.style==be.style() && IndustrialDoorBlock.plane(state)==plane
             && be.getLevel().getBlockEntity(pos) instanceof IndustrialDoorEntity next && Objects.equals(be.owner,next.owner);
     }
     private static IndustrialDoorEntity root(IndustrialDoorEntity be) {
         if(be.size>0)return be;
         return be.owner!=null&&be.getLevel().getBlockEntity(be.owner) instanceof IndustrialDoorEntity d&&d.size>0?d:null;
     }
-    private static void frame(IndustrialDoorEntity be,Direction f,PoseStack pose,MultiBufferSource buffers,IndustrialDoorLighting light) {
-        renderFrameBody(be,f,pose,buffers,light);
+    private static void frame(IndustrialDoorEntity be,IndustrialDoorPlane plane,PoseStack pose,MultiBufferSource buffers,IndustrialDoorLighting light) {
+        renderFrameBody(be,plane,pose,buffers,light);
         if(!be.getBlockState().getValue(IndustrialDoorBlock.ACTIVE)||!be.getBlockState().getValue(IndustrialDoorBlock.RAIL))return;
         IndustrialDoorEntity d=root(be);
         if(d==null)return;
-        int row=IndustrialDoorPlane.offset(d.doorOrigin(),be.getBlockPos(),IndustrialDoorPlane.up(f));
-        float y0=(float)IndustrialDoorVisualState.railStart(d.size,row),y1=(float)IndustrialDoorVisualState.railEnd(d.size,row);
+        int row=plane.row(d.doorOrigin(),be.getBlockPos());
+        int height=d.height();
+        float y0=(float)IndustrialDoorVisualState.railStart(height,row),y1=(float)IndustrialDoorVisualState.railEnd(height,row);
         if(y1<=y0)return;
         int color=IndustrialDoorVisualState.lampColor(d.progress,d.targetProgress(),be.getLevel().getGameTime());
         // Decorative housings stand proud of the full cube by one eighth of a block.
@@ -126,18 +140,18 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             float z0=backSide?-.109375f:1f,z1=backSide?0:1.109375f;
             box(pose,out,.34375f,y0,z0,.65625f,y1,z1,.015625f,.515625f,light);
             box(pose,out,.375f,y0,backSide?-.1171875f:1.109375f,.625f,y1,backSide?-.109375f:1.1171875f,.328125f,.515625f,light);
-            float lens0=(float)Math.max(y0,IndustrialDoorVisualState.railBottom(d.size)+.03125-row);
-            float lens1=(float)Math.min(y1,IndustrialDoorVisualState.railTop(d.size)-.03125-row);
+            float lens0=(float)Math.max(y0,IndustrialDoorVisualState.railBottom(height)+.03125-row);
+            float lens1=(float)Math.min(y1,IndustrialDoorVisualState.railTop(height)-.03125-row);
             if(color!=IndustrialDoorVisualState.OFF&&lens1>lens0)lens(pose,out,.4375f,.5625f,lens0,lens1,backSide?-.125f:1.125f,color);
         }
     }
-    private static void renderFrameBody(IndustrialDoorEntity be,Direction f,PoseStack pose,MultiBufferSource buffers,IndustrialDoorLighting light) {
-        int mask=frameMask(be,f);
+    private static void renderFrameBody(IndustrialDoorEntity be,IndustrialDoorPlane plane,PoseStack pose,MultiBufferSource buffers,IndustrialDoorLighting light) {
         var style=((IndustrialDoorBlock)be.getBlockState().getBlock()).style;
+        int mask=frameMask(be,plane);
         // Front and back follow the same physical XY path. Each corner has two mitered rails.
         float[][] front={{0,0,1},{1,0,1},{1,1,1},{0,1,1}},back={{0,0,0},{1,0,0},{1,1,0},{0,1,0}};
-        if(style==IndustrialDoorStyle.IRIS){
-            var tile=irisFrameTile(be,f,mask);
+        if(style.hasHazardFrame()){
+            var tile=hazardFrameTile(be, plane);
             var concrete=buffers.getBuffer(RenderType.entityCutoutNoCull(texture(style,tile.part())));
             material(pose,concrete,front,tile,light,0,0,1);
             material(pose,concrete,back,tile,light,0,0,-1);
@@ -148,24 +162,40 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         // Other faces only see the connections in their own plane. A corner thus gets
         // a U-shaped end cap across the thickness, with one return at BOTH front and back.
         // Shared internal faces are hidden by the adjacent full frame cube.
-        if((mask&1)==0)frameFace(pose,buffers,style,new float[][]{{0,1,1},{1,1,1},{1,1,0},{0,1,0}},mask&10,light,0,1,0);
-        if((mask&4)==0)frameFace(pose,buffers,style,new float[][]{{0,0,0},{1,0,0},{1,0,1},{0,0,1}},mask&10,light,0,-1,0);
-        if((mask&8)==0)frameFace(pose,buffers,style,new float[][]{{0,0,0},{0,0,1},{0,1,1},{0,1,0}},mask&5,light,-1,0,0);
-        if((mask&2)==0)frameFace(pose,buffers,style,new float[][]{{1,0,1},{1,0,0},{1,1,0},{1,1,1}},mask&5,light,1,0,0);
+        var door = assembledRoot(be);
+        var section = door != null ? IndustrialDoorFrameGroove.section(door, be.getBlockPos(), plane) : null;
+        if((mask&1)==0)frameSide(pose,buffers,style,new float[][]{{0,1,1},{1,1,1},{1,1,0},{0,1,0}},mask&10,section,1,light,0,1);
+        if((mask&4)==0)frameSide(pose,buffers,style,new float[][]{{0,0,0},{1,0,0},{1,0,1},{0,0,1}},mask&10,section,4,light,0,-1);
+        if((mask&8)==0)frameSide(pose,buffers,style,new float[][]{{0,0,0},{0,0,1},{0,1,1},{0,1,0}},mask&5,section,8,light,-1,0);
+        if((mask&2)==0)frameSide(pose,buffers,style,new float[][]{{1,0,1},{1,0,0},{1,1,0},{1,1,1}},mask&5,section,2,light,1,0);
     }
-    private static IndustrialDoorFrameLayout.Tile irisFrameTile(IndustrialDoorEntity be,Direction facing,int mask) {
-        var tile=IndustrialDoorFrameLayout.tile(mask);
-        if(!tile.part().equals("frame_middle"))return tile;
-        var door=root(be);
-        if(door==null)return tile;
-        int column=IndustrialDoorPlane.offset(door.doorOrigin(),be.getBlockPos(),IndustrialDoorPlane.across(facing));
-        int row=IndustrialDoorPlane.offset(door.doorOrigin(),be.getBlockPos(),IndustrialDoorPlane.up(facing));
-        // The stripe points into the aperture on every run and reaches the same channel at each corner.
-        int turns=column==0?0:column==door.size-1?2:row==0?3:1;
-        return new IndustrialDoorFrameLayout.Tile(tile.part(),turns);
+    private static void frameSide(PoseStack pose, MultiBufferSource buffers, IndustrialDoorStyle style, float[][] points,
+                                  int mask, IndustrialDoorFrameGroove.Section section, int face,
+                                  IndustrialDoorLighting light, float nx, float ny) {
+        if (section == null || section.face() != face) {
+            frameFace(pose,buffers,style,points,mask,light,nx,ny,0);
+            return;
+        }
+        ResourceLocation liner = switch (style) {
+            case IRIS -> texture(style, "hazard");
+            case JAW -> texture(style, section.grooved() ? "frame_liner" : "frame_reveal");
+            default -> texture(style, "frame_groove");
+        };
+        var material = buffers.getBuffer(RenderType.entityCutoutNoCull(liner));
+        IndustrialDoorFrameGroove.render(pose,material,light,light.face(points,nx,ny,0),style,section,nx,ny);
+    }
+    private static IndustrialDoorEntity assembledRoot(IndustrialDoorEntity frame) {
+        return frame.getBlockState().getValue(IndustrialDoorBlock.ACTIVE) ? root(frame) : null;
+    }
+    private static IndustrialDoorFrameLayout.Tile hazardFrameTile(IndustrialDoorEntity frame, IndustrialDoorPlane plane) {
+        var door = assembledRoot(frame);
+        if (door == null) return IndustrialDoorFrameLayout.tile(0);
+        int column = plane.column(door.doorOrigin(), frame.getBlockPos());
+        int row = plane.row(door.doorOrigin(), frame.getBlockPos());
+        return IndustrialDoorFrameLayout.stripedTile(column, row, door.size, door.height());
     }
     private static void frameFace(PoseStack pose,MultiBufferSource buffers,IndustrialDoorStyle style,float[][] points,int mask,IndustrialDoorLighting light,float nx,float ny,float nz) {
-        var tile=IndustrialDoorFrameLayout.tile(style==IndustrialDoorStyle.IRIS?0:mask);
+        var tile=IndustrialDoorFrameLayout.tile(style.hasHazardFrame()?0:mask);
         boolean corner=tile.part().equals("frame_corner");
         VertexConsumer out=buffers.getBuffer(RenderType.entityCutoutNoCull(texture(style,corner?"frame_middle":tile.part())));
         if(!corner){material(pose,out,points,tile,light,nx,ny,nz);return;}
@@ -189,7 +219,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         for(int i=0;i<4;i++)coords[i]=IndustrialDoorFrameLayout.uv(coords[i][0],coords[i][1],tile.turns());
         textured(pose,out,p,coords,light,nx,ny,nz);
     }
-    private static void box(PoseStack pose,VertexConsumer out,float x0,float y0,float z0,float x1,float y1,float z1,float u,float v,IndustrialDoorLighting light) {
+    static void box(PoseStack pose,VertexConsumer out,float x0,float y0,float z0,float x1,float y1,float z1,float u,float v,IndustrialDoorLighting light) {
         quad(pose,out,new float[][]{{x0,y0,z1},{x1,y0,z1},{x1,y1,z1},{x0,y1,z1}},u,v,u,v,light,0,0,1);
         quad(pose,out,new float[][]{{x1,y0,z0},{x0,y0,z0},{x0,y1,z0},{x1,y1,z0}},u,v,u,v,light,0,0,-1);
         quad(pose,out,new float[][]{{x0,y1,z1},{x1,y1,z1},{x1,y1,z0},{x0,y1,z0}},u,v,u,v,light,0,1,0);
@@ -206,7 +236,9 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
                                   IndustrialMeshDoorMotion.Panel panel, double footHeight, double headHeight, IndustrialDoorLighting light) {
         // Tile the lattice per block and clip the moving texture at the lintel.
         double start = panel.start() + footHeight;
-        double end = Math.min(panel.end() - headHeight, height - panel.rise());
+        double visibleEnd = height - panel.rise();
+        if (start >= visibleEnd) return;
+        double end = Math.min(panel.end() - headHeight, visibleEnd + IndustrialDoorFrameGroove.DEPTH);
         if (start >= end) return;
         float z = (float) panel.depth();
         for (int row = (int) start; row < end; row++) {
@@ -232,7 +264,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         if (bottom >= height) return;
         float z = (float) depth;
         box(pose, out, 1, (float) (1 + bottom), z - .04f, height + 1,
-            (float) (1 + Math.min(height, bottom + MESH_RAIL_HEIGHT)), z + .04f,
+            (float) (1 + Math.min(height + IndustrialDoorFrameGroove.DEPTH, bottom + MESH_RAIL_HEIGHT)), z + .04f,
             9.5f / 32, 10.5f / 32, light);
     }
 
@@ -240,7 +272,7 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
                                        IndustrialMeshDoorMotion.Panel beam, IndustrialDoorLighting light) {
         double bottom = beam.bottom();
         if (bottom >= height) return;
-        double top = Math.min(height, beam.end() + beam.rise());
+        double top = Math.min(height + IndustrialDoorFrameGroove.DEPTH, beam.end() + beam.rise());
         float y0 = (float) (1 + bottom), y1 = (float) (1 + top);
         float topV = (float) (1 - (top - bottom) / IndustrialMeshDoorMotion.HAZARD_HEIGHT);
         float front = (float) beam.farDepth(), back = (float) beam.nearDepth();
@@ -263,19 +295,22 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
             u, v, u, v, light, 1, 0, 0);
     }
     private static void segment(PoseStack pose,VertexConsumer out,double start,double end,double offset,double height,IndustrialDoorLighting light) {
-        double a=Math.max(0,start+offset),b=Math.min(height,end+offset);
-        if(b<=a)return;
+        double bottom = start + offset, top = end + offset;
+        if (Math.min(height, top) <= Math.max(0, bottom)) return;
+        float depth = IndustrialDoorFrameGroove.DEPTH;
+        double a = Math.max(-depth, bottom), b = Math.min(height + depth, top);
         float y0=(float)(1+a),y1=(float)(1+b),x0=1,x1=(float)height+1;
+        float back = IndustrialDoorFrameGroove.PANEL_BACK, front = IndustrialDoorFrameGroove.PANEL_FRONT;
         // Both halves reference the same original door image, including while clipped by the frame.
         float v0=IndustrialDoorVisualState.panelV(height,b-offset),v1=IndustrialDoorVisualState.panelV(height,a-offset);
-        panelQuad(pose,out,new float[][]{{x0,y0,.625f},{x1,y0,.625f},{x1,y1,.625f},{x0,y1,.625f}},0,v0,1,v1,light,0,0,1);
-        panelQuad(pose,out,new float[][]{{x1,y0,.375f},{x0,y0,.375f},{x0,y1,.375f},{x1,y1,.375f}},0,v0,1,v1,light,0,0,-1);
-        panelQuad(pose,out,new float[][]{{x0,y1,.625f},{x1,y1,.625f},{x1,y1,.375f},{x0,y1,.375f}},0,0,.5f,.5f,light,0,1,0);
-        panelQuad(pose,out,new float[][]{{x0,y0,.375f},{x1,y0,.375f},{x1,y0,.625f},{x0,y0,.625f}},0,0,.5f,.5f,light,0,-1,0);
-        panelQuad(pose,out,new float[][]{{x0,y0,.375f},{x0,y0,.625f},{x0,y1,.625f},{x0,y1,.375f}},0,0,.5f,.5f,light,-1,0,0);
-        panelQuad(pose,out,new float[][]{{x1,y0,.625f},{x1,y0,.375f},{x1,y1,.375f},{x1,y1,.625f}},0,0,.5f,.5f,light,1,0,0);
+        panelQuad(pose,out,new float[][]{{x0,y0,front},{x1,y0,front},{x1,y1,front},{x0,y1,front}},0,v0,1,v1,light,0,0,1);
+        panelQuad(pose,out,new float[][]{{x1,y0,back},{x0,y0,back},{x0,y1,back},{x1,y1,back}},0,v0,1,v1,light,0,0,-1);
+        panelQuad(pose,out,new float[][]{{x0,y1,front},{x1,y1,front},{x1,y1,back},{x0,y1,back}},0,0,.5f,.5f,light,0,1,0);
+        panelQuad(pose,out,new float[][]{{x0,y0,back},{x1,y0,back},{x1,y0,front},{x0,y0,front}},0,0,.5f,.5f,light,0,-1,0);
+        panelQuad(pose,out,new float[][]{{x0,y0,back},{x0,y0,front},{x0,y1,front},{x0,y1,back}},0,0,.5f,.5f,light,-1,0,0);
+        panelQuad(pose,out,new float[][]{{x1,y0,front},{x1,y0,back},{x1,y1,back},{x1,y1,front}},0,0,.5f,.5f,light,1,0,0);
     }
-    private static void panelQuad(PoseStack pose,VertexConsumer out,float[][] points,float u0,float v0,float u1,float v1,IndustrialDoorLighting light,float nx,float ny,float nz) {
+    static void panelQuad(PoseStack pose,VertexConsumer out,float[][] points,float u0,float v0,float u1,float v1,IndustrialDoorLighting light,float nx,float ny,float nz) {
         // Break only the geometry into block-sized light samples. UVs still refer
         // to the single full panel image, including the two clipped moving halves.
         float[] columns=lightCuts(points[0],points[1]),rows=lightCuts(points[0],points[3]);
@@ -300,7 +335,9 @@ public class IndustrialDoorRenderer implements BlockEntityRenderer<IndustrialDoo
         textured(pose,out,p,new float[][]{{u0,v1},{u1,v1},{u1,v0},{u0,v0}},light,nx,ny,nz);
     }
     private static void textured(PoseStack pose,VertexConsumer out,float[][] p,float[][] uv,IndustrialDoorLighting light,float nx,float ny,float nz) {
-        int packedLight=light.face(p,nx,ny,nz);
+        textured(pose,out,p,uv,light,nx,ny,nz,light.face(p,nx,ny,nz));
+    }
+    static void textured(PoseStack pose,VertexConsumer out,float[][] p,float[][] uv,IndustrialDoorLighting light,float nx,float ny,float nz,int packedLight) {
         for(int i=0;i<4;i++)out.addVertex(pose.last(),p[i][0],p[i][1],p[i][2]).setColor(255,255,255,255)
             .setUv(uv[i][0],uv[i][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light.vertex(p[i],nz,packedLight)).setNormal(pose.last(),nx,ny,nz);
     }

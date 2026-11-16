@@ -16,6 +16,15 @@ public final class IndustrialDoorFrameLayout {
             if(rotateMask(3,turns)==mask)return new Tile("frame_corner",turns);
         return new Tile("frame",0);
     }
+    /** The stripe faces the aperture. Its four corners follow the same painted path. */
+    public static Tile stripedTile(int column, int row, int width, int height) {
+        boolean left = column == 0, right = column == width - 1;
+        boolean bottom = row == 0, top = row == height - 1;
+        if (left) return new Tile(bottom || top ? "frame_corner" : "frame_middle", top ? 1 : 0);
+        if (right) return new Tile(bottom || top ? "frame_corner" : "frame_middle", bottom ? 3 : 2);
+        if (bottom || top) return new Tile("frame_middle", top ? 1 : 3);
+        return tile(0);
+    }
     /** Inverse texture rotation: the painted connection turns clockwise with the tile. */
     public static float[] uv(float u,float v,int turns){
         for(int i=0;i<Math.floorMod(turns,4);i++){float next=v;v=1-u;u=next;}

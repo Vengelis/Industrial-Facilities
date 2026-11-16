@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "industrial_facilities:industrial_barrier_yellow_hazard",
+    "industrial_facilities:industrial_door_jaw_frame",
     "industrial_facilities:emergency_exit_sign_left",
     "industrial_facilities:road_restricted",
     "industrial_facilities:road_diagonal_transition_mirror_white",
@@ -53,8 +54,10 @@
     "industrial_facilities:terminal_badge_bank",
     "industrial_facilities:forbidden_sign",
     "industrial_facilities:down_sign",
+    "industrial_facilities:industrial_door_iris_controller",
     "industrial_facilities:warning_sign",
     "industrial_facilities:industrial_metal_door_blast",
+    "industrial_facilities:industrial_door_jaw_controller",
     "industrial_facilities:industrial_door_blast_controller",
     "industrial_facilities:industrial_metal_door_rusty",
     "industrial_facilities:information_sign",
@@ -75,6 +78,7 @@
     "industrial_facilities:industrial_barrier_white",
     "industrial_facilities:road_arrow",
     "industrial_facilities:road_concrete_light_gray",
+    "industrial_facilities:industrial_door_iris_frame",
     "industrial_facilities:industrial_door_dark_controller",
     "industrial_facilities:road_arrow_white",
     "industrial_facilities:camera_terminal",
@@ -131,8 +135,6 @@
     "industrial_facilities:road_diagonal_red",
     "industrial_facilities:stop_sign",
     "industrial_facilities:industrial_door_blast_frame",
-    "industrial_facilities:security_camera",
-    "industrial_facilities:industrial_door_iris_frame",
-    "industrial_facilities:industrial_door_iris_controller"
+    "industrial_facilities:security_camera"
   ]
 }

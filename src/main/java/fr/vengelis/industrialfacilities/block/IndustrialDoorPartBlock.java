@@ -35,14 +35,19 @@ public class IndustrialDoorPartBlock extends Block implements EntityBlock {
         return door == null ? Shapes.empty() : collision(door,p);
     }
     private static VoxelShape collision(IndustrialDoorEntity door, BlockPos p) {
-        double height=door.size-2, half=height/2, travel=half*door.progress;
+        int height = door.height() - 2;
+        double half=height/2.0, travel=half*door.progress;
         double row=p.getY()-door.doorOrigin().getY()-1;
         var facing = IndustrialDoorBlock.facing(door.getBlockState());
-        if (door.style() == IndustrialDoorStyle.IRIS) {
-            BlockPos origin = IndustrialDoorManager.at(door.doorOrigin(), facing, 1, 1);
-            int column = IndustrialDoorPlane.offset(origin, p, IndustrialDoorPlane.across(facing));
-            int line = IndustrialDoorPlane.offset(origin, p, IndustrialDoorPlane.up(facing));
-            return IndustrialIrisDoorMotion.collision((int) height, door.progress, facing, column, line);
+        var style = door.style();
+        if (style == IndustrialDoorStyle.IRIS || style == IndustrialDoorStyle.JAW) {
+            IndustrialDoorPlane plane = door.plane();
+            BlockPos origin = plane.at(door.doorOrigin(), 1, 1);
+            int column = plane.column(origin, p);
+            int line = plane.row(origin, p);
+            return style == IndustrialDoorStyle.IRIS
+                ? IndustrialIrisDoorMotion.collision(height, door.progress, facing, column, line)
+                : IndustrialJawDoorMotion.layout(door, plane).collision(door.progress, plane, column, line);
         }
         if (door.style() == IndustrialDoorStyle.MESH) {
             var lower = IndustrialMeshDoorMotion.lower(height, door.progress);

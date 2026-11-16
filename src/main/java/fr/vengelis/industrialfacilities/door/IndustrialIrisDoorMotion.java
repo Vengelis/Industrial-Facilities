@@ -83,7 +83,7 @@ public final class IndustrialIrisDoorMotion {
     }
 
     private static VoxelShape strip(Direction facing, double x0, double y0, double x1, double y1) {
-        return Shapes.create(IndustrialDoorPlane.worldBox(BlockPos.ZERO, facing, new AABB(x0, y0, BACK, x1, y1, FRONT)));
+        return Shapes.create(IndustrialDoorPlane.of(facing).worldBox(BlockPos.ZERO, new AABB(x0, y0, BACK, x1, y1, FRONT)));
     }
 
     public static boolean isClear(int size, double progress, AABB localEntity) {
