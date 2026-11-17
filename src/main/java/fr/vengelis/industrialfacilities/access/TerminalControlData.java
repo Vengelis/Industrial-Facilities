@@ -21,7 +21,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 /** Dimension-local control links, latched lockdowns and timed button requests. */
 public final class TerminalControlData extends SavedData {
-    private static final int MAX_LINKS = 64;
+    static final int MAX_LINKS = 64;
 
     public record Target(UUID id, BlockPos position, boolean emitter) {}
     private record Pulse(UUID button, Target reader, UUID code) {}
@@ -127,6 +127,28 @@ public final class TerminalControlData extends SavedData {
         return target.emitter && TerminalLinks.loaded(level, target.position)
             && level.getBlockEntity(target.position) instanceof SignalEmitterEntity emitter
             && target.id.equals(emitter.instanceId) && owner.equals(emitter.creator) ? emitter : null;
+    }
+
+    static boolean available(ServerLevel level, ControlTerminalEntity source, Target target) {
+        return TerminalLinks.inRange(source.getBlockPos(), target.position)
+            && (target.emitter ? emitterAt(level, target, source.creator) != null
+                               : terminalAt(level, target, source.creator) != null);
+    }
+
+    String unlinkOffline(ServerLevel level, ControlTerminalEntity terminal, UUID id, BlockPos position) {
+        Circuit circuit = circuit(terminal);
+        if (circuit != null) {
+            var targets = circuit.links.iterator();
+            while (targets.hasNext()) {
+                Target target = targets.next();
+                if (!target.id.equals(id) || !target.position.equals(position)) continue;
+                if (available(level, terminal, target)) return "device_back_online";
+                targets.remove();
+                changed(level);
+                return "device_unlinked";
+            }
+        }
+        return "device_not_linked";
     }
 
     public String link(ServerLevel level, ControlTerminalEntity source, BlockPos position) {

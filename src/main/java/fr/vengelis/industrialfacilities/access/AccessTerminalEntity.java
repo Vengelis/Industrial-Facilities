@@ -47,6 +47,7 @@ public class AccessTerminalEntity extends BlockEntity {
     public void invalidate(){if(getLevel() instanceof ServerLevel server){
         if(terminalId!=null)AccessRegistry.get(server.getServer()).remove(terminalId);
         TerminalControlData.get(server).remove(server,instanceId);
+        fr.vengelis.industrialfacilities.supervision.SupervisionData.get(server).removeTerminal(instanceId);
     }terminalId=null;instanceId=UUID.randomUUID();grantedUntil=0;accessGranted=false;sync();}
     public void updateAccessState(){
         if(!(level instanceof ServerLevel))return;
@@ -75,6 +76,9 @@ public class AccessTerminalEntity extends BlockEntity {
     @Override public void onLoad(){super.onLoad();syncReaderMaterialState();if(level instanceof ServerLevel server&&terminalId!=null&&getBlockState().getValue(AccessTerminalBlock.ASSEMBLED)&&getBlockState().getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER)AccessRegistry.get(server.getServer()).put(this);}
     public static void tick(Level level,BlockPos pos,BlockState state,AccessTerminalEntity be){
         if(level instanceof ServerLevel&&state.getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER){be.updateAccessState();be.syncReaderMaterialState();}
+        if(level instanceof ServerLevel server && state.getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER
+                && state.getValue(AccessTerminalBlock.ASSEMBLED) && (level.getGameTime()+pos.asLong())%20==0)
+            fr.vengelis.industrialfacilities.supervision.SupervisionData.get(server).refresh(server,be);
         if(level instanceof ServerLevel&&(level.getGameTime()+pos.asLong())%20==0){
             if(state.getValue(AccessTerminalBlock.ASSEMBLED)&&level.hasChunkAt(state.getValue(AccessTerminalBlock.HALF)==DoubleBlockHalf.LOWER?pos.above():pos.below()))AccessTerminalBlock.checkStructure(level,pos,state);
             else if(!state.getValue(AccessTerminalBlock.ASSEMBLED)){AccessTerminalBlock.tryAssemble(level,pos);AccessTerminalBlock.tryAssemble(level,pos.below());}

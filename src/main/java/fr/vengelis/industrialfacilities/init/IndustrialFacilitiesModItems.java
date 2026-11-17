@@ -18,6 +18,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.item.ItemProperties;
 
+import fr.vengelis.industrialfacilities.supervision.PortableConsoleItem;
 import fr.vengelis.industrialfacilities.procedures.ExtinguisherPropertyValueProviderProcedure;
 import fr.vengelis.industrialfacilities.item.*;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
@@ -163,6 +164,9 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> KEYPASS_MANAGER;
 	public static final DeferredItem<Item> TERMINAL_BUTTON;
 	public static final DeferredItem<Item> TERMINAL_LOCKDOWN;
+	public static final DeferredItem<Item> SUPERVISION_CONSOLE;
+	public static final DeferredItem<Item> SUPERVISION_DISPLAY;
+	public static final DeferredItem<Item> PORTABLE_CONSOLE;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -303,6 +307,9 @@ public class IndustrialFacilitiesModItems {
 		KEYPASS_MANAGER = block(IndustrialFacilitiesModBlocks.KEYPASS_MANAGER);
 		TERMINAL_BUTTON = block(IndustrialFacilitiesModBlocks.TERMINAL_BUTTON);
 		TERMINAL_LOCKDOWN = block(IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN);
+		SUPERVISION_CONSOLE = block(IndustrialFacilitiesModBlocks.SUPERVISION_CONSOLE);
+		SUPERVISION_DISPLAY = block(IndustrialFacilitiesModBlocks.SUPERVISION_DISPLAY);
+		PORTABLE_CONSOLE = REGISTRY.register("portable_console", PortableConsoleItem::new);
 	}
 
 	// Start of user code block custom items

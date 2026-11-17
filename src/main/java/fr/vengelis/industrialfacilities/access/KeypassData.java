@@ -50,7 +50,8 @@ public final class KeypassData extends SavedData {
     public List<Reader> readers(KeypassTerminalEntity manager){
         return bindings.values().stream().filter(b->belongs(b,manager)).map(b->new Reader(b.reader.id,b.reader.pos,b.configured(),names.getOrDefault(b.reader.id,""))).toList();
     }
-    public String readerName(KeypassTerminalEntity reader){return reader.manager()?"":names.getOrDefault(reader.instanceId,"");}
+    public String readerName(KeypassTerminalEntity reader){return reader.manager()?"":readerName(reader.instanceId);}
+    public String readerName(UUID reader){return names.getOrDefault(reader,"");}
     private static boolean mayManage(ServerPlayer player,KeypassTerminalEntity manager){
         return manager.manager()&&validDevice(player,manager)&&manager.isOwner(player)&&player.distanceToSqr(manager.getBlockPos().getCenter())<=64;
     }

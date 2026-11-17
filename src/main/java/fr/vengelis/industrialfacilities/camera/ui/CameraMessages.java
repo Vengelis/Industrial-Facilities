@@ -102,6 +102,22 @@ public final class CameraMessages {
             return TYPE;
         }
     }
+    public record UnlinkOffline(int menuId, int requestId, UUID device) implements CustomPacketPayload {
+        public static final Type<UnlinkOffline> TYPE = new Type<>(CameraMenus.id("camera_unlink_offline"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, UnlinkOffline> CODEC = StreamCodec.of(
+                (buffer, action) -> {
+                    buffer.writeVarInt(action.menuId);
+                    buffer.writeVarInt(action.requestId);
+                    buffer.writeUUID(action.device);
+                },
+                buffer -> new UnlinkOffline(buffer.readVarInt(), buffer.readVarInt(), buffer.readUUID()));
+
+        @Override
+        public Type<UnlinkOffline> type() {
+            return TYPE;
+        }
+    }
+
     /** Le serveur renvoie l’état du menu et l’identifiant de la dernière demande traitée. */
     public record State(int menuId, int revision, boolean editable, boolean running, CompoundTag program,
             List<Link> links, int range, float yaw, float pitch, String status, String runtimeStatus, int actionSerial,
@@ -201,6 +217,10 @@ public final class CameraMessages {
             if (context.player().containerMenu instanceof CameraMenu menu && menu.containerId == data.menuId
                     && menu.stillValid(context.player()))
                 menu.apply(context.player(), data);
+        }));
+        registrar.playToServer(UnlinkOffline.TYPE, UnlinkOffline.CODEC, (data, context) -> context.enqueueWork(() -> {
+            if (context.player().containerMenu instanceof CameraMenu menu)
+                menu.applyUnlink(context.player(), data);
         }));
         registrar.playToClient(
                 State.TYPE, State.CODEC, (data, context) -> context.enqueueWork(() -> receiver.accept(data)));

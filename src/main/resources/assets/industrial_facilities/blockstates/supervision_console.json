@@ -1,0 +1,324 @@
+{
+  "variants": {
+    "column=0,facing=south,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 0
+    },
+    "column=1,facing=south,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 0
+    },
+    "column=2,facing=south,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 0
+    },
+    "column=3,facing=south,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 0
+    },
+    "column=0,facing=south,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_0",
+      "y": 0
+    },
+    "column=1,facing=south,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_1",
+      "y": 0
+    },
+    "column=2,facing=south,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_2",
+      "y": 0
+    },
+    "column=3,facing=south,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_fill",
+      "y": 0
+    },
+    "column=0,facing=south,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 0
+    },
+    "column=1,facing=south,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 0
+    },
+    "column=2,facing=south,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 0
+    },
+    "column=3,facing=south,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 0
+    },
+    "column=0,facing=south,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_0",
+      "y": 0
+    },
+    "column=1,facing=south,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 0
+    },
+    "column=2,facing=south,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_2",
+      "y": 0
+    },
+    "column=3,facing=south,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 0
+    },
+    "column=0,facing=south,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 0
+    },
+    "column=1,facing=south,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 0
+    },
+    "column=2,facing=south,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 0
+    },
+    "column=3,facing=south,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 0
+    },
+    "column=0,facing=west,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 90
+    },
+    "column=1,facing=west,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 90
+    },
+    "column=2,facing=west,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 90
+    },
+    "column=3,facing=west,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 90
+    },
+    "column=0,facing=west,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_0",
+      "y": 90
+    },
+    "column=1,facing=west,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_1",
+      "y": 90
+    },
+    "column=2,facing=west,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_2",
+      "y": 90
+    },
+    "column=3,facing=west,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_fill",
+      "y": 90
+    },
+    "column=0,facing=west,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 90
+    },
+    "column=1,facing=west,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 90
+    },
+    "column=2,facing=west,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 90
+    },
+    "column=3,facing=west,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 90
+    },
+    "column=0,facing=west,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_0",
+      "y": 90
+    },
+    "column=1,facing=west,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 90
+    },
+    "column=2,facing=west,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_2",
+      "y": 90
+    },
+    "column=3,facing=west,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 90
+    },
+    "column=0,facing=west,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 90
+    },
+    "column=1,facing=west,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 90
+    },
+    "column=2,facing=west,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 90
+    },
+    "column=3,facing=west,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 90
+    },
+    "column=0,facing=north,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 180
+    },
+    "column=1,facing=north,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 180
+    },
+    "column=2,facing=north,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 180
+    },
+    "column=3,facing=north,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 180
+    },
+    "column=0,facing=north,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_0",
+      "y": 180
+    },
+    "column=1,facing=north,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_1",
+      "y": 180
+    },
+    "column=2,facing=north,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_2",
+      "y": 180
+    },
+    "column=3,facing=north,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_fill",
+      "y": 180
+    },
+    "column=0,facing=north,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 180
+    },
+    "column=1,facing=north,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 180
+    },
+    "column=2,facing=north,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 180
+    },
+    "column=3,facing=north,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 180
+    },
+    "column=0,facing=north,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_0",
+      "y": 180
+    },
+    "column=1,facing=north,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 180
+    },
+    "column=2,facing=north,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_2",
+      "y": 180
+    },
+    "column=3,facing=north,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 180
+    },
+    "column=0,facing=north,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 180
+    },
+    "column=1,facing=north,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 180
+    },
+    "column=2,facing=north,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 180
+    },
+    "column=3,facing=north,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 180
+    },
+    "column=0,facing=east,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 270
+    },
+    "column=1,facing=east,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 270
+    },
+    "column=2,facing=east,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 270
+    },
+    "column=3,facing=east,row=0": {
+      "model": "industrial_facilities:block/supervision_console",
+      "y": 270
+    },
+    "column=0,facing=east,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_0",
+      "y": 270
+    },
+    "column=1,facing=east,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_1",
+      "y": 270
+    },
+    "column=2,facing=east,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_2",
+      "y": 270
+    },
+    "column=3,facing=east,row=1": {
+      "model": "industrial_facilities:block/supervision_console_lower_fill",
+      "y": 270
+    },
+    "column=0,facing=east,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 270
+    },
+    "column=1,facing=east,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 270
+    },
+    "column=2,facing=east,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 270
+    },
+    "column=3,facing=east,row=2": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 270
+    },
+    "column=0,facing=east,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_0",
+      "y": 270
+    },
+    "column=1,facing=east,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 270
+    },
+    "column=2,facing=east,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_2",
+      "y": 270
+    },
+    "column=3,facing=east,row=3": {
+      "model": "industrial_facilities:block/supervision_console_case_3_1",
+      "y": 270
+    },
+    "column=0,facing=east,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_0",
+      "y": 270
+    },
+    "column=1,facing=east,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 270
+    },
+    "column=2,facing=east,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case_2_2",
+      "y": 270
+    },
+    "column=3,facing=east,row=4": {
+      "model": "industrial_facilities:block/supervision_console_case",
+      "y": 270
+    }
+  }
+}

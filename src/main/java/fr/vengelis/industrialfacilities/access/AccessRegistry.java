@@ -64,6 +64,8 @@ public final class AccessRegistry extends SavedData {
         public int readerCount() {
             return group.members.size();
         }
+
+        public UUID instanceId() { return instanceId; }
     }
 
     private record DoorSite(String dimension, BlockPos position) {}
@@ -225,6 +227,14 @@ public final class AccessRegistry extends SavedData {
     public boolean obsoleteDoorLink(String dimension, BlockPos pos, UUID instance) {
         DoorSite site = new DoorSite(dimension, pos);
         return doorGenerations.containsKey(site) && !Objects.equals(doorGenerations.get(site), instance);
+    }
+
+    /** Retire une seule porte de la liste partagée par le groupe. */
+    List<Entry> unlinkDoor(Entry reader, DoorLink link) {
+        if (!reader.group.doors.remove(link)) return List.of();
+        reindex();
+        setDirty();
+        return List.copyOf(reader.group.members);
     }
 
     public void registerDoor(String dimension, BlockPos pos, UUID instance) {

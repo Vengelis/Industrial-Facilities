@@ -1,9 +1,16 @@
 package fr.vengelis.industrialfacilities.access.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
+import fr.vengelis.industrialfacilities.access.TerminalDevices;
+import fr.vengelis.industrialfacilities.supervision.SupervisionData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -41,14 +48,64 @@ public final class AccessMessages {
                 buf.readBoolean(),buf.readBoolean(),buf.readBoolean(),buf.readBoolean(),buf.readByte(),buf.readUtf(512)));
         @Override public Type<State> type(){return TYPE;}
     }
+    public record UnlinkDevice(int menuId, UUID device, BlockPos position) implements CustomPacketPayload {
+        public static final Type<UnlinkDevice> TYPE = new Type<>(AccessMenus.id("unlink_offline_device"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, UnlinkDevice> CODEC = StreamCodec.of(
+            (buf, data) -> {
+                buf.writeVarInt(data.menuId);
+                buf.writeUUID(data.device);
+                buf.writeBlockPos(data.position);
+            },
+            buf -> new UnlinkDevice(buf.readVarInt(), buf.readUUID(), buf.readBlockPos()));
+        @Override public Type<UnlinkDevice> type() { return TYPE; }
+    }
+
+    public record DeviceList(int menuId, List<TerminalDevices.Link> links) implements CustomPacketPayload {
+        public DeviceList { links = List.copyOf(links); }
+        public static final Type<DeviceList> TYPE = new Type<>(AccessMenus.id("access_device_list"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, DeviceList> CODEC = StreamCodec.of(
+            (buf, data) -> {
+                buf.writeVarInt(data.menuId);
+                buf.writeVarInt(data.links.size());
+                for (var link : data.links) {
+                    buf.writeUUID(link.id());
+                    buf.writeBlockPos(link.position());
+                    buf.writeEnum(link.kind());
+                    buf.writeBoolean(link.available());
+                    buf.writeUtf(link.name(), SupervisionData.MAX_NAME);
+                }
+            },
+            buf -> {
+                int menu = buf.readVarInt(), count = buf.readVarInt();
+                if (count < 0 || count > TerminalDevices.MAX_LINKS)
+                    throw new IllegalArgumentException("Invalid access link list size");
+                var links = new ArrayList<TerminalDevices.Link>(count);
+                for (int i = 0; i < count; i++) {
+                    links.add(new TerminalDevices.Link(buf.readUUID(), buf.readBlockPos(),
+                        buf.readEnum(TerminalDevices.Kind.class), buf.readBoolean(), buf.readUtf(SupervisionData.MAX_NAME)));
+                }
+                return new DeviceList(menu, links);
+            });
+        @Override public Type<DeviceList> type() { return TYPE; }
+    }
+
     public static java.util.function.Consumer<State> receiver=data->{};
+    public static java.util.function.Consumer<DeviceList> deviceReceiver = data -> {};
     @SubscribeEvent public static void network(RegisterPayloadHandlersEvent event){
-        var registrar=event.registrar("access_v4");
+        var registrar=event.registrar("access_v5");
         registrar.playToServer(Action.TYPE,Action.CODEC,(data,context)->context.enqueueWork(()->{
             if(context.player().containerMenu instanceof AccessMenu menu&&menu.containerId==data.menuId&&menu.stillValid(context.player()))
                 menu.apply(context.player(),data.action,data.code,data.value);
         }));
         registrar.playToClient(State.TYPE,State.CODEC,(data,context)->context.enqueueWork(()->receiver.accept(data)));
+        registrar.playToServer(UnlinkDevice.TYPE, UnlinkDevice.CODEC, (data, context) -> context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player) || player.containerMenu.containerId != data.menuId())
+                return;
+            if (player.containerMenu instanceof AccessMenu menu) menu.unlinkDevice(player, data);
+            if (player.containerMenu instanceof KeypassMenu menu) menu.unlinkDevice(player, data);
+        }));
+        registrar.playToClient(DeviceList.TYPE, DeviceList.CODEC,
+            (data, context) -> context.enqueueWork(() -> deviceReceiver.accept(data)));
     }
     private AccessMessages(){}
 }

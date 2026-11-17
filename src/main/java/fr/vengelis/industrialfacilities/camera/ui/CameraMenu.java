@@ -5,9 +5,11 @@ import java.util.Objects;
 import java.util.UUID;
 import fr.vengelis.industrialfacilities.access.AccessTerminalEntity;
 import fr.vengelis.industrialfacilities.security.*;
+import fr.vengelis.industrialfacilities.supervision.SupervisionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -103,14 +105,12 @@ public class CameraMenu extends AbstractContainerMenu {
                 observed = program.copy();
                 revision++;
             }
-            links = terminal.linkViews()
-                            .stream()
-                            .limit(CameraMessages.MAX_LINKS)
-                            .map(link
-                                    -> new CameraMessages.Link(link.id(), link.kind(), link.pos(),
-                                            link.name().length() > 64 ? link.name().substring(0, 64) : link.name(),
-                                            link.available()))
-                            .toList();
+            var names = terminal.getLevel() instanceof ServerLevel level ? SupervisionData.get(level) : null;
+            links = terminal.linkViews().stream().limit(CameraMessages.MAX_LINKS).map(link -> {
+                String name = names == null ? "" : names.customName(terminal.creator, link.id());
+                return new CameraMessages.Link(link.id(), link.kind(), link.pos(),
+                    name.isEmpty() ? link.name() : name, link.available());
+            }).toList();
         } else if (camera != null) {
             editable = Objects.equals(camera.creator, inventory.player.getUUID());
             range = camera.range;
@@ -205,8 +205,18 @@ public class CameraMenu extends AbstractContainerMenu {
                                    action.alertTicks(), action.resetTicks(), action.haloEnabled())
                              .message();
         }
+        acknowledge(action.requestId());
+    }
+    public void applyUnlink(Player player, CameraMessages.UnlinkOffline action) {
+        if (!(player instanceof ServerPlayer server) || mode != PROGRAM || player.containerMenu != this
+                || action.menuId() != containerId || action.requestId() <= 0 || !stillValid(player))
+            return;
+        status = terminal.unlinkOffline(server, action.device()).message();
+        acknowledge(action.requestId());
+    }
+    private void acknowledge(int requestId) {
         actionSerial++;
-        lastRequestId = action.requestId();
+        lastRequestId = requestId;
         lastState = null;
         broadcastChanges();
     }

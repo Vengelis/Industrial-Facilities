@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 
 import net.minecraft.world.level.block.Block;
 
+import fr.vengelis.industrialfacilities.supervision.SupervisionConsoleBlock;
 import fr.vengelis.industrialfacilities.security.SignalEmitterBlock;
 import fr.vengelis.industrialfacilities.security.SecurityCameraBlock;
 import fr.vengelis.industrialfacilities.security.CameraTerminalBlock;
@@ -147,6 +148,8 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> KEYPASS_MANAGER;
 	public static final DeferredBlock<Block> TERMINAL_BUTTON;
 	public static final DeferredBlock<Block> TERMINAL_LOCKDOWN;
+	public static final DeferredBlock<Block> SUPERVISION_CONSOLE;
+	public static final DeferredBlock<Block> SUPERVISION_DISPLAY;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -279,6 +282,8 @@ public class IndustrialFacilitiesModBlocks {
 		KEYPASS_MANAGER = REGISTRY.register("keypass_manager", KeypassManagerBlock::new);
 		TERMINAL_BUTTON = REGISTRY.register("terminal_button", TerminalButtonBlock::new);
 		TERMINAL_LOCKDOWN = REGISTRY.register("terminal_lockdown", TerminalLockdownBlock::new);
+		SUPERVISION_CONSOLE = REGISTRY.register("supervision_console", SupervisionConsoleBlock::new);
+		SUPERVISION_DISPLAY = REGISTRY.register("supervision_display", SupervisionDisplayBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

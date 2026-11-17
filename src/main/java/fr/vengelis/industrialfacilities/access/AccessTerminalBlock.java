@@ -105,6 +105,8 @@ public class AccessTerminalBlock extends Block implements EntityBlock {
         else if(terminal.encoder||terminal.bank)AccessMenus.open(player,terminal);
         else {
             var result=wallet?BadgeWalletItem.activate(player,terminal,stack):AccessDoorService.activate(player,terminal,stack);
+            if (!result.ok() && level instanceof ServerLevel server)
+                fr.vengelis.industrialfacilities.supervision.SupervisionData.get(server).denied(server,terminal);
             player.displayClientMessage(result.message().startsWith("gui.industrial_facilities.")||result.message().equals(BadgeWalletItem.DENIED)
                 ? Component.translatable(result.message()) : Component.literal(result.message()),true);
             BlockPos base=terminal.getBlockPos();

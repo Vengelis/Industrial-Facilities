@@ -2,6 +2,7 @@ package fr.vengelis.industrialfacilities.access.client;
 
 import java.util.*;
 import fr.vengelis.industrialfacilities.access.KeypassData;
+import fr.vengelis.industrialfacilities.access.TerminalDevices;
 import fr.vengelis.industrialfacilities.access.ui.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
@@ -19,11 +20,16 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
     private String loadedName="";
     private int page;
     private boolean confirmUnlink,confirmDetach;
+    private boolean showingDevices;
+    private Button devicesButton;
+    private TerminalLinkList deviceList;
+    private List<AbstractWidget> keypad = List.of();
     public KeypassScreen(KeypassMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=282;imageHeight=208;}
     private static Component tr(String key,Object... args){return Component.translatable(KeypassMenus.KEY+key,args);}
     private Button button(int x,int y,int w,int h,Component label,Button.OnPress callback){return addRenderableWidget(Button.builder(label,callback).bounds(leftPos+x,topPos+y,w,h).build());}
     @Override protected void init(){
         String draft=nameInput==null?loadedName:nameInput.getValue();
+        deviceList = null;
         super.init();rows.clear();
         if(menu.manager){
             for(int i=0;i<PAGE_SIZE;i++){int row=i;rows.add(button(12,31+i*19,258,18,Component.empty(),b->{int index=page*PAGE_SIZE+row;if(index<menu.readers.size())selectReader(menu.readers.get(index));}));}
@@ -41,7 +47,16 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
             button(72,126,44,21,tr("backspace"),b->{String s=input.getValue();if(!s.isEmpty())input.setValue(s.substring(0,s.length()-1));});
             button(119,126,44,21,Component.literal("0"),b->digit("0"));
             submit=button(166,126,44,21,tr("ok"),b->send(KeypassMenu.SUBMIT,input.getValue()));
-            if(menu.owner)detach=button(72,154,138,18,tr("detach"),b->{if(confirmDetach)send(KeypassMenu.DETACH,"");else confirmDetach=true;refresh();});
+            if(menu.owner){
+                devicesButton = button(12, 154, 120, 18, Component.translatable(TerminalDevices.UI + "devices"),
+                    ignored -> showDevices(true));
+                detach=button(145,154,125,18,tr("detach"),b->{if(confirmDetach)send(KeypassMenu.DETACH,"");else confirmDetach=true;refresh();});
+                keypad = children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
+                deviceList = new TerminalLinkList(leftPos, topPos, imageWidth, imageHeight, this::addRenderableWidget,
+                    link -> PacketDistributor.sendToServer(new AccessMessages.UnlinkDevice(menu.containerId, link.id(), link.position())),
+                    () -> showDevices(false));
+                if (showingDevices) showDevices(true);
+            }
         }
         refresh();
     }
@@ -64,8 +79,21 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
         if(kind!=KeypassMenu.RENAME)input.setValue("");confirmUnlink=false;confirmDetach=false;refresh();
     }
     private int pages(){return Math.max(1,(menu.readers.size()+PAGE_SIZE-1)/PAGE_SIZE);}
+    private void showDevices(boolean visible) {
+        if (getFocused() != null) getFocused().setFocused(false);
+        setFocused(null);
+        showingDevices = visible;
+        for (var widget : keypad) widget.visible = !visible;
+        deviceList.update(menu.deviceLinks, visible, menu.owner);
+        confirmDetach = false;
+        refresh();
+    }
     private void refresh(){
         if(input==null)return;
+        if (deviceList != null) {
+            deviceList.update(menu.deviceLinks, showingDevices, menu.owner);
+            devicesButton.setMessage(Component.translatable(TerminalDevices.UI + "device_count", menu.doors));
+        }
         boolean valid=KeypassData.validPin(input.getValue());
         if(menu.manager){
             if(previous==null||save==null||unlink==null||nameInput==null||rename==null)return;
@@ -93,6 +121,10 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
     }
     @Override protected void containerTick(){super.containerTick();refresh();}
     @Override public boolean keyPressed(int key,int scan,int modifiers){
+        if (showingDevices) {
+            if (key == 256) { showDevices(false); return true; }
+            return super.keyPressed(key, scan, modifiers);
+        }
         if(nameInput!=null&&nameInput.isFocused()&&key!=256){if(key==257||key==335){renameSelected();return true;}return nameInput.keyPressed(key,scan,modifiers)||key!=258;}
         if((key==257||key==335)&&input!=null&&KeypassData.validPin(input.getValue())&&(!menu.manager||selected!=null)){send(menu.manager?KeypassMenu.SAVE:KeypassMenu.SUBMIT,input.getValue());return true;}
         if(input!=null&&input.isFocused()&&key!=256)return input.keyPressed(key,scan,modifiers)||key!=258;
@@ -103,16 +135,22 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
         g.renderOutline(leftPos,topPos,imageWidth,imageHeight,0xFF636675);
         g.fill(leftPos+1,topPos+1,leftPos+imageWidth-1,topPos+23,menu.manager?0xFF244A4B:0xFF5B4129);
         g.fill(leftPos+8,topPos+179,leftPos+imageWidth-8,topPos+200,0xFF15161B);
+        if (showingDevices) deviceList.renderBackground(g, leftPos, topPos);
     }
     @Override protected void renderLabels(GuiGraphics g,int x,int y){
         g.drawString(font,title,12,8,INK,false);
+        if (showingDevices) {
+            deviceList.render(g, font, menu.status);
+            return;
+        }
         if(menu.manager){
             g.drawCenteredString(font,tr("page",page+1,pages()),imageWidth/2,114,INK);
             if(menu.readers.isEmpty())g.drawCenteredString(font,tr("no_readers"),imageWidth/2,66,INK);
         }else{
-            g.drawString(font,tr("doors",menu.doors),12,161,INK,false);
+            if (!menu.owner) g.drawString(font,tr("doors",menu.doors),12,161,INK,false);
         }
-        Component message=tr(menu.status.isEmpty()?(menu.manager?"manager_hint":"reader_hint"):menu.status);
+        Component message=menu.status.startsWith(TerminalDevices.UI) ? Component.translatable(menu.status)
+            : tr(menu.status.isEmpty()?(menu.manager?"manager_hint":"reader_hint"):menu.status);
         g.drawString(font,font.plainSubstrByWidth(message.getString(),imageWidth-26),13,186,ACCENT,false);
     }
     @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){super.render(g,mouseX,mouseY,partial);renderTooltip(g,mouseX,mouseY);}

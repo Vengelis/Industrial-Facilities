@@ -1,5 +1,6 @@
 package fr.vengelis.industrialfacilities.access.ui;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import fr.vengelis.industrialfacilities.access.*;
@@ -29,6 +30,7 @@ public class AccessMenu extends AbstractContainerMenu {
     public final SimpleContainer input=new SimpleContainer(1);
     public String code="",status="";
     public int accessLevel=1,links;
+    public List<TerminalDevices.Link> deviceLinks = List.of();
     public boolean editable,allowRedstone,secured,allowCameraAutomation;
     public boolean meshDoor,halfOpening;
     public int irisOpeningPercent=-1;
@@ -120,6 +122,21 @@ public class AccessMenu extends AbstractContainerMenu {
         var current=new AccessMessages.State(containerId,code,accessLevel,links,editable,
             allowRedstone,secured,allowCameraAutomation,meshDoor,halfOpening,irisOpeningPercent,status);
         if(!current.equals(lastState)){lastState=current;PacketDistributor.sendToPlayer(server,current);}
+        if (showsDevices() && editable && stillValid(server)) {
+            var devices = TerminalDevices.links(server.serverLevel(), terminal);
+            if (!devices.equals(deviceLinks)) {
+                deviceLinks = devices;
+                PacketDistributor.sendToPlayer(server, new AccessMessages.DeviceList(containerId, devices));
+            }
+        }
+    }
+    public boolean showsDevices() {
+        return mode == READER || mode == BUTTON || mode == LOCKDOWN;
+    }
+    void unlinkDevice(ServerPlayer player, AccessMessages.UnlinkDevice action) {
+        if (!showsDevices() || terminal == null || !stillValid(player)) return;
+        status = TerminalDevices.unlinkOffline(player, terminal, action.device(), action.position());
+        broadcastChanges();
     }
     public void receive(AccessMessages.State state){
         if(state.menuId()!=containerId)return;

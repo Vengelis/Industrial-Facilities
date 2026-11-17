@@ -149,7 +149,7 @@ public final class AccessDoorService {
         }
         if (IndustrialDoorManager.fireAlarmActive(level, door)) return false;
         if (level.getGameTime() < door.accessOpenUntil) {
-            if (!controls.locked(door.accessRequester)) return true;
+            if (!controls.locked(door.accessRequester) && stillLinkedRequester(level, door)) return true;
             cancelAccessRequest(door);
         }
         if (controls.buttonRequests(level, door)) return true;
@@ -165,6 +165,11 @@ public final class AccessDoorService {
         door.accessOpenUntil = 0;
         door.accessRequester = null;
         door.sync();
+    }
+
+    private static boolean stillLinkedRequester(ServerLevel level, IndustrialDoorEntity door) {
+        return door.accessRequester == null || AccessRegistry.get(level.getServer()).hasReader(door.doorInstanceId,
+            reader -> reader.instanceId == null || door.accessRequester.equals(reader.instanceId));
     }
 
     /** Le voyant reste vert pendant la fermeture ou si un obstacle maintient la porte ouverte. */

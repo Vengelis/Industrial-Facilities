@@ -30,6 +30,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private static final int TEXT = 0xE7E6ED, MUTED = 0xA8A6B5, PURPLE = 0xC3A0ED;
     private static final int ROW = 20;
+    private static final int UNLINK_WIDTH = 64;
     private static final UUID NONE = new UUID(0, 0);
     private record Palette(String token, String label, int color, boolean heading) {
     }
@@ -102,8 +103,10 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
     private double pressX, pressY;
     // Sélection d’un appareil lié : cible d’une action, consultation ou aperçu du champ.
     private List<CameraMessages.Link> popup = List.of();
+    private List<CameraMessages.Link> displayedLinks = List.of();
     private String popupMode = "", popupPath = "";
     private int popupScroll, popupSelected, popupX, popupY, popupWidth, popupHeight;
+    private int pendingUnlinkRequest;
     // Sélecteur d’objet pour les conditions qui interrogent un inventaire.
     private boolean itemPickerOpen;
     private Button inventoryItemButton;
@@ -207,6 +210,8 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         sync();
         rebuildRows();
         rebuildControls();
+        if (!popup.isEmpty())
+            layoutPopup();
     }
     private void sync() {
         if (menu.actionSerial != observedActionSerial) {
@@ -217,6 +222,22 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             syncCameraSettings();
         } else {
             syncProgramDraft();
+            syncDeviceLinks();
+        }
+    }
+
+    private void syncDeviceLinks() {
+        if (!displayedLinks.equals(menu.links)) {
+            displayedLinks = menu.links;
+            rebuildRows();
+            if (!popup.isEmpty() && popupMode.equals("devices")) {
+                popup = menu.links;
+                layoutPopup();
+            }
+        }
+        if (pendingUnlinkRequest != 0 && menu.lastRequestId >= pendingUnlinkRequest) {
+            pendingUnlinkRequest = 0;
+            rebuildControls();
         }
     }
 
@@ -1314,11 +1335,35 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             localStatus = "gui.industrial_facilities.camera.no_devices";
             return;
         }
+        layoutPopup();
+    }
+
+    private void layoutPopup() {
         popupWidth = Math.min(270, imageWidth - 20);
         popupHeight = Math.min(popup.size() * ROW, Math.max(ROW, imageHeight - 110));
         popupX = leftPos + imageWidth - popupWidth - 10;
         popupY = topPos + 52;
+        popupScroll = Math.clamp(popupScroll, 0, Math.max(0, popup.size() * ROW - popupHeight));
+        popupSelected = Math.clamp(popupSelected, 0, Math.max(0, popup.size() - 1));
     }
+
+    private boolean showsUnlink(CameraMessages.Link link) {
+        return popupMode.equals("devices") && menu.editable && !link.available();
+    }
+
+    private int unlinkButtonX() {
+        return popupX + popupWidth - UNLINK_WIDTH - 4;
+    }
+
+    private void unlinkDevice(CameraMessages.Link link) {
+        if (!showsUnlink(link) || waitingSave || pendingUnlinkRequest != 0)
+            return;
+        localStatus = "";
+        pendingUnlinkRequest = nextRequest++;
+        PacketDistributor.sendToServer(
+                new CameraMessages.UnlinkOffline(menu.containerId, pendingUnlinkRequest, link.id()));
+    }
+
     private void chooseLink(CameraMessages.Link link) {
         if (popupMode.equals("target") && !waitingSave && menu.editable && at(popupPath) instanceof CompoundTag node) {
             remember();
@@ -1347,8 +1392,13 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         if (button == 0 && !popup.isEmpty()) {
             if (x >= popupX && x < popupX + popupWidth && y >= popupY && y < popupY + popupHeight) {
                 int index = (int) (y - popupY + popupScroll) / ROW;
-                if (index < popup.size())
-                    chooseLink(popup.get(index));
+                if (index < popup.size()) {
+                    var link = popup.get(index);
+                    if (showsUnlink(link) && x >= unlinkButtonX() && x < unlinkButtonX() + UNLINK_WIDTH)
+                        unlinkDevice(link);
+                    else
+                        chooseLink(link);
+                }
                 return true;
             }
             popup = List.of();
@@ -1412,8 +1462,8 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             dragging = false;
             if (moved) {
                 Row row = rowAt(x, y);
-                if (row == null && eventToken(token) && x >= canvasX && x < canvasX + canvasWidth && y >= paneY
-                        && y < paneY + paneHeight)
+                if (token != null && row == null && eventToken(token) && x >= canvasX && x < canvasX + canvasWidth
+                        && y >= paneY && y < paneY + paneHeight)
                     editorAdd(token);
                 else
                     drop(token, path, row);
@@ -1479,6 +1529,10 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             }
             if (key == 257) {
                 chooseLink(popup.get(popupSelected));
+                return true;
+            }
+            if (key == 261 && popupMode.equals("devices")) {
+                unlinkDevice(popup.get(popupSelected));
                 return true;
             }
         }
@@ -1687,7 +1741,7 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
             }
             return;
         }
-        if (menu.mode == CameraMenu.PROGRAM) {
+        if (menu.mode == CameraMenu.PROGRAM && popup.isEmpty()) {
             Row row = rowAt(mx, my);
             if (row != null && !dragging)
                 g.renderTooltip(font, Component.literal(row.label), mx, my);
@@ -1735,17 +1789,34 @@ public class CameraScreen extends AbstractContainerScreen<CameraMenu> {
         g.fill(popupX - 1, popupY - 1, popupX + popupWidth + 1, popupY + popupHeight + 1, 0xFFE0C0FF);
         g.fill(popupX, popupY, popupX + popupWidth, popupY + popupHeight, 0xFF292632);
         g.enableScissor(popupX, popupY, popupX + popupWidth, popupY + popupHeight);
+        CameraMessages.Link hoveredLink = null;
         for (int i = 0; i < popup.size(); i++) {
             var link = popup.get(i);
             int ry = popupY + i * ROW - popupScroll;
             if (ry + ROW < popupY || ry > popupY + popupHeight)
                 continue;
+            if (mx >= popupX && mx < popupX + popupWidth && my >= Math.max(ry, popupY)
+                    && my < Math.min(ry + ROW, popupY + popupHeight))
+                hoveredLink = link;
             if (i == popupSelected || mx >= popupX && mx < popupX + popupWidth && my >= ry && my < ry + ROW)
                 g.fill(popupX + 1, ry, popupX + popupWidth - 1, ry + ROW, 0xFF51425F);
+            boolean unlink = showsUnlink(link);
             fit(g, Component.literal(link.name() + " · " + tr(link.available() ? "online" : "offline").getString()),
-                    popupX + 6, ry + 6, popupWidth - 12, link.available() ? TEXT : MUTED);
+                    popupX + 6, ry + 6, popupWidth - 12 - (unlink ? UNLINK_WIDTH : 0), link.available() ? TEXT : MUTED);
+            if (unlink) {
+                int x = unlinkButtonX();
+                boolean enabled = !waitingSave && pendingUnlinkRequest == 0;
+                boolean hovered = enabled && mx >= x && mx < x + UNLINK_WIDTH && my >= ry && my < ry + ROW;
+                g.fill(x, ry + 2, x + UNLINK_WIDTH, ry + ROW - 2, hovered ? 0xFF794851 : 0xFF4E363E);
+                fit(g, tr("unlink_device"), x + 4, ry + 6, UNLINK_WIDTH - 8, enabled ? TEXT : MUTED);
+            }
         }
         g.disableScissor();
+        if (hoveredLink != null && popupMode.equals("devices") && mx < unlinkButtonX()) {
+            var link = hoveredLink;
+            g.renderTooltip(font, List.of(Component.literal(link.name()).getVisualOrderText(),
+                Component.literal(link.position().toShortString()).getVisualOrderText()), mx, my);
+        }
     }
     private void cameraControls() {
         int w = Math.max(48, (imageWidth - 40) / 3);

@@ -5,6 +5,7 @@ import java.util.List;
 import fr.vengelis.industrialfacilities.access.AccessBadges;
 import fr.vengelis.industrialfacilities.access.ui.*;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -17,7 +18,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 /** A small adaptive panel: configuration stays on the server; widgets send intents only. */
 public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
-    private static final int TEXT=0xDDE3E6,MUTED=0x97A6AE,ACCENT=0x7BD3DB;
+    private static final int TEXT=0xDDE3E6,MUTED=TerminalGui.MUTED,ACCENT=TerminalGui.ACCENT;
     private boolean compact,confirmClearLinks,confirmClearBadge;
     private int selectedLevel=1,codeCursor;
     private EditBox codeInput,limitInput,codeDisplay,nameInput;
@@ -32,19 +33,31 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private EditBox duration;
     private Button applyDuration;
     private int lastDuration;
+    private boolean showingDevices;
+    private Button devicesButton;
+    private TerminalLinkList deviceList;
+    private List<AbstractWidget> settings = List.of();
     private final List<Button> readerLevels=new ArrayList<>(),masterLevels=new ArrayList<>(),ownerButtons=new ArrayList<>(),encodingButtons=new ArrayList<>();
     public AccessScreen(AccessMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=340;imageHeight=menu.mode==AccessMenu.ENCODER?284:218;}
     private static Component tr(String key,Object... args){return Component.translatable("gui.industrial_facilities.access."+key,args);}
     private static Component status(String text){return text.startsWith("gui.industrial_facilities.")?Component.translatable(text):Component.literal(text);}
-    private Button button(int x,int y,int width,int height,Component text,Button.OnPress action){return addRenderableWidget(Button.builder(text,action).bounds(leftPos+x,topPos+y,width,height).build());}
+    private Button button(int x,int y,int width,int height,Component text,Button.OnPress action){return addRenderableWidget(TerminalGui.button(leftPos+x,topPos+y,width,height,text,action));}
     private void send(int action,String code,int value){PacketDistributor.sendToServer(new AccessMessages.Action(menu.containerId,action,code,value));}
     @Override protected void init(){
         compact=width<352||height<296;imageWidth=compact?300:340;imageHeight=menu.mode==AccessMenu.ENCODER?(compact?232:284):218;
+        deviceList = null;
         super.init();ownerButtons.clear();readerLevels.clear();masterLevels.clear();encodingButtons.clear();menu.layoutSlots(compact);
         if(menu.mode==AccessMenu.ENCODER)initEncoder();
         else if(menu.mode==AccessMenu.READER)initReader();
         else if(menu.mode==AccessMenu.DOOR)initDoor();
         else initControl();
+        if (menu.showsDevices()) {
+            settings = children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
+            deviceList = new TerminalLinkList(leftPos, topPos, imageWidth, imageHeight, this::addRenderableWidget,
+                link -> PacketDistributor.sendToServer(new AccessMessages.UnlinkDevice(menu.containerId, link.id(), link.position())),
+                () -> showDevices(false));
+            showDevices(showingDevices);
+        }
         refresh();
     }
     private static Component controlText(String key,Object... args) {
@@ -57,16 +70,11 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             duration.setMaxLength(3);
             duration.setFilter(value -> value.matches("[0-9]{0,3}"));
             duration.setResponder(value -> refreshDuration());
-            applyDuration = button(98,87,92,20,tr("apply_iris_opening"),
+            applyDuration = button(98,87,92,TerminalGui.ACTION_HEIGHT,tr("apply_iris_opening"),
                 b -> send(AccessMenu.BUTTON_SECONDS,"",Integer.parseInt(duration.getValue())));
             duration.setTooltip(Tooltip.create(controlText("range")));
         }
-        clearLinks=button(14,162,174,20,tr("clear_links"),b->{
-            if(!confirmClearLinks){confirmClearLinks=true;b.setMessage(tr("confirm_clear_links"));}
-            else{send(AccessMenu.CLEAR_LINKS,"",0);confirmClearLinks=false;b.setMessage(tr("clear_links"));}
-        });
-        ownerButtons.add(clearLinks);
-        button(imageWidth-88,162,74,20,tr("close"),b->onClose());
+        initLinkControls();
     }
     private void refreshDuration() {
         if (duration == null || applyDuration == null) return;
@@ -88,12 +96,26 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         codeDisplay=field(14,48,imageWidth-28,18,tr("code"));codeDisplay.setMaxLength(64);codeDisplay.setEditable(false);codeDisplay.setValue(menu.code);lastCode=menu.code;
         button(14,72,110,20,tr("copy_code"),b->{if(!menu.code.isEmpty())minecraft.keyboardHandler.setClipboard(menu.code);});
         for(int i=1;i<=5;i++){int level=i;Button b=button(14+(i-1)*48,132,44,20,Component.literal(Integer.toString(i)),v->send(AccessMenu.SET_LEVEL,"",level));readerLevels.add(b);ownerButtons.add(b);}
-        clearLinks=button(14,162,174,20,tr("clear_links"),b->{
-            if(!confirmClearLinks){confirmClearLinks=true;b.setMessage(tr("confirm_clear_links"));}
+        initLinkControls();
+        clearLinks.setTooltip(Tooltip.create(tr("clear_links_hint")));
+    }
+    private void initLinkControls() {
+        int w = (imageWidth - 114) / 2;
+        devicesButton = button(14, 162, w, TerminalGui.ACTION_HEIGHT, tr("devices"), ignored -> showDevices(true));
+        clearLinks=button(18+w,162,w,TerminalGui.ACTION_HEIGHT,tr("clear_links"),b->{
+            if(!confirmClearLinks){confirmClearLinks=true;b.setMessage(tr("confirm"));}
             else{send(AccessMenu.CLEAR_LINKS,"",0);confirmClearLinks=false;b.setMessage(tr("clear_links"));}
         });ownerButtons.add(clearLinks);
-        clearLinks.setTooltip(Tooltip.create(tr("clear_links_hint")));
         button(imageWidth-88,162,74,20,tr("close"),b->onClose());
+    }
+    private void showDevices(boolean visible) {
+        if (getFocused() != null) getFocused().setFocused(false);
+        setFocused(null);
+        showingDevices = visible;
+        for (var widget : settings) widget.visible = !visible;
+        deviceList.update(menu.deviceLinks, visible, menu.editable);
+        confirmClearLinks = false;
+        clearLinks.setMessage(tr("clear_links"));
     }
     private void initEncoder(){
         bankSharing=button(imageWidth-(compact?144:156),4,compact?132:144,18,Component.empty(),
@@ -151,6 +173,10 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     }
     @Override protected void containerTick(){super.containerTick();refresh();}
     private void refresh(){
+        if (deviceList != null) {
+            deviceList.update(menu.deviceLinks, showingDevices, menu.editable);
+            devicesButton.active = menu.editable;
+        }
         for(Button b:ownerButtons)b.active=menu.editable;
         for(int i=0;i<readerLevels.size();i++)readerLevels.get(i).setMessage(Component.literal((i+1==menu.accessLevel?"[":"")+(i+1)+(i+1==menu.accessLevel?"]":"")));
         for(int i=0;i<masterLevels.size();i++)masterLevels.get(i).setMessage(Component.literal((i+1==selectedLevel?"[":"")+(i+1)+(i+1==selectedLevel?"]":"")));
@@ -204,21 +230,24 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     }
     @Override protected void renderBg(GuiGraphics g,float partial,int mouseX,int mouseY){
         int x=leftPos,y=topPos;
-        g.fill(x-1,y-1,x+imageWidth+1,y+imageHeight+1,0xFF6D777E);g.fill(x,y,x+imageWidth,y+imageHeight,0xFF1B2026);
-        g.fill(x,y,x+imageWidth,y+26,menu.mode==AccessMenu.READER?0xFF733F42:menu.mode==AccessMenu.DOOR?0xFF745F38:0xFF285B66);
-        g.fill(x+6,y+29,x+imageWidth-6,y+imageHeight-6,0xFF242B32);
+        TerminalGui.panel(g,x,y,imageWidth,imageHeight,
+            menu.mode==AccessMenu.READER?0xFF733F42:menu.mode==AccessMenu.DOOR?0xFF745F38:TerminalGui.TEAL_HEADER);
+        if (showingDevices) deviceList.renderBackground(g, x, y);
         if(menu.mode==AccessMenu.ENCODER){
             int invY=compact?150:202,invX=compact?69:89,inputX=compact?24:30;
             g.fill(x+inputX-2,y+invY+24,x+inputX+18,y+invY+44,0xFF71838C);g.fill(x+inputX-1,y+invY+25,x+inputX+17,y+invY+43,0xFF11171B);
-            for(int row=0;row<3;row++)for(int col=0;col<9;col++)slot(g,x+invX+col*18,y+invY+row*18);
-            for(int col=0;col<9;col++)slot(g,x+invX+col*18,y+invY+58);
+            for(int row=0;row<3;row++)for(int col=0;col<9;col++)TerminalGui.slot(g,x+invX+col*18,y+invY+row*18);
+            for(int col=0;col<9;col++)TerminalGui.slot(g,x+invX+col*18,y+invY+58);
         }
     }
-    private static void slot(GuiGraphics g,int x,int y){g.fill(x-1,y-1,x+17,y+17,0xFF59636A);g.fill(x,y,x+16,y+16,0xFF11171B);}
     private void drawFit(GuiGraphics g,Component text,int x,int y,int width,int color){g.drawString(font,font.plainSubstrByWidth(text.getString(),width),x,y,color,false);}
     private void wrapped(GuiGraphics g,Component text,int x,int y,int width,int color){g.drawWordWrap(font,text,x,y,width,color);}
     @Override protected void renderLabels(GuiGraphics g,int mouseX,int mouseY){
         drawFit(g,title,14,9,menu.mode==AccessMenu.ENCODER?imageWidth-(compact?172:184):imageWidth-28,0xFFFFFF);
+        if (showingDevices) {
+            deviceList.render(g, font, menu.status);
+            return;
+        }
         if(menu.mode==AccessMenu.READER){
             g.drawString(font,tr(menu.code.isEmpty()?"code_unassigned":"code"),14,34,MUTED,false);
             drawFit(g,tr("owner",menu.editable?tr("you").getString():menu.creator),14,101,imageWidth-28,MUTED);
@@ -240,14 +269,15 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             if(!menu.editable)drawFit(g,tr("read_only"),14,182,imageWidth-110,0xD6A97B);
             drawFit(g,status(menu.status),14,197,imageWidth-28,TEXT);
         }else{
-            g.drawString(font,tr("linked",menu.links),14,42,ACCENT,false);
+            g.drawString(font,tr("device_count",menu.links),14,42,ACCENT,false);
             if(menu.mode==AccessMenu.BUTTON)g.drawString(font,controlText("seconds"),14,73,TEXT,false);
             wrapped(g,controlText(menu.mode==AccessMenu.BUTTON?"button_hint":"lockdown_hint"),14,119,imageWidth-28,MUTED);
             drawFit(g,status(menu.status),14,197,imageWidth-28,TEXT);
         }
     }
     @Override public boolean keyPressed(int key,int scan,int modifiers){
-        if(key==256){onClose();return true;}
+        if(key==256){if(showingDevices)showDevices(false);else onClose();return true;}
+        if (TerminalGui.handleInventoryKey(getFocused(),key,scan,modifiers)) return true;
         if(codeInput!=null&&codeInput.isFocused())return codeInput.keyPressed(key,scan,modifiers);
         if(limitInput!=null&&limitInput.isFocused())return limitInput.keyPressed(key,scan,modifiers);
         if(nameInput!=null&&nameInput.isFocused())return nameInput.keyPressed(key,scan,modifiers);

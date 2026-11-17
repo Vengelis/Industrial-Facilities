@@ -18,6 +18,7 @@ public final class KeypassMenu extends AbstractContainerMenu {
     private final KeypassTerminalEntity terminal;
     private final java.util.UUID instance;
     public List<KeypassData.Reader> readers=List.of();
+    public List<TerminalDevices.Link> deviceLinks = List.of();
     public String status="";
     public int doors,revision;
     private KeypassMessages.State last;
@@ -37,6 +38,19 @@ public final class KeypassMenu extends AbstractContainerMenu {
         super.broadcastChanges();if(!(inventory.player instanceof ServerPlayer player)||!stillValid(player))return;
         var state=new KeypassMessages.State(containerId,revision,terminal.linkedCount(),status,manager?KeypassData.get(player.serverLevel()).readers(terminal):List.of());
         if(!state.equals(last)){last=state;PacketDistributor.sendToPlayer(player,state);}
+        if (!manager && owner) {
+            var devices = TerminalDevices.links(player.serverLevel(), terminal);
+            if (!devices.equals(deviceLinks)) {
+                deviceLinks = devices;
+                PacketDistributor.sendToPlayer(player, new AccessMessages.DeviceList(containerId, devices));
+            }
+        }
+    }
+    void unlinkDevice(ServerPlayer player, AccessMessages.UnlinkDevice action) {
+        if (manager || !stillValid(player)) return;
+        status = TerminalDevices.unlinkOffline(player, terminal, action.device(), action.position());
+        revision++;
+        broadcastChanges();
     }
     public void receive(KeypassMessages.State state){if(state.menuId()==containerId){readers=state.readers();status=state.status();doors=state.doors();revision=state.revision();}}
     public void apply(ServerPlayer player,KeypassMessages.Action action){
@@ -51,6 +65,8 @@ public final class KeypassMenu extends AbstractContainerMenu {
         }else if(kind==SUBMIT){
             status=AccessDoorService.activateKeypass(player,terminal,action.value());
             boolean ok=status.equals("granted");
+            if (!ok && !status.equals("slow_down"))
+                fr.vengelis.industrialfacilities.supervision.SupervisionData.get(player.serverLevel()).denied(player.serverLevel(),terminal);
             if(!status.equals("slow_down")&&!status.equals("locked"))player.serverLevel().playSound(null,terminal.getBlockPos().getX()+.5,terminal.getBlockPos().getY()+1.3,terminal.getBlockPos().getZ()+.5,
                 ok?IndustrialFacilitiesModSounds.TERMINAL_ACCESS_GRANTED.get():IndustrialFacilitiesModSounds.TERMINAL_ACCESS_DENIED.get(),SoundSource.BLOCKS,.6f,1f);
             if(ok){player.closeContainer();return;}

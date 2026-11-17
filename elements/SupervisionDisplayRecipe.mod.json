@@ -1,0 +1,31 @@
+{
+  "_fv": 89,
+  "_type": "recipe",
+  "definition": {
+    "recipeType": "Crafting",
+    "recipeRetstackSize": 9,
+    "group": "machines",
+    "unlockingItems": [
+      "CUSTOM:SupervisionDisplay"
+    ],
+    "cookingBookCategory": "MISC",
+    "xpReward": 0.0,
+    "cookingTime": 200,
+    "craftingBookCategory": "BUILDING",
+    "recipeShapeless": true,
+    "recipeSlots": [
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Items.IRON_INGOT",
+      "Blocks.GLASS_PANE",
+      "Blocks.GLASS_PANE",
+      "Blocks.GLASS_PANE",
+      "Items.REDSTONE"
+    ],
+    "recipeReturnStack": "CUSTOM:SupervisionDisplay",
+    "name": "supervision_display",
+    "namespace": "mod"
+  }
+}

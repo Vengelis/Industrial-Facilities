@@ -154,5 +154,8 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModBlocks.KEYPASS_MANAGER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_BUTTON.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.SUPERVISION_CONSOLE.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.SUPERVISION_DISPLAY.get().asItem());
+				tabData.accept(IndustrialFacilitiesModItems.PORTABLE_CONSOLE.get());
 			}).build());
 }

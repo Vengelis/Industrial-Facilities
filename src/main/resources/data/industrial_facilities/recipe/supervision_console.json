@@ -1,0 +1,22 @@
+{
+  "type": "industrial_facilities:fabricator",
+  "category": "machines",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 24
+    },
+    {
+      "item": "minecraft:glass_pane",
+      "count": 9
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 6
+    }
+  ],
+  "result": {
+    "id": "industrial_facilities:supervision_console",
+    "count": 9
+  }
+}

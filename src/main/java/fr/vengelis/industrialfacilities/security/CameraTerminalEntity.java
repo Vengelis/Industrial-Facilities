@@ -231,6 +231,25 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         var group = panel.automationGroup(creator, id);
         return group != null && group.blocks().stream().allMatch(p -> TerminalLinks.inRange(worldPosition, p));
     }
+    public AccessBadges.Result unlinkOffline(ServerPlayer player, UUID id) {
+        if (!canEdit(player) || isLockedDown())
+            return fail("link_denied");
+        var link = find(id);
+        if (link == null)
+            return fail("not_linked");
+        if (available(link))
+            return fail("device_back_online");
+        return removeLink(link);
+    }
+
+    private AccessBadges.Result removeLink(Link link) {
+        links.remove(link);
+        recordLockdownDoorLinks();
+        compiled = null;
+        pause("stopped");
+        return success("device_unlinked");
+    }
+
     public AccessBadges.Result link(ServerPlayer player, BlockPos pos, boolean remove) {
         if (!canOwn(player) || player.distanceToSqr(pos.getCenter()) > 64 || !(level instanceof ServerLevel server)
                 || !TerminalLinks.loaded(server, pos))
@@ -255,11 +274,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
                 }
             if (old == null)
                 return fail("not_linked");
-            pause("stopped");
-            links.remove(old);
-            recordLockdownDoorLinks();
-            sync();
-            return success("device_unlinked");
+            return removeLink(old);
         }
         var target = level.getBlockEntity(pos);
         UUID id;

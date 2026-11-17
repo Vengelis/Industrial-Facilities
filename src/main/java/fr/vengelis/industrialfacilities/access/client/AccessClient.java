@@ -14,6 +14,12 @@ public final class AccessClient {
     @SubscribeEvent public static void screens(RegisterMenuScreensEvent event){event.register(AccessMenus.TYPE,AccessScreen::new);event.register(KeypassMenus.TYPE,KeypassScreen::new);event.register(AccessMenus.WALLET_TYPE,BadgeWalletScreen::new);}
     @SubscribeEvent public static void setup(FMLClientSetupEvent event){
         AccessMessages.receiver=state->{var player=Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof AccessMenu menu&&menu.containerId==state.menuId())menu.receive(state);};
+        AccessMessages.deviceReceiver = state -> {
+            var player = Minecraft.getInstance().player;
+            if (player == null || player.containerMenu.containerId != state.menuId()) return;
+            if (player.containerMenu instanceof AccessMenu menu) menu.deviceLinks = state.links();
+            if (player.containerMenu instanceof KeypassMenu menu) menu.deviceLinks = state.links();
+        };
         KeypassMessages.receiver=state->{var player=Minecraft.getInstance().player;if(player!=null&&player.containerMenu instanceof KeypassMenu menu&&menu.containerId==state.menuId())menu.receive(state);};
     }
     private AccessClient(){}
