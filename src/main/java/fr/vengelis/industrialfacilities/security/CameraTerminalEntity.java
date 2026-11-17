@@ -97,6 +97,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         });
         if (removed.isEmpty())
             return;
+        recordLockdownDoorLinks();
         outputs.keySet().removeAll(removed);
         CompoundTag pruned = CameraProgram.withoutTargets(program, removed);
         if (pruned != program) {
@@ -119,6 +120,15 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             return !(server.getBlockEntity(link.pos) instanceof IndustrialDoorEntity door) || door.size == 0
                     || !link.id.equals(door.doorInstanceId);
         });
+    }
+
+    private void recordLockdownDoorLinks() {
+        if (!(level instanceof ServerLevel server)) return;
+        Set<UUID> doors = new HashSet<>();
+        for (Link link : links) {
+            if (link.kind.equals("door") && TerminalLinks.inRange(worldPosition, link.pos)) doors.add(link.id);
+        }
+        TerminalControlData.get(server).recordCameraDoors(instanceId, doors);
     }
     private boolean canOwn(ServerPlayer player) {
         return isOwner(player) && player.isAlive() && player.level() == level
@@ -247,6 +257,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
                 return fail("not_linked");
             pause("stopped");
             links.remove(old);
+            recordLockdownDoorLinks();
             sync();
             return success("device_unlinked");
         }
@@ -323,6 +334,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
                 }
         pause("stopped");
         links.add(new Link(id, kind, at.immutable()));
+        if (kind.equals("door")) recordLockdownDoorLinks();
         sync();
         return success("linked");
     }
@@ -381,6 +393,8 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         observation.lastSeen = compiled.observeExit(cameraId, entity, camera.lens());
         return true;
     }
+    private boolean suspendedForLockdown;
+
     public void tickServer() {
         if (!(level instanceof ServerLevel server))
             return;
@@ -392,6 +406,16 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             pause("stopped");
             return;
         }
+        if (isLockedDown()) {
+            if (!suspendedForLockdown) {
+                suspendedForLockdown = true;
+                release();
+                visible.clear();
+                compiled = null;
+            }
+            return;
+        }
+        suspendedForLockdown = false;
         if (!prepareRunningProgram(server)) {
             return;
         }
@@ -598,6 +622,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         stageResetSeen.clear();
         compiled = null;
         reconcileDoorLinks(false);
+        recordLockdownDoorLinks();
     }
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
@@ -606,7 +631,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             tag.putUUID("Creator", creator);
         tag.putUUID("InstanceId", instanceId);
         tag.putBoolean("CameraRunning", running);
-        return tag;
+        return withLockdownStatus(tag);
     }
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {

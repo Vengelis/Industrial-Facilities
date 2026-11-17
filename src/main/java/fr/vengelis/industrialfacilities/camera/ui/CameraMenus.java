@@ -31,7 +31,7 @@ public final class CameraMenus {
     public static void open(Player player, CameraTerminalEntity terminal) {
         if (!(player instanceof ServerPlayer server) || terminal.getLevel() != player.level()
                 || !terminal.isOwner(player)
-                || AccessTerminalEntity.resolve(player.level(), terminal.getBlockPos()) != terminal)
+                || AccessTerminalEntity.resolve(player.level(), terminal.getBlockPos()) != terminal || !terminal.canInteract(player))
             return;
         server.openMenu(new SimpleMenuProvider((id, inventory, p)
                                                        -> new CameraMenu(id, inventory, terminal),

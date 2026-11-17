@@ -145,6 +145,8 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> SIGNAL_EMITTER;
 	public static final DeferredBlock<Block> KEYPASS_READER;
 	public static final DeferredBlock<Block> KEYPASS_MANAGER;
+	public static final DeferredBlock<Block> TERMINAL_BUTTON;
+	public static final DeferredBlock<Block> TERMINAL_LOCKDOWN;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -275,6 +277,8 @@ public class IndustrialFacilitiesModBlocks {
 		SIGNAL_EMITTER = REGISTRY.register("signal_emitter", SignalEmitterBlock::new);
 		KEYPASS_READER = REGISTRY.register("keypass_reader", KeypassReaderBlock::new);
 		KEYPASS_MANAGER = REGISTRY.register("keypass_manager", KeypassManagerBlock::new);
+		TERMINAL_BUTTON = REGISTRY.register("terminal_button", TerminalButtonBlock::new);
+		TERMINAL_LOCKDOWN = REGISTRY.register("terminal_lockdown", TerminalLockdownBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

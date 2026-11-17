@@ -201,6 +201,12 @@ public final class NetworkTabletClient {
         if (!world.hasChunkAt(link.sourceRoot()) || !world.hasChunkAt(link.targetRoot())) {
             return false;
         }
+        if (link.sourceKind().equals(TerminalLinks.BUTTON) || link.sourceKind().equals(TerminalLinks.LOCKDOWN)) {
+            return NetworkTabletOutlines.terminalAt(world, link.sourceRoot(), link.sourceId(), link.sourceKind()) != null
+                && (link.targetKind().equals(TerminalLinks.TERMINAL)
+                    ? NetworkTabletOutlines.terminalAt(world, link.targetRoot(), link.targetId(), link.targetKind()) != null
+                    : world.getBlockEntity(link.targetRoot()) instanceof fr.vengelis.industrialfacilities.security.SignalEmitterEntity);
+        }
         // Les lecteurs Keypass peuvent être remplacés pendant la durée de vie de l'instantané.
         return !link.sourceKind().equals(TerminalLinks.KEYPASS_MANAGER)
             || (NetworkTabletOutlines.terminalAt(world, link.sourceRoot(), link.sourceId(), link.sourceKind()) != null
@@ -234,6 +240,8 @@ public final class NetworkTabletClient {
     }
 
     public static int colorFor(String source, String target) {
+        if (source.equals(TerminalLinks.BUTTON)) return 0x60C8F6;
+        if (source.equals(TerminalLinks.LOCKDOWN)) return 0xF47360;
         if (source.equals(TerminalLinks.KEYPASS_MANAGER) || target.equals(TerminalLinks.KEYPASS_READER)) {
             return KEYPASS_COLOR;
         }

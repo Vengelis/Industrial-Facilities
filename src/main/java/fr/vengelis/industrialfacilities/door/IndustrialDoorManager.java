@@ -1,16 +1,24 @@
 package fr.vengelis.industrialfacilities.door;
 
+import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import fr.vengelis.industrialfacilities.access.AccessDoorService;
 import fr.vengelis.industrialfacilities.alarm.FireAlarmControls;
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /** Assemble, anime et démonte les portes industrielles à deux vantaux côté serveur. */
@@ -21,6 +29,11 @@ public final class IndustrialDoorManager {
     private static final int MAX_JAW_HEIGHT = 10;
     private static final int FRAME_CHECK_INTERVAL = 10;
     private static final double PANEL_INSET = 3.0 / 8.0;
+    private static final float CRUSH_DAMAGE = 20.0F;
+    private static final int CRUSH_INTERVAL_TICKS = 20;
+    private static final int CRUSH_IDLE_CHECK_TICKS = 5;
+    private static final ResourceKey<DamageType> DOOR_CRUSH = ResourceKey.create(Registries.DAMAGE_TYPE,
+        ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID, "door_crush"));
 
     private IndustrialDoorManager() {}
 
@@ -151,6 +164,7 @@ public final class IndustrialDoorManager {
         door.doorInstanceId = UUID.randomUUID();
         door.allowLinkedRedstone = false;
         door.accessOpenUntil = 0;
+        door.accessRequester = null;
         door.allowCameraAutomation = false;
         door.automationOwner = null;
         AccessDoorService.registerDoor(level, door);
@@ -226,7 +240,17 @@ public final class IndustrialDoorManager {
         boolean opening = target > door.progress;
         int motionTicks = door.motionTicks(opening);
         float nextProgress = IndustrialDoorEntity.advance(door.progress, target, motionTicks);
-        boolean blocked = nextProgress < door.progress && obstructed(level, door, nextProgress);
+        boolean closing = nextProgress < door.progress;
+        boolean blocked = closing && !door.forcedClosing && !findObstructions(level, door, nextProgress, false).isEmpty();
+        if (!door.forcedClosing || nextProgress >= 1) {
+            door.crushCooldowns = null;
+        } else {
+            long now = level.getGameTime();
+            // Detect contacts during closure immediately and stagger checks on stationary doors.
+            if (closing || (now + door.getBlockPos().asLong()) % CRUSH_IDLE_CHECK_TICKS == 0) {
+                crushEntities(level, door, findObstructions(level, door, nextProgress, closing), now);
+            }
+        }
         if (door.paused != blocked) {
             door.paused = blocked;
             door.sync();
@@ -288,7 +312,7 @@ public final class IndustrialDoorManager {
         }
     }
 
-    private static boolean obstructed(ServerLevel level, IndustrialDoorEntity door, float nextProgress) {
+    private static List<Entity> findObstructions(ServerLevel level, IndustrialDoorEntity door, float nextProgress, boolean sweepMesh) {
         int innerSize = door.size - 2;
         int innerHeight = door.height() - 2;
         IndustrialDoorPlane plane = door.plane();
@@ -299,12 +323,12 @@ public final class IndustrialDoorManager {
             var jaws = style == IndustrialDoorStyle.JAW ? IndustrialJawDoorMotion.layout(door, plane) : null;
             AABB slab = jaws == null ? IndustrialIrisDoorMotion.slab(innerSize)
                 : IndustrialJawDoorMotion.slab(innerSize, innerHeight);
-            return !level.getEntities((Entity) null, plane.worldBox(first, slab), entity -> {
-                if (!entity.isAlive() || entity.isSpectator()) return false;
+            return level.getEntities((Entity) null, plane.worldBox(first, slab), entity -> {
+                if (!canObstruct(entity)) return false;
                 AABB local = plane.localBox(first, entity.getBoundingBox());
                 return !(jaws == null ? IndustrialIrisDoorMotion.isClear(innerSize, nextProgress, local)
                     : jaws.isClear(nextProgress, local));
-            }).isEmpty();
+            });
         }
         BlockPos last = plane.at(door.doorOrigin(), innerSize, innerSize);
         double minX = Math.min(first.getX(), last.getX());
@@ -313,14 +337,19 @@ public final class IndustrialDoorManager {
         double maxZ = Math.max(first.getZ(), last.getZ()) + 1;
         double bottom = first.getY();
 
-        if (door.style() == IndustrialDoorStyle.MESH) {
+        if (style == IndustrialDoorStyle.MESH) {
             var lowerPanel = IndustrialMeshDoorMotion.lower(innerSize, nextProgress);
-            AABB lower = lowerPanel.bounds(innerSize, innerSize, facing);
-            AABB upper = IndustrialMeshDoorMotion.upper(innerSize, nextProgress).bounds(innerSize, innerSize, facing);
-            AABB beam = IndustrialMeshDoorMotion.hazardBeam(lowerPanel).bounds(innerSize, innerSize, facing);
-            return lower != null && hasObstruction(level, lower.move(minX, bottom, minZ))
-                || upper != null && hasObstruction(level, upper.move(minX, bottom, minZ))
-                || beam != null && hasObstruction(level, beam.move(minX, bottom, minZ));
+            var upperPanel = IndustrialMeshDoorMotion.upper(innerSize, nextProgress);
+            var hazardBeam = IndustrialMeshDoorMotion.hazardBeam(lowerPanel);
+            if (sweepMesh) {
+                var previousLower = IndustrialMeshDoorMotion.lower(innerSize, door.progress);
+                lowerPanel = lowerPanel.sweptFrom(previousLower);
+                upperPanel = upperPanel.sweptFrom(IndustrialMeshDoorMotion.upper(innerSize, door.progress));
+                hazardBeam = hazardBeam.sweptFrom(IndustrialMeshDoorMotion.hazardBeam(previousLower));
+            }
+            return entitiesIntersectingPanels(level, minX, bottom, minZ,
+                lowerPanel.bounds(innerSize, innerSize, facing), upperPanel.bounds(innerSize, innerSize, facing),
+                hazardBeam.bounds(innerSize, innerSize, facing));
         }
 
         // Les vantaux occupent l'épaisseur centrale du cadre. Réduire uniquement l'axe normal à la porte.
@@ -335,17 +364,49 @@ public final class IndustrialDoorManager {
         // La progression règle la demi-hauteur du passage libre entre les deux vantaux.
         if (door.lifts()) {
             double lowerEdge = bottom + innerSize * nextProgress;
-            return hasObstruction(level, new AABB(minX, lowerEdge, minZ, maxX, bottom + innerSize, maxZ));
+            var panel = new AABB(minX, lowerEdge, minZ, maxX, bottom + innerSize, maxZ);
+            return level.getEntities((Entity) null, panel, IndustrialDoorManager::canObstruct);
         }
         double halfHeight = innerSize / 2.0;
         double halfGap = halfHeight * nextProgress;
         AABB lowerPanel = new AABB(minX, bottom, minZ, maxX, bottom + halfHeight - halfGap, maxZ);
         AABB upperPanel = new AABB(minX, bottom + halfHeight + halfGap, minZ, maxX, bottom + innerSize, maxZ);
-        return hasObstruction(level, lowerPanel) || hasObstruction(level, upperPanel);
+        return entitiesIntersectingPanels(level, 0, 0, 0, lowerPanel, upperPanel);
     }
 
-    private static boolean hasObstruction(ServerLevel level, AABB panel) {
-        return !level.getEntities((Entity) null, panel, entity -> entity.isAlive() && !entity.isSpectator()).isEmpty();
+    private static boolean canObstruct(Entity entity) {
+        return entity.isAlive() && !entity.isSpectator();
+    }
+
+    private static List<Entity> entitiesIntersectingPanels(ServerLevel level, double x, double y, double z, AABB... panels) {
+        AABB bounds = null;
+        for (int index = 0; index < panels.length; index++) {
+            if (panels[index] == null) continue;
+            AABB panel = panels[index].move(x, y, z);
+            panels[index] = panel;
+            bounds = bounds == null ? panel : bounds.minmax(panel);
+        }
+        if (bounds == null) return List.of();
+        return level.getEntities((Entity) null, bounds, entity -> {
+            if (!canObstruct(entity)) return false;
+            AABB hitbox = entity.getBoundingBox();
+            for (AABB panel : panels) if (panel != null && panel.intersects(hitbox)) return true;
+            return false;
+        });
+    }
+
+    private static void crushEntities(ServerLevel level, IndustrialDoorEntity door, List<Entity> obstructions, long now) {
+        if (door.crushCooldowns != null) door.crushCooldowns.values().removeIf(until -> until <= now);
+        if (obstructions.isEmpty()) return;
+        if (door.crushCooldowns == null) door.crushCooldowns = new HashMap<>();
+        var damageType = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DOOR_CRUSH);
+        var source = new DamageSource(damageType);
+        for (Entity entity : obstructions) {
+            UUID id = entity.getUUID();
+            if (!door.crushCooldowns.containsKey(id) && entity.hurt(source, CRUSH_DAMAGE)) {
+                door.crushCooldowns.put(id, now + CRUSH_INTERVAL_TICKS);
+            }
+        }
     }
 
     public static void breakMember(ServerLevel level, IndustrialDoorEntity member) {
@@ -407,6 +468,7 @@ public final class IndustrialDoorManager {
         member.progress = 0;
         member.targetOpen = false;
         member.paused = false;
+        member.crushCooldowns = null;
         member.tearingDown = false;
         member.sync();
     }

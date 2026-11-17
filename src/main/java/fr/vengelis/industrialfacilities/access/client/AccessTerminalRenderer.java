@@ -33,16 +33,23 @@ import java.util.*;
 @EventBusSubscriber(modid=IndustrialFacilitiesMod.MODID,value=Dist.CLIENT)
 public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessTerminalEntity> {
     private static final ResourceLocation OPEN_SCREEN=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_reader_open_screen_32");
+    private static final ResourceLocation BUTTON_SCREEN=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_button_active_screen_32");
+    private static final ResourceLocation LOCKDOWN_SCREEN=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_lockdown_active_screen_32");
+    private static final ResourceLocation DISABLED_SCREEN=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_lockdown_disabled_screen_32");
     private static final ResourceLocation INDICATOR=ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_indicator_emissive_32");
     private static final Map<BakedQuad,BakedQuad> OPEN_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<BakedQuad,BakedQuad> DISABLED_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<BakedQuad,BakedQuad> INDICATOR_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
     public AccessTerminalRenderer(BlockEntityRendererProvider.Context context){}
     @SubscribeEvent public static void register(EntityRenderersEvent.RegisterRenderers event){event.registerBlockEntityRenderer(AccessContent.TYPE,AccessTerminalRenderer::new);}
     @SubscribeEvent public static void registerScreen(ModelEvent.RegisterAdditional event){
         event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_reader_open_screen")));
         event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_indicator_emissive")));
+        event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_button_active_screen")));
+        event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_lockdown_active_screen")));
+        event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_lockdown_disabled_screen")));
     }
-    @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();INDICATOR_QUADS.clear();}
+    @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();DISABLED_QUADS.clear();INDICATOR_QUADS.clear();}
     @SubscribeEvent public static void itemColours(RegisterColorHandlersEvent.Item event){
         event.register((stack,index)->0xff000000|colour(index,1,false),IndustrialFacilitiesModItems.TERMINAL_READER.get(),IndustrialFacilitiesModItems.TERMINAL_ENCODER.get(),IndustrialFacilitiesModItems.TERMINAL_BADGE_BANK.get(),IndustrialFacilitiesModItems.KEYPASS_READER.get(),IndustrialFacilitiesModItems.KEYPASS_MANAGER.get());
     }
@@ -55,10 +62,24 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
         return Minecraft.getInstance().getModelManager().getModel(ModelResourceLocation.inventory(BuiltInRegistries.BLOCK.getKey(be.getBlockState().getBlock())));
     }
     /** Remap only the screen's sprite; every bevel, vertex and normal stays intact. */
-    public static BakedQuad screenQuad(BakedQuad quad,boolean granted){
+    public static BakedQuad screenQuad(BakedQuad quad,boolean granted,boolean lockedDown){
         String sprite=quad.getSprite().contents().name().getPath();
-        if(!granted||!sprite.equals("block/terminal_reader_screen_32")&&!sprite.equals("block/keypass_reader_screen_32"))return quad;
-        return remap(quad,OPEN_SCREEN,OPEN_QUADS);
+        if(lockedDown&&isScreen(sprite))return remap(quad,DISABLED_SCREEN,DISABLED_QUADS);
+        if(!granted)return quad;
+        return switch (sprite) {
+            case "block/terminal_reader_screen_32","block/keypass_reader_screen_32" -> remap(quad,OPEN_SCREEN,OPEN_QUADS);
+            case "block/terminal_button_screen_32" -> remap(quad,BUTTON_SCREEN,OPEN_QUADS);
+            case "block/terminal_lockdown_screen_32" -> remap(quad,LOCKDOWN_SCREEN,OPEN_QUADS);
+            default -> quad;
+        };
+    }
+    private static boolean isScreen(String sprite){
+        return switch(sprite){
+            case "block/terminal_reader_screen_32","block/terminal_encoder_screen_32","block/terminal_badge_bank_screen_32",
+                 "block/camera_terminal_screen_32","block/keypass_reader_screen_32","block/keypass_manager_screen_32",
+                 "block/terminal_button_screen_32","block/terminal_lockdown_screen_32" -> true;
+            default -> false;
+        };
     }
     private static BakedQuad remap(BakedQuad quad,ResourceLocation target,Map<BakedQuad,BakedQuad> cache){
         return cache.computeIfAbsent(quad,source->{
@@ -76,8 +97,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     }
     public static boolean isEmissive(BakedQuad quad,int level){
         String sprite=quad.getSprite().contents().name().getPath();int index=quad.getTintIndex();
-        return sprite.contains("terminal_reader_screen")||sprite.contains("terminal_encoder_screen")||sprite.contains("terminal_badge_bank_screen")||sprite.contains("camera_terminal_screen")||sprite.contains("keypass_reader_screen")||sprite.contains("keypass_manager_screen")
-            ||index==200||(index>=100&&index<100+Math.clamp(level,1,5));
+        return isScreen(sprite)||index==200||(index>=100&&index<100+Math.clamp(level,1,5));
     }
     /** Native glowing-eyes lane is recognized by Iris shader packs. The normal
      * pass still writes the dark screen backing and depth before this overlay. */
@@ -87,6 +107,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     @Override public void render(AccessTerminalEntity be,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
         if(be.getLevel()==null||!be.getBlockState().getValue(AccessTerminalBlock.ASSEMBLED)||be.getBlockState().getValue(AccessTerminalBlock.HALF)!=DoubleBlockHalf.LOWER)return;
         Direction facing=be.getBlockState().getValue(AccessTerminalBlock.FACING);
+        boolean lockedDown=be.isLockedDown();
         var lighting=new Lighting(be,facing);var model=model(be);var random=RandomSource.create(42);
         pose.pushPose();pose.translate(.5,0,.5);
         pose.mulPose(Axis.YP.rotationDegrees(switch(facing){case EAST->90;case NORTH->180;case WEST->270;default->0;}));
@@ -100,7 +121,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
                 int index=quad.getTintIndex();int color=colour(index,Math.clamp(be.accessLevel,1,5),be.accessGranted);
                 boolean emissive=isEmissive(quad,be.accessLevel);
                 int packedLight=emissive?LightTexture.FULL_BRIGHT:lighting.sample(quad);
-                BakedQuad display=screenQuad(quad,be.accessGranted);
+                BakedQuad display=screenQuad(quad,be.accessGranted,lockedDown);
                 if(emissive&&(index==200||index>=100&&index<105))display=remap(display,INDICATOR,INDICATOR_QUADS);
                 // Eyes uses additive blending. A black depth-writing backing
                 // prevents transparent screens and avoids doubling the color.

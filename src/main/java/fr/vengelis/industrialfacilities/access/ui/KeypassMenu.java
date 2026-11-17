@@ -30,7 +30,7 @@ public final class KeypassMenu extends AbstractContainerMenu {
     @Override public ItemStack quickMoveStack(Player player,int index){return ItemStack.EMPTY;}
     @Override public boolean stillValid(Player player){
         if(player.level().isClientSide)return true;
-        return terminal!=null&&player==inventory.player&&player instanceof ServerPlayer server&&KeypassData.validDevice(server,terminal)
+        return terminal!=null&&!terminal.isLockedDown()&&player==inventory.player&&player instanceof ServerPlayer server&&KeypassData.validDevice(server,terminal)
             &&instance.equals(terminal.instanceId)&&player.distanceToSqr(terminal.getBlockPos().getCenter())<=64&&(!manager||terminal.isOwner(player));
     }
     @Override public void broadcastChanges(){

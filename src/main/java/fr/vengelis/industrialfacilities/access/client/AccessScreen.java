@@ -25,10 +25,13 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private boolean nameDirty,updatingName;
     private ItemStack observedNameBadge=ItemStack.EMPTY;
     private Button clearLinks,clearBadge,redstone,nextCode,renameBadge,bankSharing,cameraAutomation;
-    private Button openingHeight;
+    private Button openingHeight,forcedClosing;
     private EditBox irisPercent;
     private Button applyIrisPercent;
     private int lastIrisPercent = -1;
+    private EditBox duration;
+    private Button applyDuration;
+    private int lastDuration;
     private final List<Button> readerLevels=new ArrayList<>(),masterLevels=new ArrayList<>(),ownerButtons=new ArrayList<>(),encodingButtons=new ArrayList<>();
     public AccessScreen(AccessMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=340;imageHeight=menu.mode==AccessMenu.ENCODER?284:218;}
     private static Component tr(String key,Object... args){return Component.translatable("gui.industrial_facilities.access."+key,args);}
@@ -38,8 +41,45 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     @Override protected void init(){
         compact=width<352||height<296;imageWidth=compact?300:340;imageHeight=menu.mode==AccessMenu.ENCODER?(compact?232:284):218;
         super.init();ownerButtons.clear();readerLevels.clear();masterLevels.clear();encodingButtons.clear();menu.layoutSlots(compact);
-        if(menu.mode==AccessMenu.ENCODER)initEncoder();else if(menu.mode==AccessMenu.READER)initReader();else initDoor();
+        if(menu.mode==AccessMenu.ENCODER)initEncoder();
+        else if(menu.mode==AccessMenu.READER)initReader();
+        else if(menu.mode==AccessMenu.DOOR)initDoor();
+        else initControl();
         refresh();
+    }
+    private static Component controlText(String key,Object... args) {
+        return Component.translatable("gui.industrial_facilities.terminal_control." + key,args);
+    }
+    private void initControl() {
+        if (menu.mode == AccessMenu.BUTTON) {
+            lastDuration = -1;
+            duration = field(14,87,76,20,controlText("seconds"));
+            duration.setMaxLength(3);
+            duration.setFilter(value -> value.matches("[0-9]{0,3}"));
+            duration.setResponder(value -> refreshDuration());
+            applyDuration = button(98,87,92,20,tr("apply_iris_opening"),
+                b -> send(AccessMenu.BUTTON_SECONDS,"",Integer.parseInt(duration.getValue())));
+            duration.setTooltip(Tooltip.create(controlText("range")));
+        }
+        clearLinks=button(14,162,174,20,tr("clear_links"),b->{
+            if(!confirmClearLinks){confirmClearLinks=true;b.setMessage(tr("confirm_clear_links"));}
+            else{send(AccessMenu.CLEAR_LINKS,"",0);confirmClearLinks=false;b.setMessage(tr("clear_links"));}
+        });
+        ownerButtons.add(clearLinks);
+        button(imageWidth-88,162,74,20,tr("close"),b->onClose());
+    }
+    private void refreshDuration() {
+        if (duration == null || applyDuration == null) return;
+        int seconds = menu.buttonSeconds.get();
+        if (seconds > 0 && seconds != lastDuration) {
+            lastDuration = seconds;
+            duration.setValue(Integer.toString(seconds));
+        }
+        String value = duration.getValue();
+        int entered = value.isEmpty() ? 0 : Integer.parseInt(value);
+        duration.setEditable(menu.editable);
+        applyDuration.active = menu.editable && entered >= 1
+            && entered <= fr.vengelis.industrialfacilities.access.ControlTerminalEntity.MAX_SECONDS;
     }
     private EditBox field(int x,int y,int w,int h,Component narration){
         EditBox box=new EditBox(font,leftPos+x,topPos+y,w,h,narration);box.setTextColor(TEXT);addRenderableWidget(box);return box;
@@ -92,19 +132,22 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         });
     }
     private void initDoor(){
-        redstone=button(14,62,imageWidth-28,22,Component.empty(),b->send(AccessMenu.REDSTONE,"",menu.allowRedstone?0:1));ownerButtons.add(redstone);
-        cameraAutomation=button(14,88,imageWidth-28,22,Component.empty(),b->send(AccessMenu.CAMERA_AUTOMATION,"",menu.allowCameraAutomation?0:1));ownerButtons.add(cameraAutomation);
-        openingHeight=button(14,114,imageWidth-28,22,Component.empty(),b->send(AccessMenu.HALF_OPENING,"",menu.halfOpening?0:1));
+        redstone=button(14,50,imageWidth-28,22,Component.empty(),b->send(AccessMenu.REDSTONE,"",menu.allowRedstone?0:1));ownerButtons.add(redstone);
+        cameraAutomation=button(14,75,imageWidth-28,22,Component.empty(),b->send(AccessMenu.CAMERA_AUTOMATION,"",menu.allowCameraAutomation?0:1));ownerButtons.add(cameraAutomation);
+        forcedClosing=button(14,100,imageWidth-28,22,Component.empty(),b->send(AccessMenu.FORCED_CLOSING,"",menu.forcedClosing()?0:1));
+        forcedClosing.setTooltip(Tooltip.create(tr("forced_closing_hint")));
+        ownerButtons.add(forcedClosing);
+        openingHeight=button(14,125,imageWidth-28,22,Component.empty(),b->send(AccessMenu.HALF_OPENING,"",menu.halfOpening?0:1));
         openingHeight.setTooltip(Tooltip.create(tr("opening_height_hint")));
-        irisPercent=field(138,116,52,18,tr("iris_opening"));
+        irisPercent=field(138,127,52,18,tr("iris_opening"));
         irisPercent.setMaxLength(3);
         irisPercent.setFilter(value->value.matches("[0-9]{0,3}"));
         irisPercent.setResponder(value->refreshIrisControls());
-        applyIrisPercent=button(imageWidth-100,114,86,22,tr("apply_iris_opening"),
+        applyIrisPercent=button(imageWidth-100,125,86,22,tr("apply_iris_opening"),
             b->send(AccessMenu.IRIS_OPENING,"",Integer.parseInt(irisPercent.getValue())));
         irisPercent.setTooltip(Tooltip.create(tr("iris_opening_hint")));
         lastIrisPercent=-1;
-        button(imageWidth-88,172,74,20,tr("close"),b->onClose());
+        button(imageWidth-88,177,74,20,tr("close"),b->onClose());
     }
     @Override protected void containerTick(){super.containerTick();refresh();}
     private void refresh(){
@@ -114,12 +157,14 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         if(codeDisplay!=null&&!menu.code.equals(lastCode)){codeDisplay.setValue(menu.code);lastCode=menu.code;}
         if(redstone!=null)redstone.setMessage(tr(menu.allowRedstone?"redstone_on":"redstone_off"));
         if(cameraAutomation!=null)cameraAutomation.setMessage(tr(menu.allowCameraAutomation?"camera_automation_on":"camera_automation_off"));
+        if(forcedClosing!=null)forcedClosing.setMessage(tr(menu.forcedClosing()?"forced_closing_on":"forced_closing_off"));
         if(openingHeight!=null){
             openingHeight.visible=menu.meshDoor;
             openingHeight.active=menu.meshDoor&&menu.editable;
             openingHeight.setMessage(tr(menu.halfOpening?"opening_height_half":"opening_height_full"));
         }
         refreshIrisControls();
+        refreshDuration();
         if(nextCode!=null)nextCode.active=!AccessBadges.codes(menu.input.getItem(0)).isEmpty();
         if(nameInput!=null&&menu.mode==AccessMenu.ENCODER){
             boolean canEncode=AccessMenu.badge(menu.input.getItem(0));
@@ -187,12 +232,17 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             String hint=!menu.input.isEmpty()&&!AccessMenu.badge(menu.input.getItem(0))?"gui.industrial_facilities.access.link_card_name_hint":"gui.industrial_facilities.access.encoder_hint";
             int statusY=compact?137:177;drawFit(g,status(menu.status.isEmpty()?hint:menu.status),12,statusY,imageWidth-24,TEXT);
             g.drawString(font,tr("card_slot"),14,invY+10,ACCENT,false);if(!compact)g.drawString(font,playerInventoryTitle,89,invY-11,MUTED,false);
-        }else{
-            g.drawString(font,tr(menu.secured?"secured":"unsecured"),14,41,ACCENT,false);
+        }else if(menu.mode==AccessMenu.DOOR){
+            g.drawString(font,tr(menu.secured?"secured":"unsecured"),14,35,ACCENT,false);
             boolean hasOpeningOption=menu.meshDoor||menu.irisOpeningPercent>=0;
-            if(menu.irisOpeningPercent>=0)g.drawString(font,tr("iris_opening"),14,121,TEXT,false);
-            wrapped(g,tr(menu.secured?(menu.allowRedstone?"door_redstone_hint":"door_badge_hint"):"door_unsecured_hint"),14,hasOpeningOption?141:120,imageWidth-28,MUTED);
-            if(!menu.editable)drawFit(g,tr("read_only"),14,hasOpeningOption?173:149,imageWidth-110,0xD6A97B);
+            if(menu.irisOpeningPercent>=0)g.drawString(font,tr("iris_opening"),14,132,TEXT,false);
+            wrapped(g,tr(menu.secured?(menu.allowRedstone?"door_redstone_hint":"door_badge_hint"):"door_unsecured_hint"),14,hasOpeningOption?150:126,imageWidth-28,MUTED);
+            if(!menu.editable)drawFit(g,tr("read_only"),14,182,imageWidth-110,0xD6A97B);
+            drawFit(g,status(menu.status),14,197,imageWidth-28,TEXT);
+        }else{
+            g.drawString(font,tr("linked",menu.links),14,42,ACCENT,false);
+            if(menu.mode==AccessMenu.BUTTON)g.drawString(font,controlText("seconds"),14,73,TEXT,false);
+            wrapped(g,controlText(menu.mode==AccessMenu.BUTTON?"button_hint":"lockdown_hint"),14,119,imageWidth-28,MUTED);
             drawFit(g,status(menu.status),14,197,imageWidth-28,TEXT);
         }
     }
@@ -201,6 +251,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         if(codeInput!=null&&codeInput.isFocused())return codeInput.keyPressed(key,scan,modifiers);
         if(limitInput!=null&&limitInput.isFocused())return limitInput.keyPressed(key,scan,modifiers);
         if(nameInput!=null&&nameInput.isFocused())return nameInput.keyPressed(key,scan,modifiers);
+        if(duration!=null&&duration.isFocused())return duration.keyPressed(key,scan,modifiers);
         return super.keyPressed(key,scan,modifiers);
     }
     @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){

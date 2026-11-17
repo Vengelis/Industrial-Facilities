@@ -37,10 +37,12 @@ public final class AccessContent {
     @SubscribeEvent public static void register(RegisterEvent event){event.register(Registries.BLOCK_ENTITY_TYPE,helper->{
         TYPE=BlockEntityType.Builder.<AccessTerminalEntity>of((pos,state)->{
             if(state.getBlock() instanceof KeypassTerminalBlock)return new KeypassTerminalEntity(pos,state);
+            if(state.getBlock() instanceof ControlTerminalBlock)return new ControlTerminalEntity(pos,state);
             if(state.getBlock() instanceof fr.vengelis.industrialfacilities.security.CameraTerminalBlock)return new fr.vengelis.industrialfacilities.security.CameraTerminalEntity(pos,state);
             return new AccessTerminalEntity(pos,state);
         },IndustrialFacilitiesModBlocks.TERMINAL_READER.get(),IndustrialFacilitiesModBlocks.TERMINAL_ENCODER.get(),IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get(),IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get(),
-            IndustrialFacilitiesModBlocks.KEYPASS_READER.get(),IndustrialFacilitiesModBlocks.KEYPASS_MANAGER.get()).build(null);
+            IndustrialFacilitiesModBlocks.KEYPASS_READER.get(),IndustrialFacilitiesModBlocks.KEYPASS_MANAGER.get(),
+            IndustrialFacilitiesModBlocks.TERMINAL_BUTTON.get(),IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN.get()).build(null);
         helper.register(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"access_terminal"),TYPE);
     });}
     private AccessContent(){}

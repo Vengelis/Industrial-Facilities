@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -30,15 +31,18 @@ public class IndustrialDoorEntity extends BlockEntity {
     public UUID placedBy;
     public boolean allowLinkedRedstone;
     public boolean allowCameraAutomation;
+    public boolean forcedClosing;
     public boolean halfOpening;
     public int irisOpeningPercent = 100;
     public UUID automationOwner;
     public long accessOpenUntil;
+    public UUID accessRequester;
     public float progress;
     public float previousProgress;
     public boolean targetOpen;
     public boolean tearingDown;
     public boolean paused;
+    Map<UUID, Long> crushCooldowns;
 
     public IndustrialDoorEntity(BlockPos pos, BlockState state) {
         super(IndustrialDoorContent.TYPE, pos, state);
@@ -155,9 +159,11 @@ public class IndustrialDoorEntity extends BlockEntity {
         }
         tag.putBoolean("AllowCameraAutomation", allowCameraAutomation);
         tag.putBoolean("AllowLinkedRedstone", allowLinkedRedstone);
+        tag.putBoolean("ForcedClosing", forcedClosing);
         tag.putBoolean("HalfOpening", halfOpening);
         if (style() == IndustrialDoorStyle.IRIS) tag.putInt("IrisOpeningPercent", irisOpeningPercent);
         tag.putLong("AccessOpenUntil", accessOpenUntil);
+        if (accessRequester != null) tag.putUUID("AccessRequester", accessRequester);
 
         if (owner != null) {
             tag.putLong("Owner", owner.asLong());
@@ -180,9 +186,11 @@ public class IndustrialDoorEntity extends BlockEntity {
         automationOwner = tag.hasUUID("AutomationOwner") ? tag.getUUID("AutomationOwner") : null;
         allowCameraAutomation = tag.getBoolean("AllowCameraAutomation");
         allowLinkedRedstone = tag.getBoolean("AllowLinkedRedstone");
+        forcedClosing = tag.getBoolean("ForcedClosing");
         halfOpening = tag.getBoolean("HalfOpening");
         irisOpeningPercent = tag.contains("IrisOpeningPercent") ? Math.clamp(tag.getInt("IrisOpeningPercent"), 0, 100) : 100;
         accessOpenUntil = tag.getLong("AccessOpenUntil");
+        accessRequester = tag.hasUUID("AccessRequester") ? tag.getUUID("AccessRequester") : null;
 
         owner = tag.contains("Owner") ? BlockPos.of(tag.getLong("Owner")) : null;
         origin = tag.contains("Origin") ? BlockPos.of(tag.getLong("Origin")) : null;

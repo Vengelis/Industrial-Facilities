@@ -19,7 +19,7 @@ public final class KeypassMenus {
     public static MenuType<KeypassMenu> TYPE;
     @SubscribeEvent public static void register(RegisterEvent event){event.register(Registries.MENU,helper->{TYPE=IMenuTypeExtension.create(KeypassMenu::new);helper.register(AccessMenus.id("keypass"),TYPE);});}
     public static void open(ServerPlayer player,KeypassTerminalEntity terminal){
-        if(!KeypassData.validDevice(player,terminal)||player.distanceToSqr(terminal.getBlockPos().getCenter())>64)return;
+        if(!KeypassData.validDevice(player,terminal)||player.distanceToSqr(terminal.getBlockPos().getCenter())>64||!terminal.canInteract(player))return;
         if(terminal.manager()&&!terminal.isOwner(player)){player.displayClientMessage(Component.translatable(KEY+"link_denied"),true);return;}
         player.openMenu(new SimpleMenuProvider((id,inv,p)->new KeypassMenu(id,inv,terminal),Component.translatable(KEY+(terminal.manager()?"manager":"reader"))),
             b->{b.writeBoolean(terminal.manager());b.writeBoolean(terminal.isOwner(player));});

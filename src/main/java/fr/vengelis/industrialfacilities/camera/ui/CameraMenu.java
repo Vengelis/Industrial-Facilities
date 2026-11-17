@@ -86,7 +86,7 @@ public class CameraMenu extends AbstractContainerMenu {
                 || player.distanceToSqr(position.getX() + .5, position.getY() + .5, position.getZ() + .5) > 64)
             return false;
         if (mode == PROGRAM)
-            return terminal != null && !terminal.isRemoved() && terminal.getLevel() == player.level()
+            return terminal != null && !terminal.isRemoved() && !terminal.isLockedDown() && terminal.getLevel() == player.level()
                     && terminal.isOwner(player) && Objects.equals(instanceId, terminal.instanceId)
                     && AccessTerminalEntity.resolve(player.level(), position) == terminal;
         return camera != null && !camera.isRemoved() && camera.getLevel() == player.level()

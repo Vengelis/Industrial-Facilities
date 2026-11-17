@@ -32,7 +32,8 @@ public final class NetworkTabletModels {
         BlockEntity entity=level.getBlockEntity(endpoint.root());
         if(entity==null||entity.isRemoved()||entity.getLevel()!=level||!entity.getBlockPos().equals(endpoint.root()))return false;
         return switch(endpoint.kind()){
-            case "reader","automation",TerminalLinks.KEYPASS_MANAGER,TerminalLinks.KEYPASS_READER->terminal(level,entity,endpoint,partial,pose,buffers);
+            case "reader","automation",TerminalLinks.KEYPASS_MANAGER,TerminalLinks.KEYPASS_READER,
+                TerminalLinks.TERMINAL,TerminalLinks.BUTTON,TerminalLinks.LOCKDOWN->terminal(level,entity,endpoint,partial,pose,buffers);
             case "door"->entity instanceof IndustrialDoorEntity door&&endpoint.instance().equals(door.doorInstanceId)&&door(level,door,partial,pose,buffers);
             case "camera"->entity instanceof SecurityCameraEntity camera&&endpoint.instance().equals(camera.instanceId)&&camera(level,camera,partial,pose,buffers);
             // These endpoints' instance UUIDs are intentionally not synchronized to clients.

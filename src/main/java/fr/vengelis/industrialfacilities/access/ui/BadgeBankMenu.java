@@ -73,7 +73,7 @@ public class BadgeBankMenu extends AbstractContainerMenu {
         if(player.level().isClientSide())return true;
         return player==inventory.player&&player.isAlive()&&player.level().hasChunkAt(position)
             &&player.distanceToSqr(position.getX()+.5,position.getY()+.5,position.getZ()+.5)<=64
-            &&terminal!=null&&terminal.bank&&!terminal.isRemoved()&&terminal.getLevel()==player.level()
+            &&terminal!=null&&terminal.bank&&!terminal.isRemoved()&&!terminal.isLockedDown()&&terminal.getLevel()==player.level()
             &&AccessTerminalEntity.resolve(player.level(),position)==terminal&&Objects.equals(instanceId,terminal.instanceId);
     }
     private static String normalized(String text){return MARKS.matcher(Normalizer.normalize(text,Normalizer.Form.NFD)).replaceAll("").toLowerCase(Locale.ROOT);}

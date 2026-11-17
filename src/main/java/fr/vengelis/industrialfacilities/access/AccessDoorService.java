@@ -111,6 +111,13 @@ public final class AccessDoorService {
         return true;
     }
 
+    public static boolean setForcedClosing(Player player, IndustrialDoorEntity door, boolean enabled) {
+        if (!canChangeSettings(player, door)) return false;
+        door.forcedClosing = enabled;
+        door.sync();
+        return true;
+    }
+
     public static boolean setHalfOpening(Player player, IndustrialDoorEntity door, boolean enabled) {
         if (door.style() != IndustrialDoorStyle.MESH || !canChangeSettings(player, door)) return false;
         door.halfOpening = enabled;
@@ -134,10 +141,18 @@ public final class AccessDoorService {
     }
 
     public static boolean shouldOpen(ServerLevel level, IndustrialDoorEntity door) {
+        var controls = TerminalControlData.get(level);
+        if (controls.blocksDoor(level, door)) {
+            controls.cancelDoorRequests(door.doorInstanceId);
+            cancelAccessRequest(door);
+            return false;
+        }
         if (IndustrialDoorManager.fireAlarmActive(level, door)) return false;
         if (level.getGameTime() < door.accessOpenUntil) {
-            return true;
+            if (!controls.locked(door.accessRequester)) return true;
+            cancelAccessRequest(door);
         }
+        if (controls.buttonRequests(level, door)) return true;
         if ((!isSecured(door) || door.allowLinkedRedstone) && level.hasNeighborSignal(door.getBlockPos())) {
             return true;
         }
@@ -145,10 +160,17 @@ public final class AccessDoorService {
             && AutomationOutputs.active(level, door.getBlockPos(), "door", door.doorInstanceId);
     }
 
+    private static void cancelAccessRequest(IndustrialDoorEntity door) {
+        if (door.accessOpenUntil == 0 && door.accessRequester == null) return;
+        door.accessOpenUntil = 0;
+        door.accessRequester = null;
+        door.sync();
+    }
+
     /** Le voyant reste vert pendant la fermeture ou si un obstacle maintient la porte ouverte. */
     public static boolean readerGranted(AccessTerminalEntity terminal) {
         if (!(terminal.getLevel() instanceof ServerLevel level) || terminal.encoder || terminal.bank
-            || terminal.terminalId == null || AccessTerminalEntity.resolve(level, terminal.getBlockPos()) != terminal) {
+            || terminal.isLockedDown() || terminal.terminalId == null || AccessTerminalEntity.resolve(level, terminal.getBlockPos()) != terminal) {
             return false;
         }
 
@@ -177,6 +199,7 @@ public final class AccessDoorService {
     }
 
     public static void clearControllerLinks(ServerLevel level, BlockPos position, UUID oldInstance) {
+        TerminalControlData.get(level).forgetDoor(oldInstance);
         var readers = AccessRegistry.get(level.getServer())
             .invalidateDoor(level.dimension().location().toString(), position, oldInstance);
         for (var entry : readers) {
@@ -193,6 +216,7 @@ public final class AccessDoorService {
         clearControllerLinks(level, door.getBlockPos(), door.doorInstanceId);
         door.doorInstanceId = null;
         door.accessOpenUntil = 0;
+        door.accessRequester = null;
         door.allowLinkedRedstone = false;
         door.allowCameraAutomation = false;
         door.automationOwner = null;
@@ -301,6 +325,7 @@ public final class AccessDoorService {
             || AccessTerminalEntity.resolve(level, terminal.getBlockPos()) != terminal) {
             return AccessBadges.Result.fail("Le terminal est hors de portée.");
         }
+        if (terminal.isLockedDown()) return AccessBadges.Result.fail(ControlTerminalBlock.UI + "locked");
 
         var registry = AccessRegistry.get(level.getServer());
         var reader = registry.find(terminal.terminalId);
@@ -324,6 +349,7 @@ public final class AccessDoorService {
             return "link_denied";
         }
         var level = player.serverLevel();
+        if (terminal.isLockedDown()) return "link_denied";
         var registry = AccessRegistry.get(level.getServer());
         var reader = registry.find(terminal.terminalId);
         if (TerminalLinks.loadedReader(level, reader) != terminal) {
@@ -339,6 +365,8 @@ public final class AccessDoorService {
     private static AccessBadges.Result openDoors(ServerLevel level, AccessRegistry registry, AccessRegistry.Entry reader,
         AccessTerminalEntity terminal, BooleanSupplier consumeAccess) {
         List<IndustrialDoorEntity> doorsToOpen = new ArrayList<>();
+        var controls = TerminalControlData.get(level);
+        boolean lockdown = false;
         boolean fireAlarmActive = false;
         for (var link : reader.doors()) {
             if (!TerminalLinks.admissible(level, terminal.getBlockPos(), link)) {
@@ -346,7 +374,9 @@ public final class AccessDoorService {
             }
             var door = TerminalLinks.loadedDoor(level, link);
             if (door == null) continue;
-            if (IndustrialDoorManager.fireAlarmActive(level, door)) {
+            if (controls.blocksDoor(level, door)) {
+                lockdown = true;
+            } else if (IndustrialDoorManager.fireAlarmActive(level, door)) {
                 fireAlarmActive = true;
             } else if (door.accessOpenUntil <= level.getGameTime() && !door.targetOpen) {
                 doorsToOpen.add(door);
@@ -355,6 +385,7 @@ public final class AccessDoorService {
 
         // Le badge n'est débité qu'une fois, après avoir trouvé au moins une porte à ouvrir.
         if (doorsToOpen.isEmpty()) {
+            if (lockdown) return AccessBadges.Result.fail(ControlTerminalBlock.UI + "door_locked");
             return AccessBadges.Result.fail(fireAlarmActive
                 ? "Porte verrouillée par une alarme incendie." : "Aucune porte liée disponible à ouvrir.");
         }
@@ -365,6 +396,7 @@ public final class AccessDoorService {
         for (var door : doorsToOpen) {
             int duration = ACCESS_DURATION_TICKS + Math.max(0, door.motionTicks(true) - DoorMotionConfig.DEFAULT_TICKS);
             door.accessOpenUntil = level.getGameTime() + duration;
+            door.accessRequester = terminal.instanceId;
             end = Math.max(end, door.accessOpenUntil);
             door.sync();
         }

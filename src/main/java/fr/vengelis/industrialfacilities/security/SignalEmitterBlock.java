@@ -1,4 +1,6 @@
 package fr.vengelis.industrialfacilities.security;
+import fr.vengelis.industrialfacilities.access.TerminalControlData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.*;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,5 +28,11 @@ public class SignalEmitterBlock extends Block implements EntityBlock {
     @Override protected int getDirectSignal(BlockState state,BlockGetter level,BlockPos pos,Direction query){return getSignal(state,level,pos,query);}
     @Override public boolean canConnectRedstone(BlockState state,BlockGetter level,BlockPos pos,Direction side){return side!=null&&side==state.getValue(FACING).getOpposite();}
     @Override public PushReaction getPistonPushReaction(BlockState state){return PushReaction.BLOCK;}
+    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
+        if (!state.is(next.getBlock()) && level instanceof ServerLevel server
+                && level.getBlockEntity(pos) instanceof SignalEmitterEntity emitter)
+            TerminalControlData.get(server).remove(server, emitter.instanceId);
+        super.onRemove(state, level, pos, next, moving);
+    }
     @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,LivingEntity entity,ItemStack stack){super.setPlacedBy(level,pos,state,entity,stack);if(!level.isClientSide&&entity instanceof Player player&&level.getBlockEntity(pos) instanceof SignalEmitterEntity emitter){emitter.creator=player.getUUID();emitter.setChanged();}}
 }

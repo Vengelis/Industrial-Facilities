@@ -161,6 +161,8 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> NETWORK_TABLET;
 	public static final DeferredItem<Item> KEYPASS_READER;
 	public static final DeferredItem<Item> KEYPASS_MANAGER;
+	public static final DeferredItem<Item> TERMINAL_BUTTON;
+	public static final DeferredItem<Item> TERMINAL_LOCKDOWN;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -299,6 +301,8 @@ public class IndustrialFacilitiesModItems {
 		NETWORK_TABLET = REGISTRY.register("network_tablet", NetworkTabletItem::new);
 		KEYPASS_READER = block(IndustrialFacilitiesModBlocks.KEYPASS_READER);
 		KEYPASS_MANAGER = block(IndustrialFacilitiesModBlocks.KEYPASS_MANAGER);
+		TERMINAL_BUTTON = block(IndustrialFacilitiesModBlocks.TERMINAL_BUTTON);
+		TERMINAL_LOCKDOWN = block(IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN);
 	}
 
 	// Start of user code block custom items

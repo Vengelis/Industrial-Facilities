@@ -16,10 +16,12 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class AccessMenu extends AbstractContainerMenu {
-    public static final int READER=0,ENCODER=1,DOOR=2;
+    public static final int READER=0,ENCODER=1,DOOR=2,BUTTON=3,LOCKDOWN=4;
     public static final int SET_LEVEL=0,CLEAR_LINKS=1,ADD_CODE=2,REMOVE_CODE=3,CLEAR_BADGE=4,MASTER=5,LIMIT=6,REDSTONE=7,RENAME=8,SET_BANK_SHARING=9,CAMERA_AUTOMATION=10;
     public static final int HALF_OPENING=11;
     public static final int IRIS_OPENING=12;
+    public static final int BUTTON_SECONDS=13;
+    public static final int FORCED_CLOSING=14;
     public final Inventory inventory;
     public final BlockPos position;
     public final int mode;
@@ -30,6 +32,8 @@ public class AccessMenu extends AbstractContainerMenu {
     public boolean editable,allowRedstone,secured,allowCameraAutomation;
     public boolean meshDoor,halfOpening;
     public int irisOpeningPercent=-1;
+    public final DataSlot buttonSeconds=DataSlot.standalone();
+    private final DataSlot forcedClosing=DataSlot.standalone();
     private final AccessTerminalEntity terminal;
     private final IndustrialDoorEntity door;
     private final UUID instanceId;
@@ -37,7 +41,7 @@ public class AccessMenu extends AbstractContainerMenu {
 
     public AccessMenu(int id,Inventory inventory,AccessTerminalEntity terminal){
         super(AccessMenus.TYPE,id);this.inventory=inventory;this.terminal=terminal;door=null;
-        position=terminal.getBlockPos();mode=terminal.encoder?ENCODER:READER;instanceId=terminal.instanceId;
+        position=terminal.getBlockPos();mode=terminalMode(terminal);instanceId=terminal.instanceId;
         creator=terminal.creator==null?"":terminal.creator.toString();code=terminal.code();
         setupSlots();refresh();
     }
@@ -48,11 +52,11 @@ public class AccessMenu extends AbstractContainerMenu {
     }
     public AccessMenu(int id,Inventory inventory,FriendlyByteBuf buffer){
         super(AccessMenus.TYPE,id);this.inventory=inventory;terminal=null;door=null;instanceId=null;
-        mode=buffer.readVarInt();if(mode<READER||mode>DOOR)throw new IllegalArgumentException("Invalid access menu mode");
+        mode=buffer.readVarInt();if(mode<READER||mode>LOCKDOWN)throw new IllegalArgumentException("Invalid access menu mode");
         position=buffer.readBlockPos();creator=buffer.readUtf(36);code=buffer.readUtf(64);setupSlots();
     }
     public static void writeOpening(FriendlyByteBuf buffer,AccessTerminalEntity terminal){
-        buffer.writeVarInt(terminal.encoder?ENCODER:READER);buffer.writeBlockPos(terminal.getBlockPos());
+        buffer.writeVarInt(terminalMode(terminal));buffer.writeBlockPos(terminal.getBlockPos());
         buffer.writeUtf(terminal.creator==null?"":terminal.creator.toString(),36);buffer.writeUtf(terminal.code(),64);
     }
     public static void writeOpening(FriendlyByteBuf buffer,IndustrialDoorEntity door){
@@ -63,12 +67,19 @@ public class AccessMenu extends AbstractContainerMenu {
             ||stack.is(IndustrialFacilitiesModItems.ACCESS_BADGE_MASTER.get())||stack.is(IndustrialFacilitiesModItems.ACCESS_BADGE_LIMITED.get());
     }
     public static boolean renameable(ItemStack stack){return AccessBadges.renameable(stack);}
+    private static int terminalMode(AccessTerminalEntity terminal) {
+        if (terminal instanceof ControlTerminalEntity control) return control.lockdown() ? LOCKDOWN : BUTTON;
+        return terminal.encoder ? ENCODER : READER;
+    }
     private void setupSlots(){
+        if(mode==BUTTON)addDataSlot(buttonSeconds);
+        if(mode==DOOR)addDataSlot(forcedClosing);
         if(mode!=ENCODER)return;
         addSlot(new Slot(input,0,30,228){@Override public boolean mayPlace(ItemStack stack){return renameable(stack);}@Override public int getMaxStackSize(){return 1;}});
         for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,9+row*9+col,89+col*18,202+row*18));
         for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,89+col*18,260));
     }
+    public boolean forcedClosing(){return forcedClosing.get()!=0;}
     /** Client layout only; server slot indices and backing containers remain unchanged. */
     public void layoutSlots(boolean compact){
         if(!inventory.player.level().isClientSide()||mode!=ENCODER)return;
@@ -87,23 +98,26 @@ public class AccessMenu extends AbstractContainerMenu {
         if(player!=inventory.player||!player.isAlive()||!player.level().hasChunkAt(position)
             ||player.distanceToSqr(position.getX()+.5,position.getY()+.5,position.getZ()+.5)>64)return false;
         if(mode==DOOR)return door!=null&&!door.isRemoved()&&door.size>0&&player.level().getBlockEntity(position)==door&&Objects.equals(instanceId,door.doorInstanceId);
-        return terminal!=null&&!terminal.isRemoved()&&AccessTerminalEntity.resolve(player.level(),position)==terminal&&Objects.equals(instanceId,terminal.instanceId);
+        return terminal!=null&&!terminal.isRemoved()&&!terminal.isLockedDown()&&AccessTerminalEntity.resolve(player.level(),position)==terminal&&Objects.equals(instanceId,terminal.instanceId);
     }
     private void refresh(){
         if(terminal!=null){code=terminal.code();accessLevel=terminal.accessLevel;links=terminal.linkedCount();editable=terminal.isOwner(inventory.player);}
         else if(door!=null){
             allowRedstone=door.allowLinkedRedstone;
             allowCameraAutomation=door.allowCameraAutomation;
+            forcedClosing.set(door.forcedClosing?1:0);
             editable=AccessDoorService.canConfigure(inventory.player,door);
             secured=AccessDoorService.isSecured(door);
             meshDoor=door.style()==IndustrialDoorStyle.MESH;
             halfOpening=meshDoor&&door.halfOpening;
             irisOpeningPercent=door.style()==IndustrialDoorStyle.IRIS?door.irisOpeningPercent:-1;
         }
+        if (mode==BUTTON && terminal instanceof ControlTerminalEntity control) buttonSeconds.set(control.seconds());
     }
     @Override public void broadcastChanges(){
+        if(inventory.player instanceof ServerPlayer)refresh();
         super.broadcastChanges();if(!(inventory.player instanceof ServerPlayer server))return;
-        refresh();var current=new AccessMessages.State(containerId,code,accessLevel,links,editable,
+        var current=new AccessMessages.State(containerId,code,accessLevel,links,editable,
             allowRedstone,secured,allowCameraAutomation,meshDoor,halfOpening,irisOpeningPercent,status);
         if(!current.equals(lastState)){lastState=current;PacketDistributor.sendToPlayer(server,current);}
     }
@@ -121,6 +135,11 @@ public class AccessMenu extends AbstractContainerMenu {
             else if(action==CLEAR_LINKS)changed=terminal.clearLinks(player);
             else return;
             status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";
+        }else if(terminal instanceof ControlTerminalEntity control){
+            if(action==BUTTON_SECONDS&&mode==BUTTON)changed=control.setSeconds(player,value);
+            else if(action==CLEAR_LINKS)changed=control.clearLinks(player);
+            else return;
+            status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";
         }else if(mode==DOOR){
             if(action!=IRIS_OPENING&&value!=0&&value!=1)return;
             switch(action){
@@ -128,6 +147,7 @@ public class AccessMenu extends AbstractContainerMenu {
                 case CAMERA_AUTOMATION -> changed=AccessDoorService.setAllowCameraAutomation(player,door,value==1);
                 case HALF_OPENING -> changed=AccessDoorService.setHalfOpening(player,door,value==1);
                 case IRIS_OPENING -> changed=AccessDoorService.setIrisOpening(player,door,value);
+                case FORCED_CLOSING -> changed=AccessDoorService.setForcedClosing(player,door,value==1);
                 default -> {return;}
             }
             status=changed?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";

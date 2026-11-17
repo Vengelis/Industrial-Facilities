@@ -91,6 +91,7 @@ public class AccessTerminalBlock extends Block implements EntityBlock {
         if(level.isClientSide)return InteractionResult.SUCCESS;
         AccessTerminalEntity terminal=AccessTerminalEntity.resolve(level,pos);
         if(terminal==null)player.displayClientMessage(Component.literal("Empilez deux blocs de terminal du même type."),true);
+        else if(!terminal.canInteract(player))return InteractionResult.CONSUME;
         else if(terminal.encoder||terminal.bank||terminal.isOwner(player))AccessMenus.open(player,terminal);
         else player.displayClientMessage(Component.literal("Présentez un badge encodé au lecteur."),true);
         return InteractionResult.CONSUME;
@@ -104,7 +105,7 @@ public class AccessTerminalBlock extends Block implements EntityBlock {
         else if(terminal.encoder||terminal.bank)AccessMenus.open(player,terminal);
         else {
             var result=wallet?BadgeWalletItem.activate(player,terminal,stack):AccessDoorService.activate(player,terminal,stack);
-            player.displayClientMessage(result.message().equals(BadgeWalletItem.DENIED)
+            player.displayClientMessage(result.message().startsWith("gui.industrial_facilities.")||result.message().equals(BadgeWalletItem.DENIED)
                 ? Component.translatable(result.message()) : Component.literal(result.message()),true);
             BlockPos base=terminal.getBlockPos();
             level.playSound(null,base.getX()+.5,base.getY()+1.3,base.getZ()+.5,

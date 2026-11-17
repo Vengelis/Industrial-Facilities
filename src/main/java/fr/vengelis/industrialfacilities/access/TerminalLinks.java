@@ -29,6 +29,9 @@ public final class TerminalLinks {
     public static final int MAX_SCANNED_BLOCK_ENTITIES = 32768;
     public static final String KEYPASS_MANAGER = "keypass_manager";
     public static final String KEYPASS_READER = "keypass_reader";
+    public static final String BUTTON = "button";
+    public static final String LOCKDOWN = "lockdown";
+    public static final String TERMINAL = "terminal";
 
     private static final Set<String> AUTOMATION_TARGETS = Set.of("door", "camera", "alarm", "emitter", "panel");
 
@@ -67,6 +70,8 @@ public final class TerminalLinks {
             case "reader" -> target.equals("door");
             case "automation" -> AUTOMATION_TARGETS.contains(target);
             case KEYPASS_MANAGER -> target.equals(KEYPASS_READER);
+            case BUTTON -> target.equals(TERMINAL);
+            case LOCKDOWN -> target.equals(TERMINAL) || target.equals("emitter");
             default -> false;
         };
     }
@@ -96,7 +101,7 @@ public final class TerminalLinks {
             return null;
         }
         AccessTerminalEntity terminal = AccessTerminalEntity.resolve(level, entry.position);
-        if (terminal == null || terminal.isRemoved() || terminal.encoder || terminal.bank
+        if (!TerminalControlData.reader(terminal) || terminal.isRemoved()
             || !terminal.getBlockPos().equals(entry.position) || !entry.id.equals(terminal.terminalId)
             || !entry.owner.equals(terminal.creator)) {
             return null;
@@ -176,7 +181,9 @@ public final class TerminalLinks {
                 break;
             }
 
-            if (terminal instanceof CameraTerminalEntity automation) {
+            if (terminal instanceof ControlTerminalEntity control) {
+                truncated |= appendControls(level, player, control, links);
+            } else if (terminal instanceof CameraTerminalEntity automation) {
                 truncated |= appendAutomationLinks(level, player, automation, links);
             } else if (terminal instanceof KeypassTerminalEntity manager && manager.manager()) {
                 truncated |= appendKeypassLinks(level, player, manager, links);
@@ -189,6 +196,18 @@ public final class TerminalLinks {
             }
         }
         return new Snapshot(links, truncated);
+    }
+
+    private static boolean appendControls(ServerLevel level, ServerPlayer player, ControlTerminalEntity control, List<Link> links) {
+        for (var target : TerminalControlData.get(level).links(control)) {
+            if (!inRange(control.getBlockPos(), target.position()) || !near(player, target.position(), TARGET_RADIUS)) continue;
+            if (target.emitter() ? TerminalControlData.emitterAt(level, target, player.getUUID()) == null
+                    : TerminalControlData.terminalAt(level, target, player.getUUID()) == null) continue;
+            if (links.size() >= MAX_LINKS) return true;
+            links.add(new Link(control.getBlockPos(), control.instanceId, control.lockdown() ? LOCKDOWN : BUTTON,
+                target.position(), target.id(), target.emitter() ? "emitter" : TERMINAL));
+        }
+        return false;
     }
 
     /** Recense les terminaux proches et renvoie true si la limite de parcours est atteinte. */

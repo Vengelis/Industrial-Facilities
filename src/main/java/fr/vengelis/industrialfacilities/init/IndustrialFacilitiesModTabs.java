@@ -152,5 +152,7 @@ public class IndustrialFacilitiesModTabs {
 				tabData.accept(IndustrialFacilitiesModItems.NETWORK_TABLET.get());
 				tabData.accept(IndustrialFacilitiesModBlocks.KEYPASS_READER.get().asItem());
 				tabData.accept(IndustrialFacilitiesModBlocks.KEYPASS_MANAGER.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_BUTTON.get().asItem());
+				tabData.accept(IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN.get().asItem());
 			}).build());
 }

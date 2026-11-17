@@ -23,6 +23,11 @@ public final class IndustrialMeshDoorMotion {
             return depth + halfThickness;
         }
 
+        /** Includes the vertical travel between the previous and next closing positions. */
+        public Panel sweptFrom(Panel previous) {
+            return new Panel(start, end + (previous.rise - rise), rise, depth, halfThickness);
+        }
+
         public @Nullable AABB bounds(double width, double height, Direction facing) {
             double minY = bottom();
             double maxY = Math.min(height, end + rise);

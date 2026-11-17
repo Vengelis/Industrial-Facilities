@@ -43,6 +43,7 @@ public final class AccessRegistry extends SavedData {
         public final UUID owner;
         public final String dimension;
         public final BlockPos position;
+        UUID instanceId;
         public int level;
         public boolean keypass;
         private ReaderGroup group = new ReaderGroup();
@@ -93,6 +94,14 @@ public final class AccessRegistry extends SavedData {
             .toList();
     }
 
+    boolean hasReader(UUID door, Predicate<Entry> matches) {
+        for (UUID id : doorReaders.getOrDefault(door, Set.of())) {
+            Entry entry = terminals.get(id);
+            if (entry != null && matches.test(entry)) return true;
+        }
+        return false;
+    }
+
     public void put(AccessTerminalEntity terminal) {
         if (terminal.terminalId == null || terminal.creator == null) {
             return;
@@ -106,6 +115,10 @@ public final class AccessRegistry extends SavedData {
         if (existing.owner.equals(terminal.creator)) {
             existing.level = terminal.accessLevel;
             existing.keypass = terminal instanceof KeypassTerminalEntity;
+            if (existing.position.equals(terminal.getBlockPos())
+                    && existing.dimension.equals(terminal.getLevel().dimension().location().toString())) {
+                existing.instanceId = terminal.instanceId;
+            }
         }
         setDirty();
     }
@@ -299,6 +312,7 @@ public final class AccessRegistry extends SavedData {
         for (Entry reader : terminals.values()) {
             CompoundTag row = new CompoundTag();
             row.putUUID("Id", reader.id);
+            if (reader.instanceId != null) row.putUUID("Instance", reader.instanceId);
             row.putUUID("Owner", reader.owner);
             row.putString("Dimension", reader.dimension);
             row.putLong("Position", reader.position.asLong());
@@ -367,6 +381,7 @@ public final class AccessRegistry extends SavedData {
             Entry reader = new Entry(row.getUUID("Id"), row.getUUID("Owner"), row.getString("Dimension"),
                 BlockPos.of(row.getLong("Position")), Math.clamp(row.getInt("Level"), 1, 5));
             reader.keypass = row.getBoolean("Keypass");
+            if (row.hasUUID("Instance")) reader.instanceId = row.getUUID("Instance");
             reader.group.doors.addAll(readDoors(row));
             terminals.put(reader.id, reader);
         }

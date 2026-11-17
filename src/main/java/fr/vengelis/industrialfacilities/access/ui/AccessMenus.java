@@ -30,14 +30,16 @@ public final class AccessMenus {
     }
     public static void open(Player player,AccessTerminalEntity terminal){
         if(!(player instanceof ServerPlayer server)||terminal.getLevel()!=player.level()
-            ||AccessTerminalEntity.resolve(player.level(),terminal.getBlockPos())!=terminal)return;
+            ||AccessTerminalEntity.resolve(player.level(),terminal.getBlockPos())!=terminal||!terminal.canInteract(player))return;
         if(terminal.bank){
             server.openMenu(new SimpleMenuProvider((id,inventory,p)->new BadgeBankMenu(id,inventory,terminal),
                 Component.translatable("gui.industrial_facilities.bank.title")),buffer->BadgeBankMenu.writeOpening(buffer,terminal));
             return;
         }
-        server.openMenu(new SimpleMenuProvider((id,inventory,p)->new AccessMenu(id,inventory,terminal),
-            Component.translatable("gui.industrial_facilities.access."+(terminal.encoder?"encoder":"reader"))),
+        String title = terminal instanceof fr.vengelis.industrialfacilities.access.ControlTerminalEntity control
+            ? "gui.industrial_facilities.terminal_control." + (control.lockdown() ? "lockdown" : "button")
+            : "gui.industrial_facilities.access." + (terminal.encoder ? "encoder" : "reader");
+        server.openMenu(new SimpleMenuProvider((id,inventory,p)->new AccessMenu(id,inventory,terminal), Component.translatable(title)),
             buffer->AccessMenu.writeOpening(buffer,terminal));
     }
     public static void openDoor(Player player,IndustrialDoorEntity door){
