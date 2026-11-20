@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.vengelis.industrialfacilities.access.AccessBadges;
 import fr.vengelis.industrialfacilities.access.ui.*;
+import fr.vengelis.industrialfacilities.frequency.FrequencyChip;
+import fr.vengelis.industrialfacilities.frequency.FrequencyContent;
+import fr.vengelis.industrialfacilities.frequency.FrequencyEncoding;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -19,7 +22,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /** A small adaptive panel: configuration stays on the server; widgets send intents only. */
 public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private static final int TEXT=0xDDE3E6,MUTED=TerminalGui.MUTED,ACCENT=TerminalGui.ACCENT;
-    private boolean compact,confirmClearLinks,confirmClearBadge;
+    private static final int ENCODER_MARGIN = 14, CHIP_Y = 47, FREQUENCY_BUTTON_HEIGHT = 17;
+    private boolean compact, compactControls,confirmClearLinks,confirmClearBadge;
+    private int inventoryX, inventoryY, frequencyFormX, frequencyStep;
     private int selectedLevel=1,codeCursor;
     private EditBox codeInput,limitInput,codeDisplay,nameInput;
     private String codeDraft="",limitDraft="0",lastCode="",nameDraft="",lastCustomName="";
@@ -36,18 +41,42 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private boolean showingDevices;
     private Button devicesButton;
     private TerminalLinkList deviceList;
-    private List<AbstractWidget> settings = List.of();
+    private List<AbstractWidget> settings = List.of(), badgeWidgets = List.of(), frequencyWidgets = List.of();
+    private Button badgesTab, frequenciesTab, encodePublic, encodePrivate, duplicateChip, renameChip, encodeSelection, chipMode;
+    private FrequencyChip.Mode selectedChipMode = FrequencyChip.Mode.BOTH;
+    private ItemStack observedChip = ItemStack.EMPTY;
+    private FrequencyCataloguePanel cataloguePanel;
+    private EditBox frequencyNumber, frequencyName;
+    private String frequencyDraft = "", frequencyNameDraft = "";
+    private boolean showingFrequencies;
     private final List<Button> readerLevels=new ArrayList<>(),masterLevels=new ArrayList<>(),ownerButtons=new ArrayList<>(),encodingButtons=new ArrayList<>();
-    public AccessScreen(AccessMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=340;imageHeight=menu.mode==AccessMenu.ENCODER?284:218;}
+    public AccessScreen(AccessMenu menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=340;imageHeight=218;}
     private static Component tr(String key,Object... args){return Component.translatable("gui.industrial_facilities.access."+key,args);}
     private static Component status(String text){return text.startsWith("gui.industrial_facilities.")?Component.translatable(text):Component.literal(text);}
     private Button button(int x,int y,int width,int height,Component text,Button.OnPress action){return addRenderableWidget(TerminalGui.button(leftPos+x,topPos+y,width,height,text,action));}
     private void send(int action,String code,int value){PacketDistributor.sendToServer(new AccessMessages.Action(menu.containerId,action,code,value));}
     @Override protected void init(){
-        compact=width<352||height<296;imageWidth=compact?300:340;imageHeight=menu.mode==AccessMenu.ENCODER?(compact?232:284):218;
+        compactControls = width < 352 || height < 296;
+        imageWidth = compactControls ? 300 : 340;
+        imageHeight = 218;
+        if (menu.mode == AccessMenu.READER) imageHeight = Math.clamp(height - 12, 218, 246);
+        if (menu.mode == AccessMenu.ENCODER) {
+            imageWidth = Math.clamp(width - 16, 300, 448);
+            imageHeight = Math.clamp(height - 12, 224, 330);
+            inventoryX = (imageWidth - 160) / 2;
+            inventoryY = imageHeight - 78;
+            compact = inventoryY < 202;
+            frequencyFormX = Math.max(148, imageWidth / 2 - 4);
+            frequencyStep = Math.clamp((inventoryY - (compact ? 52 : 63)) / 6, 16, 29);
+            int[] chipX = new int[FrequencyEncoding.SLOTS];
+            int formWidth = imageWidth - ENCODER_MARGIN - frequencyFormX;
+            for (int i = 0; i < chipX.length; i++)
+                chipX[i] = frequencyFormX + formWidth * (2 * i + 1) / (2 * chipX.length) - 8;
+            menu.layoutEncoderSlots((inventoryX - 4) / 2, inventoryX, inventoryY, chipX, CHIP_Y);
+        }
         deviceList = null;
-        super.init();ownerButtons.clear();readerLevels.clear();masterLevels.clear();encodingButtons.clear();menu.layoutSlots(compact);
-        if(menu.mode==AccessMenu.ENCODER)initEncoder();
+        super.init();ownerButtons.clear();readerLevels.clear();masterLevels.clear();encodingButtons.clear();
+        if(menu.mode==AccessMenu.ENCODER)initEncoderTabs();
         else if(menu.mode==AccessMenu.READER)initReader();
         else if(menu.mode==AccessMenu.DOOR)initDoor();
         else initControl();
@@ -65,20 +94,23 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     }
     private void initControl() {
         if (menu.mode == AccessMenu.BUTTON) {
-            lastDuration = -1;
-            duration = field(14,87,76,20,controlText("seconds"));
-            duration.setMaxLength(3);
-            duration.setFilter(value -> value.matches("[0-9]{0,3}"));
-            duration.setResponder(value -> refreshDuration());
-            applyDuration = button(98,87,92,TerminalGui.ACTION_HEIGHT,tr("apply_iris_opening"),
-                b -> send(AccessMenu.BUTTON_SECONDS,"",Integer.parseInt(duration.getValue())));
-            duration.setTooltip(Tooltip.create(controlText("range")));
+            initDuration(87, AccessMenu.BUTTON_SECONDS);
         }
         initLinkControls();
     }
+    private void initDuration(int y, int action) {
+        lastDuration = -1;
+        duration = field(14,y,76,20,menu.mode == AccessMenu.READER ? tr("open_seconds") : controlText("seconds"));
+        duration.setMaxLength(3);
+        duration.setFilter(value -> value.matches("[0-9]{0,3}"));
+        duration.setResponder(value -> refreshDuration());
+        applyDuration = button(98,y,92,TerminalGui.ACTION_HEIGHT,tr("apply_iris_opening"),
+            b -> send(action,"",Integer.parseInt(duration.getValue())));
+        duration.setTooltip(Tooltip.create(controlText("range")));
+    }
     private void refreshDuration() {
         if (duration == null || applyDuration == null) return;
-        int seconds = menu.buttonSeconds.get();
+        int seconds = menu.mode == AccessMenu.READER ? menu.openSeconds.get() : menu.buttonSeconds.get();
         if (seconds > 0 && seconds != lastDuration) {
             lastDuration = seconds;
             duration.setValue(Integer.toString(seconds));
@@ -95,18 +127,20 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
     private void initReader(){
         codeDisplay=field(14,48,imageWidth-28,18,tr("code"));codeDisplay.setMaxLength(64);codeDisplay.setEditable(false);codeDisplay.setValue(menu.code);lastCode=menu.code;
         button(14,72,110,20,tr("copy_code"),b->{if(!menu.code.isEmpty())minecraft.keyboardHandler.setClipboard(menu.code);});
-        for(int i=1;i<=5;i++){int level=i;Button b=button(14+(i-1)*48,132,44,20,Component.literal(Integer.toString(i)),v->send(AccessMenu.SET_LEVEL,"",level));readerLevels.add(b);ownerButtons.add(b);}
+        for(int i=1;i<=5;i++){int level=i;Button b=button(14+(i-1)*48,Math.min(132,imageHeight-108),44,20,Component.literal(Integer.toString(i)),v->send(AccessMenu.SET_LEVEL,"",level));readerLevels.add(b);ownerButtons.add(b);}
+        initDuration(imageHeight-72, AccessMenu.OPEN_SECONDS);
         initLinkControls();
         clearLinks.setTooltip(Tooltip.create(tr("clear_links_hint")));
     }
     private void initLinkControls() {
         int w = (imageWidth - 114) / 2;
-        devicesButton = button(14, 162, w, TerminalGui.ACTION_HEIGHT, tr("devices"), ignored -> showDevices(true));
-        clearLinks=button(18+w,162,w,TerminalGui.ACTION_HEIGHT,tr("clear_links"),b->{
+        int y = menu.mode == AccessMenu.READER ? imageHeight - 44 : 162;
+        devicesButton = button(14, y, w, TerminalGui.ACTION_HEIGHT, tr("devices"), ignored -> showDevices(true));
+        clearLinks=button(18+w,y,w,TerminalGui.ACTION_HEIGHT,tr("clear_links"),b->{
             if(!confirmClearLinks){confirmClearLinks=true;b.setMessage(tr("confirm"));}
             else{send(AccessMenu.CLEAR_LINKS,"",0);confirmClearLinks=false;b.setMessage(tr("clear_links"));}
         });ownerButtons.add(clearLinks);
-        button(imageWidth-88,162,74,20,tr("close"),b->onClose());
+        button(imageWidth-88,y,74,20,tr("close"),b->onClose());
     }
     private void showDevices(boolean visible) {
         if (getFocused() != null) getFocused().setFocused(false);
@@ -117,38 +151,161 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         confirmClearLinks = false;
         clearLinks.setMessage(tr("clear_links"));
     }
+    private void initEncoderTabs() {
+        initEncoder();
+        badgeWidgets = children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
+        initFrequencyEncoder();
+        frequencyWidgets = children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast)
+            .skip(badgeWidgets.size()).toList();
+        int catalogueWidth = frequencyFormX - 10 - ENCODER_MARGIN;
+        int catalogueFooterGap = Math.clamp(18 + (imageHeight - 224) / 4, 18, 32);
+        cataloguePanel = new FrequencyCataloguePanel(font, menu, leftPos + ENCODER_MARGIN, topPos, catalogueWidth,
+            topPos + inventoryY - catalogueFooterGap, this::addRenderableWidget, input -> {
+            if (getFocused() != null) getFocused().setFocused(false);
+            setFocused(input);
+            input.setFocused(true);
+        }, cataloguePanel);
+        badgesTab = button(imageWidth - 152, 4, 63, 18, tr("tab_badges"),
+            b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, AccessMenu.BADGES_TAB));
+        frequenciesTab = button(imageWidth - 85, 4, 73, 18, tr("tab_frequencies"),
+            b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, AccessMenu.FREQUENCIES_TAB));
+    }
+
+    private static Component frequencyText(String key) {
+        return Component.translatable(FrequencyContent.UI + key);
+    }
+
+    private void initFrequencyEncoder() {
+        int formWidth = imageWidth - ENCODER_MARGIN - frequencyFormX;
+        int actionWidth = Math.min(formWidth, compactControls ? 132 : 172);
+        int actionX = frequencyFormX + (formWidth - actionWidth) / 2;
+        int numberWidth = 49;
+        int gap = 5;
+        int fieldY = frequencyFieldY();
+        int fieldHeight = Math.min(17, frequencyStep - 2);
+        frequencyNumber = field(actionX, fieldY, numberWidth, fieldHeight, frequencyText("number"));
+        frequencyNumber.setMaxLength(6);
+        frequencyNumber.setFilter(value -> value.matches("[0-9]{0,6}"));
+        if (frequencyStep < 24) frequencyNumber.setHint(frequencyText("number_hint"));
+        frequencyNumber.setValue(frequencyDraft);
+        frequencyNumber.setResponder(value -> frequencyDraft = value);
+        frequencyNumber.setTooltip(Tooltip.create(frequencyText("number")));
+
+        frequencyName = field(actionX + numberWidth + gap, fieldY, actionWidth - numberWidth - gap, fieldHeight, frequencyText("name"));
+        frequencyName.setMaxLength(FrequencyEncoding.NAME_LENGTH);
+        if (frequencyStep < 24) frequencyName.setHint(frequencyText("name_short"));
+        frequencyName.setValue(frequencyNameDraft);
+        frequencyName.setResponder(value -> frequencyNameDraft = value);
+
+        int buttonWidth = (actionWidth - 4) / 2;
+        int right = actionX + actionWidth - buttonWidth;
+        int actionY = fieldY + frequencyStep;
+        int copyY = actionY + frequencyActionStep();
+        encodePublic = button(actionX, actionY, buttonWidth, FREQUENCY_BUTTON_HEIGHT,
+            frequencyText("public"), b -> sendFrequency(FrequencyEncoding.PUBLIC));
+        encodePrivate = button(right, actionY, buttonWidth, FREQUENCY_BUTTON_HEIGHT,
+            frequencyText("private"), b -> sendFrequency(FrequencyEncoding.PRIVATE));
+        duplicateChip = button(actionX, copyY, buttonWidth, FREQUENCY_BUTTON_HEIGHT,
+            frequencyText("duplicate"), b -> sendFrequency(FrequencyEncoding.DUPLICATE));
+        renameChip = button(right, copyY, buttonWidth, FREQUENCY_BUTTON_HEIGHT,
+            frequencyText("apply_chip"), b -> sendFrequency(FrequencyEncoding.RENAME));
+        renameChip.setTooltip(Tooltip.create(frequencyText("apply_chip_hint")));
+        frequencyName.setTooltip(Tooltip.create(frequencyText("name")));
+        encodeSelection = button(actionX, copyY + frequencyActionStep(), actionWidth - 57, FREQUENCY_BUTTON_HEIGHT, frequencyText("catalogue_encode_short"), b -> {
+            var selection = cataloguePanel.selection();
+            if (selection == null) return;
+            int action = selection.privateFrequency() ? FrequencyEncoding.FROM_PRIVATE_CATALOGUE : FrequencyEncoding.FROM_PUBLIC_CATALOGUE;
+            PacketDistributor.sendToServer(new FrequencyContent.Encode(menu.containerId, action, selection.number(), "", selectedChipMode.ordinal()));
+        });
+        encodeSelection.setTooltip(Tooltip.create(frequencyText("catalogue_encode")));
+        chipMode = button(actionX + actionWidth - 53, copyY + frequencyActionStep(), 53, FREQUENCY_BUTTON_HEIGHT,
+            Component.empty(), b -> { selectedChipMode = selectedChipMode.next(); refreshChipMode(); });
+        refreshChipMode();
+    }
+
+    private void refreshChipMode() {
+        chipMode.setMessage(Component.literal(selectedChipMode.shortName));
+        chipMode.setTooltip(Tooltip.create(Component.empty().append(selectedChipMode.label()).append("\n")
+            .append(selectedChipMode.hint()).append("\n").append(frequencyText("encoder_mode_hint"))));
+    }
+
+    private int frequencyFieldY() { return 70 + (frequencyStep - 18) * 2; }
+
+    private int frequencyActionStep() { return Math.max(frequencyStep, FREQUENCY_BUTTON_HEIGHT + 1); }
+
+    private int frequencyStatusY() { return encodeSelection.getY() - topPos + FREQUENCY_BUTTON_HEIGHT + 2; }
+
+    private int enteredFrequency() {
+        return frequencyDraft.isEmpty() ? 0 : Integer.parseInt(frequencyDraft);
+    }
+
+    private void sendFrequency(int action) {
+        PacketDistributor.sendToServer(new FrequencyContent.Encode(menu.containerId, action, enteredFrequency(), frequencyNameDraft, selectedChipMode.ordinal()));
+    }
+
+    private void refreshEncoderTabs() {
+        boolean selected = menu.frequencyTab();
+        if (showingFrequencies != selected && getFocused() != null) {
+            getFocused().setFocused(false);
+            setFocused(null);
+        }
+        showingFrequencies = selected;
+        for (var widget : badgeWidgets) widget.visible = !selected;
+        for (var widget : frequencyWidgets) widget.visible = selected;
+        cataloguePanel.refresh(selected);
+        badgesTab.active = selected;
+        frequenciesTab.active = !selected;
+        boolean blank = FrequencyEncoding.accepts(0, menu.getSlot(AccessMenu.FREQUENCY_SLOTS).getItem());
+        var source = menu.getSlot(AccessMenu.FREQUENCY_SLOTS + 1).getItem();
+        boolean hasSource = FrequencyChip.read(source) != null;
+        if (!ItemStack.isSameItemSameComponents(source, observedChip)) {
+            observedChip = source.copy();
+            if (hasSource) {
+                selectedChipMode = FrequencyChip.mode(source);
+                frequencyName.setValue(FrequencyContent.displayName(source, FrequencyChip.read(source)));
+            }
+        }
+        refreshChipMode();
+        encodePublic.active = encodePrivate.active = blank && enteredFrequency() > 0;
+        duplicateChip.active = blank && hasSource;
+        renameChip.active = hasSource;
+        encodeSelection.active = blank && cataloguePanel.selection() != null;
+    }
+
     private void initEncoder(){
-        bankSharing=button(imageWidth-(compact?144:156),4,compact?132:144,18,Component.empty(),
+        bankSharing=button(12,inventoryY+11,50,15,Component.empty(),
             b->send(AccessMenu.SET_BANK_SHARING,"",AccessBadges.foreignBankAllowed(menu.input.getItem(0))?0:1));
         int codeY=compact?33:43;
-        codeInput=field(12,codeY,imageWidth-76,18,tr("terminal_code"));codeInput.setMaxLength(64);codeInput.setHint(tr("terminal_code"));codeInput.setValue(codeDraft);codeInput.setResponder(v->codeDraft=v);
-        button(imageWidth-60,codeY,48,18,tr("paste"),b->codeInput.setValue(minecraft.keyboardHandler.getClipboard().strip()));
-        int actionY=compact?55:67,w=(imageWidth-32)/3;
-        encodingButtons.add(button(12,actionY,w,20,tr("add_code"),b->send(AccessMenu.ADD_CODE,codeInput.getValue(),0)));
-        encodingButtons.add(button(16+w,actionY,w,20,tr("remove_code"),b->send(AccessMenu.REMOVE_CODE,codeInput.getValue(),0)));
-        clearBadge=button(20+w*2,actionY,w,20,tr("clear_badge"),b->{
+        int codeWidth = compactControls ? 224 : 264;
+        codeInput=field(12,codeY,codeWidth,18,tr("terminal_code"));codeInput.setMaxLength(64);codeInput.setHint(tr("terminal_code"));codeInput.setValue(codeDraft);codeInput.setResponder(v->codeDraft=v);
+        button(16+codeWidth,codeY,48,18,tr("paste"),b->codeInput.setValue(minecraft.keyboardHandler.getClipboard().strip()));
+        int actionY=compact?55:67;
+        int actionWidth = compactControls ? 89 : 102;
+        encodingButtons.add(button(12,actionY,actionWidth,20,tr("add_code"),b->send(AccessMenu.ADD_CODE,codeInput.getValue(),0)));
+        encodingButtons.add(button((imageWidth-actionWidth)/2,actionY,actionWidth,20,tr("remove_code"),b->send(AccessMenu.REMOVE_CODE,codeInput.getValue(),0)));
+        clearBadge=button(imageWidth-12-actionWidth,actionY,actionWidth,20,tr("clear_badge"),b->{
             if(!confirmClearBadge){confirmClearBadge=true;b.setMessage(tr("confirm"));}
             else{send(AccessMenu.CLEAR_BADGE,"",0);confirmClearBadge=false;b.setMessage(tr("clear_badge"));}
         });
         encodingButtons.add(clearBadge);
-        int levelY=compact?77:97,start=compact?82:96,pitch=compact?21:23;
-        for(int i=1;i<=5;i++){int level=i;masterLevels.add(button(start+(i-1)*pitch,levelY,compact?19:21,compact?16:18,Component.literal(Integer.toString(i)),b->{selectedLevel=level;refresh();}));}
-        encodingButtons.add(button(imageWidth-100,levelY,88,compact?16:18,tr("make_master"),b->send(AccessMenu.MASTER,"",selectedLevel)));
+        int levelY=compact?77:97,start=compact?82:96,pitch=compactControls?21:23;
+        for(int i=1;i<=5;i++){int level=i;masterLevels.add(button(start+(i-1)*pitch,levelY,compactControls?19:21,compactControls?16:18,Component.literal(Integer.toString(i)),b->{selectedLevel=level;refresh();}));}
+        encodingButtons.add(button(imageWidth-100,levelY,88,compactControls?16:18,tr("make_master"),b->send(AccessMenu.MASTER,"",selectedLevel)));
         int limitY=compact?95:125;
-        limitInput=field(start,limitY,compact?100:112,18,tr("limit"));limitInput.setMaxLength(7);limitInput.setFilter(s->s.matches("[0-9]{0,7}"));limitInput.setValue(limitDraft);limitInput.setResponder(v->limitDraft=v);
+        int valueWidth = compactControls ? 100 : 112;
+        limitInput=field(start,limitY,valueWidth,18,tr("limit"));limitInput.setMaxLength(7);limitInput.setFilter(s->s.matches("[0-9]{0,7}"));limitInput.setValue(limitDraft);limitInput.setResponder(v->limitDraft=v);
         encodingButtons.add(button(imageWidth-100,limitY,88,18,tr("set_limit"),b->{
             try{int count=Integer.parseInt(limitInput.getValue());if(count>=0&&count<=1000000){send(AccessMenu.LIMIT,"",count);return;}}catch(NumberFormatException ignored){}
             menu.status="gui.industrial_facilities.access.invalid_limit";
         }));
         int nameY=compact?116:151;
-        nameInput=field(start,nameY,compact?100:112,18,tr("badge_name"));nameInput.setMaxLength(64);nameInput.setHint(tr("badge_name_hint"));
+        nameInput=field(start,nameY,valueWidth,18,tr("badge_name"));nameInput.setMaxLength(64);nameInput.setHint(tr("badge_name_hint"));
         nameInput.setValue(nameDraft);nameInput.setResponder(v->{nameDraft=v;if(!updatingName)nameDirty=!v.equals(lastCustomName);});
         renameBadge=button(imageWidth-100,nameY,88,18,tr("rename"),b->{
             send(AccessMenu.RENAME,nameInput.getValue(),0);
             if(nameInput.getValue().strip().equals(lastCustomName))nameDirty=false;
         });
-        int invY=compact?150:202;
-        nextCode=button(12,invY+54,50,18,tr("next_code"),b->{
+        nextCode=button(12,inventoryY+54,50,18,tr("next_code"),b->{
             var codes=AccessBadges.codes(menu.input.getItem(0));if(codes.isEmpty())return;
             codeCursor=Math.floorMod(codeCursor,codes.size());codeInput.setValue(codes.get(codeCursor).toString());codeCursor=(codeCursor+1)%codes.size();
         });
@@ -192,11 +349,12 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         refreshIrisControls();
         refreshDuration();
         if(nextCode!=null)nextCode.active=!AccessBadges.codes(menu.input.getItem(0)).isEmpty();
+        if (menu.mode == AccessMenu.ENCODER) refreshEncoderTabs();
         if(nameInput!=null&&menu.mode==AccessMenu.ENCODER){
             boolean canEncode=AccessMenu.badge(menu.input.getItem(0));
             var badgeData=AccessBadges.read(menu.input.getItem(0));
             bankSharing.active=canEncode&&(!badgeData.hasUUID("Issuer")||badgeData.getUUID("Issuer").equals(menu.inventory.player.getUUID()));
-            bankSharing.setMessage(tr(AccessBadges.foreignBankAllowed(menu.input.getItem(0))?"bank_shared":"bank_private"));
+            bankSharing.setMessage(tr(AccessBadges.foreignBankAllowed(menu.input.getItem(0))?"bank_shared_short":"bank_private_short"));
             for(Button b:encodingButtons)b.active=canEncode;
             for(Button b:masterLevels)b.active=canEncode;
             codeInput.setEditable(canEncode);limitInput.setEditable(canEncode);refreshName();
@@ -234,33 +392,58 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
             menu.mode==AccessMenu.READER?0xFF733F42:menu.mode==AccessMenu.DOOR?0xFF745F38:TerminalGui.TEAL_HEADER);
         if (showingDevices) deviceList.renderBackground(g, x, y);
         if(menu.mode==AccessMenu.ENCODER){
-            int invY=compact?150:202,invX=compact?69:89,inputX=compact?24:30;
-            g.fill(x+inputX-2,y+invY+24,x+inputX+18,y+invY+44,0xFF71838C);g.fill(x+inputX-1,y+invY+25,x+inputX+17,y+invY+43,0xFF11171B);
-            for(int row=0;row<3;row++)for(int col=0;col<9;col++)TerminalGui.slot(g,x+invX+col*18,y+invY+row*18);
-            for(int col=0;col<9;col++)TerminalGui.slot(g,x+invX+col*18,y+invY+58);
+            if (showingFrequencies)
+                g.fill(x + frequencyFormX - 6, y + 33, x + frequencyFormX - 5, y + inventoryY - 3, 0xFF48545C);
+            for (var slot : menu.slots)
+                if (slot.isActive()) TerminalGui.slot(g, x + slot.x, y + slot.y);
         }
     }
     private void drawFit(GuiGraphics g,Component text,int x,int y,int width,int color){g.drawString(font,font.plainSubstrByWidth(text.getString(),width),x,y,color,false);}
     private void wrapped(GuiGraphics g,Component text,int x,int y,int width,int color){g.drawWordWrap(font,text,x,y,width,color);}
     @Override protected void renderLabels(GuiGraphics g,int mouseX,int mouseY){
-        drawFit(g,title,14,9,menu.mode==AccessMenu.ENCODER?imageWidth-(compact?172:184):imageWidth-28,0xFFFFFF);
+        drawFit(g,title,14,9,menu.mode==AccessMenu.ENCODER?imageWidth-176:imageWidth-28,0xFFFFFF);
         if (showingDevices) {
             deviceList.render(g, font, menu.status);
             return;
         }
         if(menu.mode==AccessMenu.READER){
             g.drawString(font,tr(menu.code.isEmpty()?"code_unassigned":"code"),14,34,MUTED,false);
-            drawFit(g,tr("owner",menu.editable?tr("you").getString():menu.creator),14,101,imageWidth-28,MUTED);
-            g.drawString(font,tr("level",menu.accessLevel),14,118,ACCENT,false);
+            if (imageHeight >= 240) drawFit(g,tr("owner",menu.editable?tr("you").getString():menu.creator),14,101,imageWidth-28,MUTED);
+            g.drawString(font,tr("level",menu.accessLevel),14,Math.min(132,imageHeight-108)-14,ACCENT,false);
+            g.drawString(font,tr("open_seconds"),14,imageHeight-85,TEXT,false);
             g.drawString(font,tr("linked",menu.links),142,77,MUTED,false);
-            drawFit(g,status(menu.status.isEmpty()?(menu.editable?"gui.industrial_facilities.access.reader_hint":"gui.industrial_facilities.access.read_only"):menu.status),14,197,imageWidth-28,TEXT);
+            drawFit(g,status(menu.status.isEmpty()?(menu.editable?"gui.industrial_facilities.access.reader_hint":"gui.industrial_facilities.access.read_only"):menu.status),14,imageHeight-18,imageWidth-28,TEXT);
         }else if(menu.mode==AccessMenu.ENCODER){
-            int levelY=compact?82:102,limitY=compact?100:130,nameY=compact?121:156,invY=compact?150:202;
+            if (showingFrequencies) {
+                cataloguePanel.render(g, ENCODER_MARGIN);
+                String[] captions = {"blank_short", "template_short", "output_short"};
+                for (int i = 0; i < captions.length; i++)
+                    g.drawCenteredString(font, frequencyText(captions[i]), menu.getSlot(AccessMenu.FREQUENCY_SLOTS + i).x + 8, 34, MUTED);
+                if (frequencyStep >= 24) {
+                    g.drawString(font, frequencyText("number_hint"), frequencyNumber.getX() - leftPos, frequencyFieldY() - 11, MUTED, false);
+                    Component nameLabel = frequencyText("name");
+                    if (font.width(nameLabel) > frequencyName.getWidth()) nameLabel = frequencyText("name_short");
+                    g.drawString(font, nameLabel, frequencyName.getX() - leftPos, frequencyFieldY() - 11, MUTED, false);
+                }
+                int statusY = frequencyStatusY();
+                int formWidth = imageWidth - frequencyFormX - ENCODER_MARGIN;
+                if (menu.status.startsWith(FrequencyContent.UI))
+                    drawFit(g, status(menu.status), frequencyFormX, statusY, formWidth, TEXT);
+                else {
+                    drawFit(g, selectedChipMode.label(), frequencyFormX, statusY, formWidth, ACCENT);
+                    if (inventoryY - statusY >= 37)
+                        wrapped(g, frequencyText("batch_help"), frequencyFormX, statusY + 12, formWidth, MUTED);
+                }
+                if (!compact) g.drawString(font, playerInventoryTitle, inventoryX, inventoryY - 11, MUTED, false);
+                return;
+            }
+            int levelY=compact?82:102,limitY=compact?100:130,nameY=compact?121:156;
             drawFit(g,tr("master"),12,levelY,compact?66:80,MUTED);drawFit(g,tr("uses"),12,limitY,compact?66:80,MUTED);
             drawFit(g,tr("badge_name"),12,nameY,compact?66:80,MUTED);
             String hint=!menu.input.isEmpty()&&!AccessMenu.badge(menu.input.getItem(0))?"gui.industrial_facilities.access.link_card_name_hint":"gui.industrial_facilities.access.encoder_hint";
             int statusY=compact?137:177;drawFit(g,status(menu.status.isEmpty()?hint:menu.status),12,statusY,imageWidth-24,TEXT);
-            g.drawString(font,tr("card_slot"),14,invY+10,ACCENT,false);if(!compact)g.drawString(font,playerInventoryTitle,89,invY-11,MUTED,false);
+            g.drawString(font,tr("card_slot"),14,inventoryY + 1,ACCENT,false);
+            if(!compact)g.drawString(font,playerInventoryTitle,inventoryX,inventoryY-11,MUTED,false);
         }else if(menu.mode==AccessMenu.DOOR){
             g.drawString(font,tr(menu.secured?"secured":"unsecured"),14,35,ACCENT,false);
             boolean hasOpeningOption=menu.meshDoor||menu.irisOpeningPercent>=0;
@@ -276,6 +459,7 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         }
     }
     @Override public boolean keyPressed(int key,int scan,int modifiers){
+        if (showingFrequencies && cataloguePanel.keyPressed(key)) return true;
         if(key==256){if(showingDevices)showDevices(false);else onClose();return true;}
         if (TerminalGui.handleInventoryKey(getFocused(),key,scan,modifiers)) return true;
         if(codeInput!=null&&codeInput.isFocused())return codeInput.keyPressed(key,scan,modifiers);
@@ -284,9 +468,38 @@ public class AccessScreen extends AbstractContainerScreen<AccessMenu> {
         if(duration!=null&&duration.isFocused())return duration.keyPressed(key,scan,modifiers);
         return super.keyPressed(key,scan,modifiers);
     }
+
+    @Override public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
+        return (showingFrequencies && cataloguePanel.mouseScrolled(x, y, vertical))
+            || super.mouseScrolled(x, y, horizontal, vertical);
+    }
+
+    @Override public boolean mouseClicked(double x, double y, int button) {
+        return (showingFrequencies && cataloguePanel.mouseClicked(x, y, button)) || super.mouseClicked(x, y, button);
+    }
+
+    @Override public boolean mouseDragged(double x, double y, int button, double dragX, double dragY) {
+        return (showingFrequencies && cataloguePanel.mouseDragged(y, button))
+            || super.mouseDragged(x, y, button, dragX, dragY);
+    }
+
+    @Override public boolean mouseReleased(double x, double y, int button) {
+        return (showingFrequencies && cataloguePanel.mouseReleased(button)) || super.mouseReleased(x, y, button);
+    }
+
     @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){
         super.render(g,mouseX,mouseY,partial);renderTooltip(g,mouseX,mouseY);
         int sy=menu.mode==AccessMenu.ENCODER?(compact?137:177):197;
+        if (showingFrequencies) {
+            int chipX = leftPos + menu.getSlot(AccessMenu.FREQUENCY_SLOTS).x + 8;
+            if (Math.abs(mouseX - chipX) < 24 && mouseY >= topPos + 33 && mouseY < topPos + 44)
+                g.renderTooltip(font, font.split(frequencyText("batch_help"), 210), mouseX, mouseY);
+            int statusY = topPos + frequencyStatusY();
+            if (menu.status.startsWith(FrequencyContent.UI) && mouseX >= leftPos + frequencyFormX
+                    && mouseX < leftPos + imageWidth - ENCODER_MARGIN && mouseY >= statusY && mouseY < statusY + 10)
+                g.renderTooltip(font, font.split(status(menu.status), 210), mouseX, mouseY);
+            return;
+        }
         if(!menu.status.isEmpty()&&mouseX>=leftPos+12&&mouseX<leftPos+imageWidth-12&&mouseY>=topPos+sy&&mouseY<topPos+sy+10)
             g.renderTooltip(font,font.split(status(menu.status),imageWidth-24),mouseX,mouseY);
         if(menu.mode==AccessMenu.ENCODER&&limitInput!=null&&limitInput.isMouseOver(mouseX,mouseY))g.renderTooltip(font,tr("zero_unlimited"),mouseX,mouseY);

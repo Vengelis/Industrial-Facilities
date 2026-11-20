@@ -42,7 +42,8 @@ public final class AccessContent {
             return new AccessTerminalEntity(pos,state);
         },IndustrialFacilitiesModBlocks.TERMINAL_READER.get(),IndustrialFacilitiesModBlocks.TERMINAL_ENCODER.get(),IndustrialFacilitiesModBlocks.TERMINAL_BADGE_BANK.get(),IndustrialFacilitiesModBlocks.CAMERA_TERMINAL.get(),
             IndustrialFacilitiesModBlocks.KEYPASS_READER.get(),IndustrialFacilitiesModBlocks.KEYPASS_MANAGER.get(),
-            IndustrialFacilitiesModBlocks.TERMINAL_BUTTON.get(),IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN.get()).build(null);
+            IndustrialFacilitiesModBlocks.TERMINAL_BUTTON.get(),IndustrialFacilitiesModBlocks.TERMINAL_LOCKDOWN.get(),
+            IndustrialFacilitiesModBlocks.FREQUENCY_ENCODER.get()).build(null);
         helper.register(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"access_terminal"),TYPE);
     });}
     private AccessContent(){}

@@ -23,6 +23,7 @@ public final class SupervisionMenu extends AbstractContainerMenu {
     public static final int RENAME_SECTOR = 7;
     public static final int DISPLAY_PAGE = 8;
     public static final int RENAME_DISPLAY = 9, SELECT_DISPLAY_SECTOR = 10, UNLINK_DISPLAY = 11;
+    public static final int FREQUENCIES = 12;
     public final int mode;
     public final boolean edit;
     public String sector;
@@ -50,6 +51,7 @@ public final class SupervisionMenu extends AbstractContainerMenu {
     private String replacementName = "";
     private String renameNotice = "";
     private long lastUpdate = Long.MIN_VALUE;
+    private long trafficRevision = -1;
 
     public SupervisionMenu(int id, Inventory inventory, FriendlyByteBuf buffer) {
         this(id, inventory, buffer.readByte(), buffer.readBoolean(), buffer.readUtf(24), null, null, null, ItemStack.EMPTY);
@@ -67,13 +69,31 @@ public final class SupervisionMenu extends AbstractContainerMenu {
         this.hand = hand;
         this.portable = portable;
         if (mode == WORLD && edit) {
-            addSlot(new Slot(pairing, 0, 316, 184) {
-                @Override public boolean mayPlace(ItemStack stack) { return stack.getItem() instanceof PortableConsoleItem; }
-                @Override public int getMaxStackSize() { return 1; }
-            });
+            addSlot(pairingSlot(316, 184));
             for (int row = 0; row < 3; row++) for (int col = 0; col < 9; col++)
                 addSlot(new Slot(inventory, 9 + row * 9 + col, 91 + col * 18, 209 + row * 18));
             for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, col, 91 + col * 18, 267));
+        }
+    }
+
+    private Slot pairingSlot(int x, int y) {
+        return new Slot(pairing, 0, x, y) {
+            @Override public boolean mayPlace(ItemStack stack) { return stack.getItem() instanceof PortableConsoleItem; }
+            @Override public int getMaxStackSize() { return 1; }
+        };
+    }
+
+    public void layoutSlots(int width, int inventoryY, int pairingX, int pairingY) {
+        if (!viewer.level().isClientSide() || mode != WORLD || !edit) return;
+        int start = (width - 160) / 2;
+        for (int index = 0; index < slots.size(); index++) {
+            Slot current = slots.get(index);
+            int offset = index - 1;
+            Slot repositioned = index == 0 ? pairingSlot(pairingX, pairingY)
+                : new Slot(viewer.getInventory(), current.getContainerSlot(), start + offset % 9 * 18,
+                    inventoryY + (offset < 27 ? offset / 9 * 18 : 58));
+            repositioned.index = current.index;
+            slots.set(index, repositioned);
         }
     }
 
@@ -118,8 +138,12 @@ public final class SupervisionMenu extends AbstractContainerMenu {
         super.broadcastChanges();
         if (!(viewer instanceof ServerPlayer player) || mode == TERMINAL || !stillValid(player)) return;
         long now = player.serverLevel().getGameTime();
-        if (now == lastUpdate || (sent != null && now - lastUpdate < 15)) return;
+        long revision = SignalTraffic.revision(player.serverLevel());
+        boolean trafficChanged = revision != trafficRevision;
+        if (now == lastUpdate || (sent != null && now - lastUpdate < (trafficChanged ? 2 : 15))) return;
         lastUpdate = now;
+        trafficRevision = revision;
+        if (trafficChanged && (mode == WORLD || mode == DISPLAY)) console.update(player.serverLevel());
         if (mode == WORLD || mode == DISPLAY) {
             if (mode == DISPLAY) {
                 displayPage = console.page();
@@ -238,6 +262,11 @@ public final class SupervisionMenu extends AbstractContainerMenu {
             return;
         }
         if (!edit || mode == PORTABLE) return;
+        if (action == FREQUENCIES && (mode == WORLD || mode == DISPLAY)) {
+            var endpoint = fr.vengelis.industrialfacilities.frequency.FrequencyEndpoint.resolve(player.serverLevel(), console.getBlockPos());
+            if (endpoint != null) fr.vengelis.industrialfacilities.frequency.FrequencyMenu.openDevice(player, endpoint, console.getBlockPos());
+            return;
+        }
         if (action == RENAME_DISPLAY || action == SELECT_DISPLAY_SECTOR || action == UNLINK_DISPLAY) {
             if (mode == WORLD && player.getUUID().equals(console.placedBy)) editDisplay(player.serverLevel(), packet);
             return;
@@ -300,6 +329,8 @@ public final class SupervisionMenu extends AbstractContainerMenu {
                     ? "display_saved" : "display_invalid_sector";
                 case UNLINK_DISPLAY -> {
                     if (target != null) displayStatus = "display_back_online";
+                    else if (!link.manual() && !fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.get(level).legacy(console.consoleId, id))
+                        displayStatus = "display_remove_chip";
                     else {
                         data.removeDisplay(id);
                         displayStatus = "display_unlinked";
@@ -329,6 +360,51 @@ public final class SupervisionMenu extends AbstractContainerMenu {
                 data.place(ref, node.id(), GraphLayout.Placement.within(current.canvas(), page, packet.x(), packet.y()));
             }
         } else return;
+        console.update(level);
+        refreshView();
+    }
+
+    void editRoute(ServerPlayer player, SupervisionPackets.EditRoute packet) {
+        if (!canEditGraph(player, packet.sector(), packet.page()) || !packet.key().valid()
+                || packet.points().size() > GraphRoutes.MAX_POINTS) return;
+        var level = player.serverLevel();
+        var data = SupervisionData.get(level);
+        var ref = console.reference();
+        var page = GraphLayout.page(data.view(level, ref), packet.page());
+        if (page.index() != packet.page() || !page.contains(packet.key())) return;
+        data.placeRoute(ref, packet.key(), packet.points());
+        console.update(level);
+        refreshView();
+    }
+
+    void editSocket(ServerPlayer player, SupervisionPackets.EditSocket packet) {
+        if (!canEditGraph(player, packet.sector(), packet.page()) || !packet.key().valid()) return;
+        var level = player.serverLevel();
+        var data = SupervisionData.get(level);
+        var ref = console.reference();
+        var page = GraphLayout.page(data.view(level, ref), packet.page());
+        if (page.index() != packet.page() || !page.contains(packet.key())) return;
+        data.placeSocket(ref, packet.key(), packet.socket());
+        console.update(level);
+        refreshView();
+    }
+
+    private boolean canEditGraph(ServerPlayer player, String sector, int page) {
+        return mode == WORLD && edit && stillValid(player) && player.getUUID().equals(console.placedBy)
+            && sector.equals(console.sector()) && page >= 0 && page <= 4096;
+    }
+
+    void joinRoutes(ServerPlayer player, SupervisionPackets.JoinRoutes packet) {
+        if (!canEditGraph(player, packet.sector(), packet.page()) || !packet.child().valid()) return;
+        var level = player.serverLevel();
+        var data = SupervisionData.get(level);
+        var ref = console.reference();
+        var view = data.view(level, ref);
+        var page = GraphLayout.page(view, packet.page());
+        if (page.index() != packet.page() || !page.contains(packet.child())) return;
+        if (packet.parent() != null && (!page.contains(packet.parent())
+                || !GraphRoutes.canJoin(packet.child(), packet.parent(), view.joins()))) return;
+        data.joinRoutes(ref, packet.child(), packet.parent());
         console.update(level);
         refreshView();
     }

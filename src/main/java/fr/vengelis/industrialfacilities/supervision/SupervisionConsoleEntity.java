@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Objects;
 import net.minecraft.core.*;
+import fr.vengelis.industrialfacilities.frequency.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -61,7 +62,10 @@ public final class SupervisionConsoleEntity extends BlockEntity {
             worldPosition.above(footprint.top()).relative(right, footprint.right()));
     }
 
-    static SupervisionConsoleEntity resolve(Level level, BlockPos pos) {
+    public UUID frequencyId() { return consoleId; }
+    public UUID frequencyOwner() { return placedBy; }
+
+    public static SupervisionConsoleEntity resolve(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof SupervisionConsoleEntity part && part.root != null
                 && level.hasChunkAt(part.root) && level.getBlockEntity(part.root) instanceof SupervisionConsoleEntity console
                 && console.assembled() && part.getBlockState().is(console.getBlockState().getBlock())) return console;
@@ -160,6 +164,7 @@ public final class SupervisionConsoleEntity extends BlockEntity {
     }
 
     void dismantle(ServerLevel level, BlockPos removed) {
+        fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.remove(level, consoleId, removed == null ? worldPosition : removed);
         if (isDisplay()) {
             var source = displayLevel(level);
             if (source != null) SupervisionData.get(source).removeDisplay(consoleId);
@@ -235,6 +240,19 @@ public final class SupervisionConsoleEntity extends BlockEntity {
                 changed = true;
             }
         }
+        if (FrequencyNetwork.get(level).installed(consoleId)) {
+            var updated = new java.util.LinkedHashSet<>(sectors);
+            updated.addAll(data.frequencySectors(level, consoleId));
+            if (updated.isEmpty()) updated.add(SupervisionData.DEFAULT_FREQUENCY_SECTOR);
+            List<String> available = List.copyOf(updated);
+            if (!sectors.equals(available)) {
+                sectors = available;
+                if (sector.isEmpty()) sector = sectors.getFirst();
+                saved = reference();
+                data.register(saved);
+                changed = true;
+            }
+        }
         var next = data.view(level, saved);
         if (changed || !next.equals(view)) {
             view = next;
@@ -247,18 +265,37 @@ public final class SupervisionConsoleEntity extends BlockEntity {
     }
 
     void bindDisplay(ServerLevel level, PortableConsoleItem.Connection connection) {
+        bindDisplay(level, connection, true);
+    }
+
+    void bindDisplay(ServerLevel level, PortableConsoleItem.Connection connection, boolean manual) {
         var oldLevel = displayLevel(level);
         var old = oldLevel == null ? null : SupervisionData.get(oldLevel).display(consoleId);
         if (oldLevel != null && oldLevel != connection.level()) SupervisionData.get(oldLevel).removeDisplay(consoleId);
         if (old == null || !old.source().equals(connection.console().id())) page = 0;
         displayDimension = connection.level().dimension().location();
         SupervisionData.get(connection.level()).bindDisplay(consoleId, connection.console(),
-            old == null ? "" : old.name(), location(level));
+            old == null ? "" : old.name(), location(level), manual);
         updateDisplay(level);
         sync();
     }
 
     private void updateDisplay(ServerLevel level) {
+        var network = FrequencyNetwork.get(level);
+        var boundLevel = displayLevel(level);
+        var bound = boundLevel == null ? null : SupervisionData.get(boundLevel).display(consoleId);
+        if ((bound == null || !bound.manual()) && network.migrated(consoleId)) {
+            var peer = network.visiblePeers(level, consoleId).stream().filter(p -> p.type() == FrequencyEndpoint.Type.CONSOLE).findFirst().orElse(null);
+            var data = SupervisionData.get(level);
+            var source = peer == null ? null : data.console(peer.id());
+            if (source != null) {
+                var previous = data.display(consoleId);
+                if (!displaysSourceIn(level) || previous == null || !previous.source().equals(source.id())) {
+                    bindDisplay(level, new PortableConsoleItem.Connection(level, source), false);
+                    return;
+                }
+            }
+        }
         var sourceLevel = displayLevel(level);
         displayName = "";
         String nextSector = "";
@@ -271,9 +308,10 @@ public final class SupervisionConsoleEntity extends BlockEntity {
             if (link == null) {
                 displayDimension = null;
                 lostLink = true;
-            } else {
+            } else if (link.manual() || network.legacy(consoleId, link.source()) || sourceLevel == level && network.visible(level, consoleId, link.source())) {
                 data.locateDisplay(consoleId, location(level));
-                var source = PortableConsoleItem.resolveConsole(sourceLevel, placedBy, link.source());
+                var source = !link.manual() && network.migrated(consoleId) ? data.console(link.source())
+                    : PortableConsoleItem.resolveConsole(sourceLevel, placedBy, link.source());
                 if (source != null) {
                     displayName = link.name();
                     nextSectors = source.sectors();

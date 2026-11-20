@@ -71,6 +71,7 @@ public final class AccessRegistry extends SavedData {
     private record DoorSite(String dimension, BlockPos position) {}
 
     private final Map<UUID, Entry> terminals = new HashMap<>();
+    private final Map<UUID, Entry> byInstance = new HashMap<>();
     // Index inverse reconstruit après chaque changement de liaisons.
     private final Map<UUID, Set<UUID>> doorReaders = new HashMap<>();
     // Une valeur null indique une démolition. Une position absente correspond à une porte ancienne.
@@ -84,6 +85,8 @@ public final class AccessRegistry extends SavedData {
     public Entry find(UUID id) {
         return terminals.get(id);
     }
+
+    Entry byInstance(UUID id) { return byInstance.get(id); }
 
     public Collection<Entry> entries() {
         return Collections.unmodifiableCollection(terminals.values());
@@ -119,7 +122,10 @@ public final class AccessRegistry extends SavedData {
             existing.keypass = terminal instanceof KeypassTerminalEntity;
             if (existing.position.equals(terminal.getBlockPos())
                     && existing.dimension.equals(terminal.getLevel().dimension().location().toString())) {
+                if (existing.instanceId != null && !existing.instanceId.equals(terminal.instanceId))
+                    byInstance.remove(existing.instanceId, existing);
                 existing.instanceId = terminal.instanceId;
+                byInstance.put(existing.instanceId, existing);
             }
         }
         setDirty();
@@ -128,6 +134,7 @@ public final class AccessRegistry extends SavedData {
     public void remove(UUID id) {
         Entry reader = terminals.remove(id);
         if (reader != null) {
+            byInstance.remove(reader.instanceId, reader);
             reader.group.members.remove(reader);
             reindex();
             setDirty();
@@ -391,7 +398,10 @@ public final class AccessRegistry extends SavedData {
             Entry reader = new Entry(row.getUUID("Id"), row.getUUID("Owner"), row.getString("Dimension"),
                 BlockPos.of(row.getLong("Position")), Math.clamp(row.getInt("Level"), 1, 5));
             reader.keypass = row.getBoolean("Keypass");
-            if (row.hasUUID("Instance")) reader.instanceId = row.getUUID("Instance");
+            if (row.hasUUID("Instance")) {
+                reader.instanceId = row.getUUID("Instance");
+                byInstance.put(reader.instanceId, reader);
+            }
             reader.group.doors.addAll(readDoors(row));
             terminals.put(reader.id, reader);
         }

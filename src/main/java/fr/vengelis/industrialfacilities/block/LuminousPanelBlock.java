@@ -45,6 +45,7 @@ public class LuminousPanelBlock extends Block implements EntityBlock {
     @Override public void setPlacedBy(Level l, BlockPos p, BlockState s, LivingEntity entity, ItemStack stack) {
         super.setPlacedBy(l, p, s, entity, stack);
         if (!l.isClientSide && l.getBlockEntity(p) instanceof PanelBlockEntity be) {
+            if (entity instanceof Player player) { be.automationOwner = player.getUUID(); be.setChanged(); }
             for (Direction d : PanelStructure.directions(s)) {
                 BlockPos next = p.relative(d);
                 if (PanelStructure.matches(l, next, s) && l.getBlockEntity(next) instanceof PanelBlockEntity old) {
@@ -52,6 +53,17 @@ public class LuminousPanelBlock extends Block implements EntityBlock {
                 }
             }
         }
+    }
+    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
+        if (!state.is(next.getBlock()) && level instanceof ServerLevel server) {
+            var group = PanelStructure.find(level, pos);
+            var controller = group.valid() ? group.controller(level) : null;
+            if (controller != null)
+                fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.remove(server, controller.automationInstanceId, pos);
+            if (level.getBlockEntity(pos) instanceof PanelBlockEntity panel && panel != controller)
+                fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.remove(server, panel.automationInstanceId, pos);
+        }
+        super.onRemove(state, level, pos, next, moving);
     }
     @Override protected void onPlace(BlockState s, Level l, BlockPos p, BlockState old, boolean moving) {
         super.onPlace(s, l, p, old, moving);

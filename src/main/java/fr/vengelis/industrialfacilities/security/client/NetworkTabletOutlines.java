@@ -36,7 +36,7 @@ public final class NetworkTabletOutlines {
         if(terminal==null||terminal.isRemoved()||!terminal.getBlockPos().equals(pos)||!id.equals(terminal.instanceId))return null;
         boolean matches=switch(kind){
             case "reader"->TerminalControlData.reader(terminal);
-            case TerminalLinks.TERMINAL->true;
+            case TerminalLinks.TERMINAL,TerminalLinks.RELAY->true;
             case TerminalLinks.BUTTON->terminal instanceof ControlTerminalEntity control&&!control.lockdown();
             case TerminalLinks.LOCKDOWN->terminal instanceof ControlTerminalEntity control&&control.lockdown();
             case "automation"->terminal instanceof CameraTerminalEntity;
@@ -57,7 +57,8 @@ public final class NetworkTabletOutlines {
     }
     private static Outline target(ClientLevel level,TerminalLinks.Link link){
         BlockPos pos=link.targetRoot();if(!level.hasChunkAt(pos))return null;
-        if(link.targetKind().equals(TerminalLinks.KEYPASS_READER)||link.targetKind().equals(TerminalLinks.TERMINAL))
+        if(link.targetKind().equals(TerminalLinks.KEYPASS_READER)||link.targetKind().equals(TerminalLinks.TERMINAL)
+            ||link.targetKind().equals(TerminalLinks.RELAY))
             return terminalOutline(terminalAt(level,pos,link.targetId(),link.targetKind()),pos,link.targetId(),link.targetKind(),NetworkTabletClient.colorFor(link.sourceKind(),link.targetKind()));
         var entity=level.getBlockEntity(pos);if(entity==null||entity.isRemoved())return null;
         AABB box;

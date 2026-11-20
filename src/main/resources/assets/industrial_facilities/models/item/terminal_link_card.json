@@ -6,7 +6,7 @@
   "overrides": [
     {
       "predicate": {
-        "industrial_facilities:automation_mode": 1
+        "industrial_facilities:encoded_frequency": 1
       },
       "model": "industrial_facilities:item/terminal_link_card_automation"
     }

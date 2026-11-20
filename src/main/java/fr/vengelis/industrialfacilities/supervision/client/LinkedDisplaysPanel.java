@@ -18,11 +18,13 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 final class LinkedDisplaysPanel {
-    private static final int PAGE_SIZE = 5;
+    private static final int MAX_ROWS = 5, ROW_HEIGHT = 21, MARGIN = 14;
     private final SupervisionMenu menu;
     private final Font font;
-    private final Button[] rows = new Button[PAGE_SIZE];
-    private final UUID[] rowIds = new UUID[PAGE_SIZE];
+    private final Button[] rows;
+    private final UUID[] rowIds;
+    private final int width, contentY, navY, listWidth, detailsX, detailsWidth, sectorY;
+    private final boolean compact;
     private final EditBox name;
     private final Button rename, previousSector, nextSector, applySector, unlink;
     private int first;
@@ -31,32 +33,49 @@ final class LinkedDisplaysPanel {
     private String sector = "";
     private boolean shown;
 
-    LinkedDisplaysPanel(SupervisionMenu menu, Font font, int left, int top, Consumer<AbstractWidget> add) {
+    LinkedDisplaysPanel(SupervisionMenu menu, Font font, int left, int top, int width, int contentY, int navY,
+                        int listWidth, int detailsX, Consumer<AbstractWidget> add) {
         this.menu = menu;
         this.font = font;
+        this.width = width;
+        this.contentY = contentY;
+        this.navY = navY;
+        this.listWidth = listWidth;
+        this.detailsX = detailsX;
+        this.detailsWidth = width - MARGIN - detailsX;
+        compact = navY - contentY < 110;
+        int count = Math.clamp((navY - contentY) / ROW_HEIGHT, 1, MAX_ROWS);
+        rows = new Button[count];
+        rowIds = new UUID[count];
         for (int row = 0; row < rows.length; row++) {
             int index = row;
-            rows[row] = TerminalGui.button(left + 14, top + 55 + row * 21, 145, 20,
+            rows[row] = TerminalGui.button(left + MARGIN, top + contentY + row * ROW_HEIGHT, listWidth, 20,
                 Component.empty(), ignored -> {
                     selectedId = rowIds[index];
                     refresh(true);
                 });
             add.accept(rows[row]);
         }
-        name = new EditBox(font, left + 170, top + 95, 99, 18, tr("display_name"));
+        int nameY = contentY + (compact ? 1 : 43);
+        int renameWidth = 68;
+        name = new EditBox(font, left + detailsX, top + nameY, detailsWidth - renameWidth - 6, 18, tr("display_name"));
         name.setMaxLength(SupervisionData.MAX_NAME);
         name.setHint(tr("display_name"));
         name.setTooltip(Tooltip.create(tr("default_name_hint")));
         add.accept(name);
-        rename = TerminalGui.button(left + 274, top + 94, 60, 20, tr("rename"),
+        rename = TerminalGui.button(left + width - MARGIN - renameWidth, top + nameY - 1, renameWidth, 20, tr("rename"),
             ignored -> send(SupervisionMenu.RENAME_DISPLAY, name.getValue(), ""));
-        previousSector = TerminalGui.button(left + 170, top + 118, 22, 20, Component.literal("‹"),
+        sectorY = contentY + (compact ? 23 : 66);
+        previousSector = TerminalGui.button(left + detailsX, top + sectorY, 22, 20, Component.literal("‹"),
             ignored -> chooseSector(-1));
-        nextSector = TerminalGui.button(left + 312, top + 118, 22, 20, Component.literal("›"),
+        nextSector = TerminalGui.button(left + width - MARGIN - 22, top + sectorY, 22, 20, Component.literal("›"),
             ignored -> chooseSector(1));
-        applySector = TerminalGui.button(left + 170, top + 141, 88, 20, tr("display_set_sector"),
+        int actionY = compact ? navY : contentY + 88;
+        int actionWidth = detailsWidth - (compact ? 31 : 0);
+        int applyWidth = Math.min(100, (actionWidth - 5) * 56 / 100);
+        applySector = TerminalGui.button(left + detailsX, top + actionY, applyWidth, 20, tr("display_set_sector"),
             ignored -> send(SupervisionMenu.SELECT_DISPLAY_SECTOR, "", sector));
-        unlink = TerminalGui.button(left + 268, top + 141, 66, 20, tr("display_unlink"),
+        unlink = TerminalGui.button(left + detailsX + applyWidth + 5, top + actionY, actionWidth - applyWidth - 5, 20, tr("display_unlink"),
             ignored -> send(SupervisionMenu.UNLINK_DISPLAY, "", ""));
         for (var button : new Button[]{rename, previousSector, nextSector, applySector, unlink}) add.accept(button);
         refresh(false);
@@ -75,10 +94,10 @@ final class LinkedDisplaysPanel {
     }
 
     boolean hasPrevious() { return first > 0; }
-    boolean hasNext() { return first + PAGE_SIZE < menu.linkedDisplays.size(); }
+    boolean hasNext() { return first + rows.length < menu.linkedDisplays.size(); }
 
     void page(int direction) {
-        first += direction * PAGE_SIZE;
+        first += direction * rows.length;
         selectedId = null;
         refresh(shown);
     }
@@ -92,8 +111,8 @@ final class LinkedDisplaysPanel {
             return;
         }
         var displays = menu.linkedDisplays;
-        first = Math.clamp(first, 0, Math.max(0, displays.size() - 1) / PAGE_SIZE * PAGE_SIZE);
-        var page = displays.subList(first, Math.min(first + PAGE_SIZE, displays.size()));
+        first = Math.clamp(first, 0, Math.max(0, displays.size() - 1) / rows.length * rows.length);
+        var page = displays.subList(first, Math.min(first + rows.length, displays.size()));
         var display = page.stream().filter(row -> row.id().equals(selectedId)).findFirst().orElse(page.isEmpty() ? null : page.getFirst());
         selectedId = display == null ? null : display.id();
         if (display != null) {
@@ -109,7 +128,7 @@ final class LinkedDisplaysPanel {
             if (!button.visible) continue;
             var item = page.get(row);
             var label = (item.id().equals(selectedId) ? "› " : "") + label(item).getString();
-            button.setMessage(Component.literal(font.plainSubstrByWidth(label, 137)));
+            button.setMessage(Component.literal(font.plainSubstrByWidth(label, listWidth - 8)));
             button.setTooltip(Tooltip.create(label(item).copy().append("\n").append(location(item)).append("\n").append(status(item))));
         }
         setControlsVisible(selected != null);
@@ -128,16 +147,21 @@ final class LinkedDisplaysPanel {
 
     void render(GuiGraphics g) {
         if (selected == null) {
-            line(g, tr("display_links_empty"), 14, 59, 318, TerminalGui.MUTED);
+            line(g, tr("display_links_empty"), MARGIN, contentY + 4, width - 2 * MARGIN, TerminalGui.MUTED);
         } else {
-            line(g, label(selected), 170, 56, 164, GraphInk.INK);
-            line(g, location(selected), 170, 68, 164, TerminalGui.MUTED);
-            String sectorLabel = tr("sector_title", selected.sector().isEmpty() ? "—" : selected.sector()).getString();
-            line(g, status(selected).copy().append(" · " + sectorLabel), 170, 80, 164,
-                GraphInk.color(selected.online() ? "online" : "offline"));
-            line(g, tr("sector_title", sector.isEmpty() ? "—" : sector), 196, 124, 112, GraphInk.INK);
+            if (!compact) {
+                line(g, label(selected), detailsX, contentY + 2, detailsWidth, GraphInk.INK);
+                line(g, location(selected), detailsX, contentY + 15, detailsWidth, TerminalGui.MUTED);
+                var sectorLabel = tr("sector_title", selected.sector().isEmpty() ? "—" : selected.sector());
+                line(g, status(selected).copy().append(" · ").append(sectorLabel), detailsX, contentY + 28, detailsWidth,
+                    GraphInk.color(selected.online() ? "online" : "offline"));
+            }
+            line(g, tr("sector_title", sector.isEmpty() ? "—" : sector), detailsX + 28, sectorY + 6,
+                detailsWidth - 54, GraphInk.INK);
         }
-        if (!menu.displayStatus.isEmpty()) line(g, tr(menu.displayStatus), 43, 168, 263, TerminalGui.MUTED);
+        if (!menu.displayStatus.isEmpty())
+            line(g, tr(menu.displayStatus), MARGIN + 31, navY + 6, (compact ? detailsX : width - MARGIN - 26) - MARGIN - 35,
+                TerminalGui.MUTED);
     }
 
     private void line(GuiGraphics g, Component text, int x, int y, int width, int color) {

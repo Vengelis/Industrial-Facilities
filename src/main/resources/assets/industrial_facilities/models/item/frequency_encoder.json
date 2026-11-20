@@ -1,0 +1,6 @@
+{
+  "parent": "industrial_facilities:block/terminal_encoder_inventory",
+  "textures": {
+    "screen": "industrial_facilities:block/frequency_encoder_screen_32"
+  }
+}

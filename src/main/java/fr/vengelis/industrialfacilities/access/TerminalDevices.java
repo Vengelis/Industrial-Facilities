@@ -2,6 +2,7 @@ package fr.vengelis.industrialfacilities.access;
 
 import fr.vengelis.industrialfacilities.supervision.SupervisionData;
 import java.util.Comparator;
+import fr.vengelis.industrialfacilities.frequency.*;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -20,22 +21,22 @@ public final class TerminalDevices {
         if (terminal instanceof ControlTerminalEntity control) {
             return TerminalControlData.get(level).links(control).stream()
                 .sorted(Comparator.comparing(TerminalControlData.Target::position).thenComparing(TerminalControlData.Target::id))
-                .map(target -> new Link(target.id(), target.position(), target.emitter() ? Kind.EMITTER : Kind.TERMINAL,
+                .map(target -> new Link(target.id(), target.position(), target.door() ? Kind.DOOR : target.emitter() ? Kind.EMITTER : Kind.TERMINAL,
                     TerminalControlData.available(level, control, target), deviceName(level, names, terminal.creator, target)))
-                .toList();
+                .limit(MAX_LINKS).toList();
         }
 
         var reader = reader(level, terminal);
         if (reader == null) return List.of();
-        return reader.doors().stream()
+        return AccessDoorService.doors(level, reader).stream()
             .map(link -> new Link(link.instance(), link.position(), Kind.DOOR, doorAvailable(level, terminal, link),
                 names.customName(terminal.creator, link.instance())))
-            .toList();
+            .limit(MAX_LINKS).toList();
     }
 
     private static String deviceName(ServerLevel level, SupervisionData names, UUID owner, TerminalControlData.Target target) {
         String custom = names.customName(owner, target.id());
-        return custom.isEmpty() && !target.emitter() ? KeypassData.get(level).readerName(target.id()) : custom;
+        return custom.isEmpty() && target.terminal() ? KeypassData.get(level).readerName(target.id()) : custom;
     }
 
     public static String unlinkOffline(ServerPlayer player, AccessTerminalEntity terminal, UUID id, BlockPos position) {
@@ -44,6 +45,8 @@ public final class TerminalDevices {
                 || player.distanceToSqr(terminal.getBlockPos().getCenter()) > 64
                 || AccessTerminalEntity.resolve(level, terminal.getBlockPos()) != terminal)
             return UI + "denied";
+        if (FrequencyNetwork.get(level).connected(level, terminal.instanceId, id))
+            return FrequencyContent.UI + "remove_chip";
         if (terminal instanceof ControlTerminalEntity control)
             return UI + TerminalControlData.get(level).unlinkOffline(level, control, id, position);
 
@@ -68,7 +71,8 @@ public final class TerminalDevices {
     }
 
     private static boolean doorAvailable(ServerLevel level, AccessTerminalEntity terminal, AccessRegistry.DoorLink link) {
-        return TerminalLinks.admissible(level, terminal.getBlockPos(), link) && TerminalLinks.loadedDoor(level, link) != null;
+        return TerminalLinks.admissible(level, terminal.getBlockPos(), terminal.instanceId, link)
+            && TerminalLinks.loadedDoor(level, link) != null;
     }
 
     private TerminalDevices() {}

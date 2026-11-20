@@ -108,7 +108,7 @@ final class TerminalLinkList {
                 link.available() ? TerminalGui.ACCENT : 0xD8AA92, false);
         }
         if (pages() > 1) g.drawCenteredString(font, (page + 1) + "/" + pages(), width - 62, 159, INK);
-        var message = status.startsWith(TerminalDevices.UI) ? Component.translatable(status) : tr("devices_hint");
+        var message = status.startsWith("gui.industrial_facilities.") ? Component.translatable(status) : tr("devices_hint");
         g.drawString(font, font.plainSubstrByWidth(message.getString(), width - 28), 14, height - 21, INK, false);
     }
 

@@ -150,6 +150,7 @@ public class IndustrialFacilitiesModBlocks {
 	public static final DeferredBlock<Block> TERMINAL_LOCKDOWN;
 	public static final DeferredBlock<Block> SUPERVISION_CONSOLE;
 	public static final DeferredBlock<Block> SUPERVISION_DISPLAY;
+	public static final DeferredBlock<Block> FREQUENCY_ENCODER;
 	static {
 		EXTINGUISHER_PLACED = REGISTRY.register("extinguisher_placed", ExtinguisherPlacedBlock::new);
 		EMERGENCY_EXIT_SIGN_RIGHT = REGISTRY.register("emergency_exit_sign_right", EmergencyExitSignRightBlock::new);
@@ -284,6 +285,7 @@ public class IndustrialFacilitiesModBlocks {
 		TERMINAL_LOCKDOWN = REGISTRY.register("terminal_lockdown", TerminalLockdownBlock::new);
 		SUPERVISION_CONSOLE = REGISTRY.register("supervision_console", SupervisionConsoleBlock::new);
 		SUPERVISION_DISPLAY = REGISTRY.register("supervision_display", SupervisionDisplayBlock::new);
+		FREQUENCY_ENCODER = REGISTRY.register("frequency_encoder", FrequencyEncoderBlock::new);
 	}
 	// Start of user code block custom blocks
 	// End of user code block custom blocks

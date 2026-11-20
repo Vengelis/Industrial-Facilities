@@ -1,8 +1,6 @@
 package fr.vengelis.industrialfacilities.access;
 
 import java.util.UUID;
-import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
-import fr.vengelis.industrialfacilities.item.TerminalLinkCardItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -10,25 +8,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-@EventBusSubscriber(modid=IndustrialFacilitiesMod.MODID)
+/** Legacy pairing decoder, retained for old data and compatibility fixtures. */
 public final class AccessLinkEvents {
-    @SubscribeEvent public static void leftClick(PlayerInteractEvent.LeftClickBlock event){
-        var stack=event.getEntity().getMainHandItem();if(!(stack.getItem() instanceof TerminalLinkCardItem))return;
-        // Cancel START/STOP/ABORT on both sides: the setup tool must never mine a terminal or door.
-        event.setCanceled(true);
-        if(event.getLevel().isClientSide||event.getAction()!=PlayerInteractEvent.LeftClickBlock.Action.START||!(event.getEntity() instanceof ServerPlayer player)||!player.isAlive()
-            ||!player.level().hasChunkAt(event.getPos())||player.distanceToSqr(event.getPos().getCenter())>64)return;
-        if(TerminalLinkCardItem.automationMode(stack)){
-            var result=fr.vengelis.industrialfacilities.security.CameraLinking.click(player,event.getPos(),stack);
-            player.displayClientMessage(Component.translatable(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();return;
-        }
-        var result=accessClick(player,event.getPos(),stack);
-        player.displayClientMessage(result.message().startsWith("gui.industrial_facilities.")?Component.translatable(result.message()):Component.literal(result.message()),true);player.getInventory().setChanged();player.containerMenu.broadcastChanges();
-    }
     static AccessBadges.Result accessClick(ServerPlayer player,BlockPos pos,ItemStack stack){
         var terminal=AccessTerminalEntity.resolve(player.level(),pos);
         CompoundTag tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();

@@ -8,6 +8,7 @@ import fr.vengelis.industrialfacilities.alarm.AlarmBlockEntity;
 import fr.vengelis.industrialfacilities.panel.*;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorEntity;
 import net.minecraft.core.*;
+import fr.vengelis.industrialfacilities.frequency.*;
 import net.minecraft.nbt.*;
 import net.minecraft.server.level.*;
 import net.minecraft.world.entity.Entity;
@@ -55,7 +56,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         reconcileDoorLinks(true);
         List<LinkView> result = new ArrayList<>();
         Map<String, Integer> counts = new HashMap<>();
-        for (Link link : links) {
+        for (Link link : effectiveLinks()) {
             int index = counts.merge(link.kind, 1, Integer::sum);
             String prefix =
                     switch (link.kind) {
@@ -198,38 +199,59 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
     private static AccessBadges.Result success(String key) {
         return AccessBadges.Result.success("gui.industrial_facilities.camera." + key);
     }
+    private List<Link> effectiveLinks() {
+        if (!(level instanceof ServerLevel server)) return List.copyOf(links);
+        var network = FrequencyNetwork.get(server);
+        var result = new ArrayList<Link>();
+        for (Link link : links) if (network.legacy(instanceId, link.id)) result.add(link);
+        for (var peer : network.peers(server, instanceId)) {
+            String kind = peer.type().cameraKind();
+            if (!kind.isEmpty() && !kind.equals("camera")) result.add(new Link(peer.id(), kind, peer.pos()));
+        }
+        for (var peer : network.senders(server, instanceId))
+            if (peer.type() == FrequencyEndpoint.Type.CAMERA) result.add(new Link(peer.id(), "camera", peer.pos()));
+        return result;
+    }
     private Link find(UUID id) {
-        for (Link link : links)
-            if (link.id.equals(id))
-                return link;
+        if (level instanceof ServerLevel server) {
+            var network = FrequencyNetwork.get(server);
+            var peer = network.endpoint(id);
+            if (peer != null && !peer.type().cameraKind().isEmpty()
+                    && (peer.type() == FrequencyEndpoint.Type.CAMERA ? network.connected(server, id, instanceId) : network.connected(server, instanceId, id)))
+                return new Link(id, peer.type().cameraKind(), peer.pos());
+            if (!network.legacy(instanceId, id)) return null;
+        }
+        for (Link link : links) if (link.id.equals(id)) return link;
         return null;
     }
     private boolean available(Link link) {
-        if (!(level instanceof ServerLevel server) || !TerminalLinks.loaded(server, link.pos)
-                || !TerminalLinks.inRange(worldPosition, link.pos))
+        if (!(level instanceof ServerLevel server) || !TerminalLinks.loaded(server, link.pos))
             return false;
         var target = server.getBlockEntity(link.pos);
+        boolean frequency = link.kind.equals("camera") ? FrequencyNetwork.get(server).connected(server, link.id, instanceId)
+            : FrequencyNetwork.get(server).connected(server, instanceId, link.id);
+        if (!frequency && !TerminalLinks.inRange(worldPosition, link.pos)) return false;
         return switch (link.kind) {
             case "camera" ->
                 target instanceof SecurityCameraEntity c&& link.id.equals(c.instanceId)
-                        && Objects.equals(creator, c.creator) && c.fieldLoaded();
+                        && (frequency || Objects.equals(creator, c.creator)) && c.fieldLoaded();
             case "door" ->
                 target instanceof IndustrialDoorEntity d&& d.size > 0 && link.id.equals(d.doorInstanceId)
-                        && Objects.equals(creator, d.automationOwner)
-                        && AccessDoorService.canConfigureOwner(creator, d);
+                        && (frequency || (Objects.equals(creator, d.automationOwner)
+                            && AccessDoorService.canConfigureOwner(creator, d)));
             case "alarm" ->
                 target instanceof AlarmBlockEntity a&& link.id.equals(a.automationInstanceId)
-                        && Objects.equals(creator, a.automationOwner);
-            case "panel" -> target instanceof PanelBlockEntity p&& panelAvailable(p, link.id);
+                        && (frequency || Objects.equals(creator, a.automationOwner));
+            case "panel" -> target instanceof PanelBlockEntity p && panelAvailable(p, link.id, frequency);
             case "emitter" ->
                 target instanceof SignalEmitterEntity e&& link.id.equals(e.instanceId)
-                        && Objects.equals(creator, e.creator);
+                        && (frequency || Objects.equals(creator, e.creator));
             default -> false;
         };
     }
-    private boolean panelAvailable(PanelBlockEntity panel, UUID id) {
-        var group = panel.automationGroup(creator, id);
-        return group != null && group.blocks().stream().allMatch(p -> TerminalLinks.inRange(worldPosition, p));
+    private boolean panelAvailable(PanelBlockEntity panel, UUID id, boolean frequency) {
+        var group = panel.automationGroup(frequency ? panel.automationOwner : creator, id);
+        return group != null && (frequency || group.blocks().stream().allMatch(p -> TerminalLinks.inRange(worldPosition, p)));
     }
     public AccessBadges.Result unlinkOffline(ServerPlayer player, UUID id) {
         if (!canEdit(player) || isLockedDown())
@@ -239,6 +261,8 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             return fail("not_linked");
         if (available(link))
             return fail("device_back_online");
+        if (level instanceof ServerLevel server && FrequencyNetwork.get(server).visible(server, instanceId, id))
+            return AccessBadges.Result.fail(FrequencyContent.UI + "remove_chip");
         return removeLink(link);
     }
 
@@ -358,8 +382,11 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         if (link == null || !available(link))
             return;
         if (link.kind.equals("panel")) {
-            if (action.equals("panel_text") && level.getBlockEntity(link.pos) instanceof PanelBlockEntity panel)
-                panel.setAutomationText(creator, id, text);
+            if (action.equals("panel_text") && level.getBlockEntity(link.pos) instanceof PanelBlockEntity panel) {
+                panel.setAutomationText(FrequencyNetwork.get((ServerLevel) level).connected((ServerLevel) level, instanceId, id)
+                    ? panel.automationOwner : creator, id, text);
+                fr.vengelis.industrialfacilities.supervision.SignalTraffic.record((ServerLevel) level, instanceId, id);
+            }
             return;
         }
         boolean on = action.endsWith("_on") || action.endsWith("_open");
@@ -370,6 +397,15 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
         }
         status = "gui.industrial_facilities.camera.running";
         outputs.put(id, on);
+        var signalKind = switch (action) {
+            case "door_open" -> fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind.OPEN;
+            case "door_close" -> fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind.CLOSE;
+            default -> fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind.GENERIC;
+        };
+        if (on || link.kind.equals("door"))
+            fr.vengelis.industrialfacilities.supervision.SignalTraffic.maintainUntil(
+                (ServerLevel) level, instanceId, instanceId, id, signalKind, Long.MAX_VALUE);
+        else fr.vengelis.industrialfacilities.supervision.SignalTraffic.stop((ServerLevel) level, instanceId, instanceId, id);
         AutomationOutputs.request((ServerLevel) level, link.pos, link.kind, id, instanceId, on);
         if (!on && otherSource(link))
             status = "gui.industrial_facilities.camera.other_source";
@@ -389,6 +425,9 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
             return false;
         }
         jobs.addAll(added);
+        if (level instanceof ServerLevel server)
+            added.stream().map(CameraProgram.Job::camera).distinct()
+                .forEach(camera -> fr.vengelis.industrialfacilities.supervision.SignalTraffic.record(server, camera, instanceId));
         return true;
     }
     private void cancelEmpty(UUID camera) {
@@ -577,6 +616,7 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
 
     private void refreshOutputs(ServerLevel server) {
         boolean hasOtherSource = false;
+        var emissions = new java.util.ArrayList<fr.vengelis.industrialfacilities.supervision.SignalTraffic.Emission>();
         var iterator = outputs.entrySet().iterator();
         while (iterator.hasNext()) {
             var output = iterator.next();
@@ -590,17 +630,26 @@ public class CameraTerminalEntity extends AccessTerminalEntity {
                 continue;
             }
             AutomationOutputs.request(server, link.pos, link.kind, link.id, instanceId, output.getValue());
+            if (output.getValue() || link.kind.equals("door")) {
+                var kind = !link.kind.equals("door") ? fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind.GENERIC
+                    : output.getValue() ? fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind.OPEN
+                    : fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind.CLOSE;
+                emissions.add(new fr.vengelis.industrialfacilities.supervision.SignalTraffic.Emission(instanceId, link.id, kind));
+            }
             if (!output.getValue() && otherSource(link))
                 hasOtherSource = true;
         }
+        fr.vengelis.industrialfacilities.supervision.SignalTraffic.maintainAll(server, instanceId, emissions, Long.MAX_VALUE);
         if (hasOtherSource)
             status = "gui.industrial_facilities.camera.other_source";
         else if (status.equals("gui.industrial_facilities.camera.other_source"))
             status = "gui.industrial_facilities.camera.running";
     }
     private void release() {
-        if (level instanceof ServerLevel server)
+        if (level instanceof ServerLevel server) {
             AutomationOutputs.release(server, instanceId);
+            fr.vengelis.industrialfacilities.supervision.SignalTraffic.stopOrigin(server, instanceId);
+        }
         outputs.clear();
         jobs.clear();
         stageSeen.clear();

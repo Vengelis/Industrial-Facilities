@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import fr.vengelis.industrialfacilities.camera.client.CameraUiClient;
-import fr.vengelis.industrialfacilities.item.TerminalLinkCardItem;
+import fr.vengelis.industrialfacilities.frequency.FrequencyContent;
 import fr.vengelis.industrialfacilities.security.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -30,8 +30,7 @@ public final class CameraFieldPreviewRenderer {
         if (draft != null)
             pos = draft.position();
         else {
-            if (!(mc.player.getMainHandItem().getItem() instanceof TerminalLinkCardItem)
-                    || !TerminalLinkCardItem.automationMode(mc.player.getMainHandItem())
+            if (!mc.player.getMainHandItem().is(FrequencyContent.CHIP.get())
                     || !(mc.hitResult instanceof BlockHitResult hit))
                 return;
             pos = hit.getBlockPos();

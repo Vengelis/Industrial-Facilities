@@ -8,11 +8,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class KeypassMenu extends AbstractContainerMenu {
     public static final int SUBMIT=0,SAVE=1,REVOKE=2,UNLINK=3,DETACH=4,RENAME=5;
+    public static final int OPEN_SECONDS=6;
+    public final DataSlot openSeconds=DataSlot.standalone();
     public final boolean manager,owner;
     private final Inventory inventory;
     private final KeypassTerminalEntity terminal;
@@ -24,9 +27,11 @@ public final class KeypassMenu extends AbstractContainerMenu {
     private KeypassMessages.State last;
     public KeypassMenu(int id,Inventory inventory,KeypassTerminalEntity terminal){
         super(KeypassMenus.TYPE,id);this.inventory=inventory;this.terminal=terminal;instance=terminal.instanceId;manager=terminal.manager();owner=terminal.isOwner(inventory.player);
+        if (!manager) { addDataSlot(openSeconds); openSeconds.set(terminal.openSeconds()); }
     }
     public KeypassMenu(int id,Inventory inventory,FriendlyByteBuf b){
         super(KeypassMenus.TYPE,id);this.inventory=inventory;terminal=null;instance=null;manager=b.readBoolean();owner=b.readBoolean();
+        if (!manager) addDataSlot(openSeconds);
     }
     @Override public ItemStack quickMoveStack(Player player,int index){return ItemStack.EMPTY;}
     @Override public boolean stillValid(Player player){
@@ -35,8 +40,9 @@ public final class KeypassMenu extends AbstractContainerMenu {
             &&instance.equals(terminal.instanceId)&&player.distanceToSqr(terminal.getBlockPos().getCenter())<=64&&(!manager||terminal.isOwner(player));
     }
     @Override public void broadcastChanges(){
+        if (terminal != null && !manager) openSeconds.set(terminal.openSeconds());
         super.broadcastChanges();if(!(inventory.player instanceof ServerPlayer player)||!stillValid(player))return;
-        var state=new KeypassMessages.State(containerId,revision,terminal.linkedCount(),status,manager?KeypassData.get(player.serverLevel()).readers(terminal):List.of());
+        var state=new KeypassMessages.State(containerId,revision,terminal.linkedCount(),status,manager?KeypassData.get(player.serverLevel()).readers(terminal).stream().limit(KeypassData.MAX_READERS).toList():List.of());
         if(!state.equals(last)){last=state;PacketDistributor.sendToPlayer(player,state);}
         if (!manager && owner) {
             var devices = TerminalDevices.links(player.serverLevel(), terminal);
@@ -71,6 +77,10 @@ public final class KeypassMenu extends AbstractContainerMenu {
                 ok?IndustrialFacilitiesModSounds.TERMINAL_ACCESS_GRANTED.get():IndustrialFacilitiesModSounds.TERMINAL_ACCESS_DENIED.get(),SoundSource.BLOCKS,.6f,1f);
             if(ok){player.closeContainer();return;}
         }else if(kind==DETACH&&terminal.isOwner(player)){status=terminal.clearLinks(player)?"detached":"not_linked";}
+        else if(kind==OPEN_SECONDS&&terminal.isOwner(player)){
+            int seconds=action.value().matches("[0-9]{1,3}")?Integer.parseInt(action.value()):0;
+            status=terminal.setOpenSeconds(player,seconds)?"gui.industrial_facilities.access.saved":"gui.industrial_facilities.access.denied";
+        }
         else return;
         revision++;broadcastChanges();
     }

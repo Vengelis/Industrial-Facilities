@@ -40,12 +40,12 @@ public final class ControlTerminalEntity extends AccessTerminalEntity {
 
     @Override public void updateAccessState() {
         if (!(level instanceof ServerLevel server)) return;
-        boolean active = AccessTerminalEntity.resolve(level, worldPosition) == this
-            && TerminalControlData.get(server).on(this, server.getGameTime());
-        if (accessGranted != active) {
-            accessGranted = active;
-            sync();
-        }
+        var controls = TerminalControlData.get(server);
+        long now = server.getGameTime();
+        boolean assembled = AccessTerminalEntity.resolve(level, worldPosition) == this;
+        long until = assembled ? controls.activationUntil(this, now) : 0;
+        boolean active = lockdown ? assembled && controls.on(this, now) : until > now;
+        updateScreenState(active, until);
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {

@@ -1,6 +1,7 @@
 package fr.vengelis.industrialfacilities.access;
 
 import java.util.ArrayList;
+import fr.vengelis.industrialfacilities.frequency.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +33,7 @@ public final class TerminalLinks {
     public static final String BUTTON = "button";
     public static final String LOCKDOWN = "lockdown";
     public static final String TERMINAL = "terminal";
+    public static final String RELAY = "relay";
 
     private static final Set<String> AUTOMATION_TARGETS = Set.of("door", "camera", "alarm", "emitter", "panel");
 
@@ -66,12 +68,17 @@ public final class TerminalLinks {
     }
 
     public static boolean validKinds(String source, String target) {
+        if (target.equals(RELAY)) return switch (source) {
+            case "reader", "automation", KEYPASS_MANAGER, BUTTON, LOCKDOWN, RELAY -> true;
+            default -> false;
+        };
         return switch (source) {
             case "reader" -> target.equals("door");
             case "automation" -> AUTOMATION_TARGETS.contains(target);
             case KEYPASS_MANAGER -> target.equals(KEYPASS_READER);
-            case BUTTON -> target.equals(TERMINAL);
-            case LOCKDOWN -> target.equals(TERMINAL) || target.equals("emitter");
+            case BUTTON -> target.equals(TERMINAL) || target.equals("door");
+            case LOCKDOWN -> target.equals(TERMINAL) || target.equals("emitter") || target.equals("door");
+            case RELAY -> AUTOMATION_TARGETS.contains(target) || target.equals(TERMINAL) || target.equals(KEYPASS_READER);
             default -> false;
         };
     }
@@ -92,6 +99,11 @@ public final class TerminalLinks {
 
     public static boolean admissible(ServerLevel level, BlockPos source, AccessRegistry.DoorLink link) {
         return link.dimension().equals(level.dimension().location().toString()) && inRange(source, link.position());
+    }
+
+    public static boolean admissible(ServerLevel level, BlockPos source, UUID sourceId, AccessRegistry.DoorLink link) {
+        return link.dimension().equals(level.dimension().location().toString()) && (inRange(source, link.position())
+            || FrequencyNetwork.get(level).connected(level, sourceId, link.instance()));
     }
 
     /** Retrouve le lecteur assemblé en vérifiant l'identité et le propriétaire enregistrés. */
@@ -190,6 +202,7 @@ public final class TerminalLinks {
             } else {
                 truncated |= appendDoorLinks(level, player, registry, terminal, links);
             }
+            truncated |= appendRelayLinks(level, player, terminal, links);
             if (links.size() >= MAX_LINKS) {
                 truncated = true;
                 break;
@@ -200,12 +213,10 @@ public final class TerminalLinks {
 
     private static boolean appendControls(ServerLevel level, ServerPlayer player, ControlTerminalEntity control, List<Link> links) {
         for (var target : TerminalControlData.get(level).links(control)) {
-            if (!inRange(control.getBlockPos(), target.position()) || !near(player, target.position(), TARGET_RADIUS)) continue;
-            if (target.emitter() ? TerminalControlData.emitterAt(level, target, player.getUUID()) == null
-                    : TerminalControlData.terminalAt(level, target, player.getUUID()) == null) continue;
-            if (links.size() >= MAX_LINKS) return true;
-            links.add(new Link(control.getBlockPos(), control.instanceId, control.lockdown() ? LOCKDOWN : BUTTON,
-                target.position(), target.id(), target.emitter() ? "emitter" : TERMINAL));
+            if (!TerminalControlData.available(level, control, target)) continue;
+            if (appendPath(level, player, links, new Link(control.getBlockPos(), control.instanceId,
+                    control.lockdown() ? LOCKDOWN : BUTTON, target.position(), target.id(), target.kind())))
+                return true;
         }
         return false;
     }
@@ -243,14 +254,11 @@ public final class TerminalLinks {
         List<Link> links) {
         BlockPos source = terminal.getBlockPos();
         for (var link : terminal.linkViews()) {
-            if (!inRange(source, link.pos()) || !near(player, link.pos(), TARGET_RADIUS)
-                || !automationTarget(level, player.getUUID(), link)) {
+            if (!(radioTarget(level, terminal.instanceId, link.id(), link.pos()) || automationTarget(level, player.getUUID(), link))) {
                 continue;
             }
-            if (links.size() >= MAX_LINKS) {
-                return true;
-            }
-            links.add(new Link(source, terminal.instanceId, "automation", link.pos(), link.id(), link.kind()));
+            if (appendPath(level, player, links, new Link(source, terminal.instanceId, "automation",
+                    link.pos(), link.id(), link.kind()))) return true;
         }
         return false;
     }
@@ -259,15 +267,11 @@ public final class TerminalLinks {
         List<Link> links) {
         BlockPos source = manager.getBlockPos();
         for (var link : KeypassData.get(level).readers(manager)) {
-            if (!inRange(source, link.position()) || !near(player, link.position(), TARGET_RADIUS)
-                || !keypassTarget(level, player.getUUID(), link)) {
+            if (!(radioTarget(level, manager.instanceId, link.id(), link.position()) || keypassTarget(level, player.getUUID(), link))) {
                 continue;
             }
-            if (links.size() >= MAX_LINKS) {
-                return true;
-            }
-            links.add(new Link(source, manager.instanceId, KEYPASS_MANAGER,
-                link.position(), link.id(), KEYPASS_READER, "", link.name()));
+            if (appendPath(level, player, links, new Link(source, manager.instanceId, KEYPASS_MANAGER,
+                    link.position(), link.id(), KEYPASS_READER, "", link.name()))) return true;
         }
         return false;
     }
@@ -282,24 +286,81 @@ public final class TerminalLinks {
         int doorCount = 0;
         BlockPos source = terminal.getBlockPos();
         String name = terminal instanceof KeypassTerminalEntity reader ? KeypassData.get(level).readerName(reader) : "";
-        for (var link : entry.doors()) {
+        for (var link : AccessDoorService.doors(level, entry)) {
             if (++doorCount > AccessRegistry.MAX_DOORS) {
                 return true;
             }
-            if (!admissible(level, source, link) || !near(player, link.position(), TARGET_RADIUS)) {
+            if (!admissible(level, source, terminal.instanceId, link)) {
                 continue;
             }
             var door = loadedDoor(level, link);
-            if (door == null || !AccessDoorService.canConfigureOwner(player.getUUID(), door)) {
+            if (door == null || !(radioTarget(level, terminal.instanceId, link.instance(), link.position())
+                    || AccessDoorService.canConfigureOwner(player.getUUID(), door))) {
                 continue;
             }
-            if (links.size() >= MAX_LINKS) {
-                return true;
-            }
-            links.add(new Link(source, terminal.instanceId, "reader",
-                door.getBlockPos(), door.doorInstanceId, "door", name, ""));
+            if (appendPath(level, player, links, new Link(source, terminal.instanceId, "reader",
+                    door.getBlockPos(), door.doorInstanceId, "door", name, ""))) return true;
         }
         return false;
+    }
+
+    private static boolean radioTarget(ServerLevel level, UUID source, UUID target, BlockPos position) {
+        return loaded(level, position) && FrequencyNetwork.get(level).visible(level, source, target);
+    }
+
+    private static boolean appendRelayLinks(ServerLevel level, ServerPlayer player, AccessTerminalEntity terminal, List<Link> links) {
+        var network = FrequencyNetwork.get(level);
+        for (var peer : network.visiblePeers(level, terminal.instanceId)) {
+            if (!peer.type().terminal()) continue;
+            var path = network.visualPath(level, terminal.instanceId, peer.id());
+            if (path.size() < 3 && !network.relay(terminal.instanceId) && !network.relay(peer.id())) continue;
+            if (appendHops(level, player, links, path, new Link(terminal.getBlockPos(), terminal.instanceId, RELAY,
+                    peer.pos(), peer.id(), RELAY))) return true;
+        }
+        return false;
+    }
+
+    private static boolean appendPath(ServerLevel level, ServerPlayer player, List<Link> links, Link link) {
+        var path = FrequencyNetwork.get(level).visualPath(level, link.sourceId(), link.targetId());
+        return path.size() > 2 ? appendHops(level, player, links, path, link) : appendVisible(level, player, links, link);
+    }
+
+    private static boolean appendHops(ServerLevel level, ServerPlayer player, List<Link> links,
+                                      List<FrequencyEndpoint> path, Link link) {
+        for (int i = 1; i < path.size(); i++) {
+            var from = path.get(i - 1);
+            var to = path.get(i);
+            boolean first = i == 1, last = i == path.size() - 1;
+            if (appendVisible(level, player, links, new Link(from.pos(), from.id(), first ? link.sourceKind() : RELAY,
+                    to.pos(), to.id(), last ? link.targetKind() : RELAY, first ? link.sourceName() : "", last ? link.targetName() : "")))
+                return true;
+        }
+        return false;
+    }
+
+    private static boolean appendVisible(ServerLevel level, ServerPlayer player, List<Link> links, Link link) {
+        if (!inRange(link.sourceRoot(), link.targetRoot()) || !near(player, link.sourceRoot(), TARGET_RADIUS)
+                || !near(player, link.targetRoot(), TARGET_RADIUS) || !loaded(level, link.sourceRoot())
+                || !loaded(level, link.targetRoot())) return false;
+        boolean relay = relayHop(link);
+        for (int i = 0; i < links.size(); i++) {
+            Link other = links.get(i);
+            if (!sameHop(link, other) || !(relay || relayHop(other))) continue;
+            if (!relay || (!link.targetName().isEmpty() && other.targetName().isEmpty())) links.set(i, link);
+            return false;
+        }
+        if (links.size() >= MAX_LINKS) return true;
+        links.add(link);
+        return false;
+    }
+
+    private static boolean relayHop(Link link) {
+        return link.sourceKind().equals(RELAY) || link.targetKind().equals(RELAY);
+    }
+
+    private static boolean sameHop(Link a, Link b) {
+        return a.sourceId().equals(b.sourceId()) && a.targetId().equals(b.targetId())
+            || a.sourceId().equals(b.targetId()) && a.targetId().equals(b.sourceId());
     }
 
     private TerminalLinks() {}

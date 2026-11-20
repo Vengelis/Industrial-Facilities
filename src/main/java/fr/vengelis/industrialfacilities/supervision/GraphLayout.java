@@ -51,9 +51,49 @@ public final class GraphLayout {
         }
     }
     public record Point(NetworkView.Node node, int x, int y, int remoteLinks) {}
-    public record Page(List<Point> points, List<NetworkView.Edge> edges, int index, int total, Canvas canvas) {
+    public record Page(List<Point> points, List<NetworkView.Edge> edges, List<NetworkView.Wire> wires,
+                       int index, int total, Canvas canvas, Map<GraphRoutes.Key, List<GraphRoutes.Bend>> routes,
+                       Map<GraphRoutes.SocketKey, GraphRoutes.Socket> sockets, Map<GraphRoutes.Key, GraphRoutes.Key> joins,
+                       List<NetworkView.Signal> signals) {
+        public Page(List<Point> points, List<NetworkView.Edge> edges, List<NetworkView.Wire> wires, int index, int total, Canvas canvas,
+                    Map<GraphRoutes.Key, List<GraphRoutes.Bend>> routes, Map<GraphRoutes.SocketKey, GraphRoutes.Socket> sockets,
+                    Map<GraphRoutes.Key, GraphRoutes.Key> joins) {
+            this(points, edges, wires, index, total, canvas, routes, sockets, joins, List.of());
+        }
+        public Page(List<Point> points, List<NetworkView.Edge> edges, List<NetworkView.Wire> wires, int index, int total, Canvas canvas) {
+            this(points, edges, wires, index, total, canvas, Map.of(), Map.of(), Map.of());
+        }
+        public Page(List<Point> points, List<NetworkView.Edge> edges, int index, int total, Canvas canvas) {
+            this(points, edges, List.of(), index, total, canvas);
+        }
         public Page(List<Point> points, List<NetworkView.Edge> edges, int index, int total) {
             this(points, edges, index, total, Canvas.DEFAULT);
+        }
+        public Page withPoints(List<Point> value) { return new Page(value, edges, wires, index, total, canvas, routes, sockets, joins, signals); }
+        public Page withRoute(GraphRoutes.Key key, List<GraphRoutes.Bend> bends) {
+            var changed = new HashMap<>(routes);
+            if (bends.isEmpty()) changed.remove(key); else changed.put(key, bends);
+            return new Page(points, edges, wires, index, total, canvas, Map.copyOf(changed), sockets, joins, signals);
+        }
+        public Page withSocket(GraphRoutes.SocketKey key, GraphRoutes.Socket value) {
+            var changed = new HashMap<>(sockets);
+            if (value == null) changed.remove(key); else changed.put(key, value);
+            return new Page(points, edges, wires, index, total, canvas, routes, Map.copyOf(changed), joins, signals);
+        }
+        public Page withoutJoin(GraphRoutes.Key key) {
+            var changed = new HashMap<>(joins);
+            changed.remove(key);
+            return new Page(points, edges, wires, index, total, canvas, routes, sockets, Map.copyOf(changed), signals);
+        }
+        public boolean contains(GraphRoutes.Key key) {
+            return wires.stream().map(GraphRoutes::key).anyMatch(key::equals)
+                || edges.stream().map(GraphRoutes::key).anyMatch(key::equals);
+        }
+        public boolean contains(GraphRoutes.SocketKey key) {
+            return points.stream().map(Point::node).filter(node -> node.id().equals(key.node()))
+                .anyMatch(node -> key.slot() < 0
+                    ? edges.stream().anyMatch(edge -> edge.source().equals(key.node()) || edge.target().equals(key.node()))
+                    : node.ports().stream().anyMatch(port -> port.slot() == key.slot() && port.channel() == key.channel()));
         }
     }
 
@@ -75,8 +115,13 @@ public final class GraphLayout {
         view.nodes().forEach(n -> left.put(n.id(), n));
         Map<UUID, List<UUID>> neighbors = new HashMap<>();
         for (var link : view.edges()) {
+            if (link.frequency()) continue;
             neighbors.computeIfAbsent(link.source(), id -> new ArrayList<>()).add(link.target());
             neighbors.computeIfAbsent(link.target(), id -> new ArrayList<>()).add(link.source());
+        }
+        for (var wire : view.wires()) {
+            neighbors.computeIfAbsent(wire.source(), id -> new ArrayList<>()).add(wire.target());
+            neighbors.computeIfAbsent(wire.target(), id -> new ArrayList<>()).add(wire.source());
         }
         List<List<NetworkView.Node>> result = new ArrayList<>();
         while (!left.isEmpty()) {
@@ -168,14 +213,21 @@ public final class GraphLayout {
         Set<UUID> ids = new HashSet<>();
         sheet.forEach(p -> ids.add(p.node().id()));
         List<NetworkView.Edge> edges = new ArrayList<>();
+        List<NetworkView.Wire> wires = new ArrayList<>();
         Map<UUID, Integer> elsewhere = new HashMap<>();
         for (var e : view.edges()) {
+            if (e.frequency()) continue;
             boolean a = ids.contains(e.source()), b = ids.contains(e.target());
             if (a && b) edges.add(e);
             else if (a || b) elsewhere.merge(a ? e.source() : e.target(), 1, Integer::sum);
         }
+        for (var wire : view.wires()) {
+            boolean a = ids.contains(wire.source()), b = ids.contains(wire.target());
+            if (a && b) wires.add(wire);
+            else if (a || b) elsewhere.merge(a ? wire.source() : wire.target(), 1, Integer::sum);
+        }
         var points = sheet.stream().map(p -> new Point(p.node(), p.x(), p.y(), elsewhere.getOrDefault(p.node().id(), 0))).toList();
-        return new Page(points, List.copyOf(edges), index, sheets.size(), view.canvas());
+        return new Page(points, List.copyOf(edges), List.copyOf(wires), index, sheets.size(), view.canvas(), view.routes(), view.sockets(), view.joins(), view.signals());
     }
 
     static ListTag write(Map<UUID, Placement> layout) {

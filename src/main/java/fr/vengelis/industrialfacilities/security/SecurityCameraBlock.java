@@ -1,4 +1,5 @@
 package fr.vengelis.industrialfacilities.security;
+import net.minecraft.server.level.ServerLevel;
 import fr.vengelis.industrialfacilities.camera.ui.CameraMenus;
 import net.minecraft.core.*;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,6 +28,11 @@ public class SecurityCameraBlock extends Block implements EntityBlock {
     @Override protected BlockState mirror(BlockState state,Mirror mirror){return rotate(state,mirror.getRotation(state.getValue(FACING)));}
     @Override protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return Block.box(2.9,2.9,2.9,13.1,13.1,13.1);}
     @Override public PushReaction getPistonPushReaction(BlockState state){return PushReaction.BLOCK;}
+    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
+        if (!state.is(next.getBlock()) && level instanceof ServerLevel server && level.getBlockEntity(pos) instanceof SecurityCameraEntity camera)
+            fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.remove(server, camera.instanceId, pos);
+        super.onRemove(state, level, pos, next, moving);
+    }
     @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,LivingEntity entity,ItemStack stack){super.setPlacedBy(level,pos,state,entity,stack);if(!level.isClientSide&&entity instanceof Player player&&level.getBlockEntity(pos) instanceof SecurityCameraEntity camera){camera.creator=player.getUUID();camera.sweepEpoch=level.getGameTime();camera.pitch=state.getValue(FACE)==AttachFace.CEILING?30:state.getValue(FACE)==AttachFace.FLOOR?-15:0;camera.sync();}}
     @Override protected InteractionResult useWithoutItem(BlockState state,Level level,BlockPos pos,Player player,BlockHitResult hit){if(player instanceof ServerPlayer server&&level.getBlockEntity(pos) instanceof SecurityCameraEntity camera&&camera.canConfigure(server))CameraMenus.openCamera(server,camera);return InteractionResult.sidedSuccess(level.isClientSide);}
 }

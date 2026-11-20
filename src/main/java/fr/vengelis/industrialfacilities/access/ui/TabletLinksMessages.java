@@ -49,6 +49,6 @@ public final class TabletLinksMessages {
     public static java.util.function.Consumer<State> receiver=state->{};
     public static State state(ServerPlayer player,TerminalLinks.Snapshot snapshot){return new State(player.level().dimension().location(),SEQUENCE.incrementAndGet(),snapshot.links(),snapshot.truncated());}
     public static void send(ServerPlayer player,TerminalLinks.Snapshot snapshot){PacketDistributor.sendToPlayer(player,state(player,snapshot));}
-    @SubscribeEvent public static void network(RegisterPayloadHandlersEvent event){event.registrar("terminal_tablet_v3").playToClient(State.TYPE,State.CODEC,(state,context)->context.enqueueWork(()->receiver.accept(state)));}
+    @SubscribeEvent public static void network(RegisterPayloadHandlersEvent event){event.registrar("terminal_tablet_v5").playToClient(State.TYPE,State.CODEC,(state,context)->context.enqueueWork(()->receiver.accept(state)));}
     private TabletLinksMessages(){}
 }

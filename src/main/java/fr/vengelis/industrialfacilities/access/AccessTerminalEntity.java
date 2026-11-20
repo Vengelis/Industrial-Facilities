@@ -13,10 +13,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 public class AccessTerminalEntity extends BlockEntity {
+    public static final int DEFAULT_OPEN_SECONDS = 5, MAX_OPEN_SECONDS = 300;
+    private int openSeconds = DEFAULT_OPEN_SECONDS;
     public UUID creator,terminalId,instanceId=UUID.randomUUID();
     public boolean encoder,bank;
     public int accessLevel=1;
-    public long grantedUntil;
+    private long screenUntil;
     /** Last server-observed state of the linked doors, synchronized to readers. */
     public boolean accessGranted;
     private boolean clientLockdownDisabled;
@@ -41,18 +43,36 @@ public class AccessTerminalEntity extends BlockEntity {
         return AccessTerminalBlock.validPair(level,base)?be:null;
     }
     public boolean setAccessLevel(Player player,int level){if(!(getLevel() instanceof ServerLevel server)||encoder||bank||!isOwner(player)||level<1||level>5)return false;accessLevel=level;AccessRegistry.get(server.getServer()).put(this);sync();return true;}
-    public int linkedCount(){if(!(getLevel() instanceof ServerLevel server)||terminalId==null)return 0;var e=AccessRegistry.get(server.getServer()).find(terminalId);return e==null?0:e.doors().size();}
-    public boolean clearLinks(Player player){if(!(getLevel() instanceof ServerLevel server)||!isOwner(player)||terminalId==null)return false;AccessRegistry.get(server.getServer()).clearLinks(terminalId);grantedUntil=0;accessGranted=false;sync();return true;}
+    public int openSeconds() { return openSeconds; }
+    public boolean setOpenSeconds(Player player, int seconds) {
+        if (!(level instanceof ServerLevel) || encoder || bank || !isOwner(player) || isLockedDown()
+            || seconds < 1 || seconds > MAX_OPEN_SECONDS) return false;
+        openSeconds = seconds;
+        sync();
+        return true;
+    }
+    public int linkedCount(){if(!(getLevel() instanceof ServerLevel server)||terminalId==null)return 0;var e=AccessRegistry.get(server.getServer()).find(terminalId);return e==null?0:AccessDoorService.doors(server,e).size();}
+    public boolean clearLinks(Player player){if(!(getLevel() instanceof ServerLevel server)||!isOwner(player)||terminalId==null)return false;AccessRegistry.get(server.getServer()).clearLinks(terminalId);screenUntil=0;accessGranted=false;sync();return true;}
     public UUID ensureCode(){if(terminalId==null){terminalId=UUID.randomUUID();sync();}if(getLevel() instanceof ServerLevel server)AccessRegistry.get(server.getServer()).put(this);return terminalId;}
     public void invalidate(){if(getLevel() instanceof ServerLevel server){
+        fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.remove(server, instanceId, worldPosition);
         if(terminalId!=null)AccessRegistry.get(server.getServer()).remove(terminalId);
         TerminalControlData.get(server).remove(server,instanceId);
         fr.vengelis.industrialfacilities.supervision.SupervisionData.get(server).removeTerminal(instanceId);
-    }terminalId=null;instanceId=UUID.randomUUID();grantedUntil=0;accessGranted=false;sync();}
+    }terminalId=null;instanceId=UUID.randomUUID();screenUntil=0;accessGranted=false;sync();}
+    public long screenUntil() { return screenUntil; }
+
+    protected final void updateScreenState(boolean granted, long until) {
+        if (accessGranted == granted && screenUntil == until) return;
+        accessGranted = granted;
+        screenUntil = until;
+        sync();
+    }
+
     public void updateAccessState(){
         if(!(level instanceof ServerLevel))return;
-        boolean next=AccessDoorService.readerGranted(this);
-        if(accessGranted!=next){accessGranted=next;sync();}
+        var screen = AccessDoorService.readerScreen(this);
+        updateScreenState(screen.granted(), screen.until());
     }
     public void sync(){
         setChanged();
@@ -84,10 +104,12 @@ public class AccessTerminalEntity extends BlockEntity {
             else if(!state.getValue(AccessTerminalBlock.ASSEMBLED)){AccessTerminalBlock.tryAssemble(level,pos);AccessTerminalBlock.tryAssemble(level,pos.below());}
         }
     }
-    @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider){super.saveAdditional(tag,provider);if(creator!=null)tag.putUUID("Creator",creator);if(terminalId!=null)tag.putUUID("TerminalId",terminalId);tag.putUUID("InstanceId",instanceId);tag.putInt("AccessLevel",accessLevel);tag.putLong("GrantedUntil",grantedUntil);tag.putBoolean("AccessGranted",accessGranted);}
-    @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);creator=tag.hasUUID("Creator")?tag.getUUID("Creator"):null;terminalId=tag.hasUUID("TerminalId")?tag.getUUID("TerminalId"):null;instanceId=tag.hasUUID("InstanceId")?tag.getUUID("InstanceId"):UUID.randomUUID();accessLevel=Math.clamp(tag.getInt("AccessLevel"),1,5);grantedUntil=tag.getLong("GrantedUntil");accessGranted=tag.getBoolean("AccessGranted");clientLockdownDisabled=tag.getBoolean("LockdownDisabled");}
+    @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider provider){super.saveAdditional(tag,provider);if(creator!=null)tag.putUUID("Creator",creator);if(terminalId!=null)tag.putUUID("TerminalId",terminalId);tag.putUUID("InstanceId",instanceId);tag.putInt("AccessLevel",accessLevel);tag.putInt("OpenSeconds",openSeconds);tag.putBoolean("AccessGranted",accessGranted);}
+    @Override protected void loadAdditional(CompoundTag tag,HolderLookup.Provider provider){super.loadAdditional(tag,provider);creator=tag.hasUUID("Creator")?tag.getUUID("Creator"):null;terminalId=tag.hasUUID("TerminalId")?tag.getUUID("TerminalId"):null;instanceId=tag.hasUUID("InstanceId")?tag.getUUID("InstanceId"):UUID.randomUUID();accessLevel=Math.clamp(tag.getInt("AccessLevel"),1,5);openSeconds=tag.contains("OpenSeconds")?Math.clamp(tag.getInt("OpenSeconds"),1,MAX_OPEN_SECONDS):DEFAULT_OPEN_SECONDS;screenUntil=tag.getLong("ScreenUntil");accessGranted=tag.getBoolean("AccessGranted");clientLockdownDisabled=tag.getBoolean("LockdownDisabled");}
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider provider){
-        return withLockdownStatus(saveWithoutMetadata(provider));
+        var tag = withLockdownStatus(saveWithoutMetadata(provider));
+        if (screenUntil > 0) tag.putLong("ScreenUntil", screenUntil);
+        return tag;
     }
     protected final CompoundTag withLockdownStatus(CompoundTag tag){
         tag.putBoolean("LockdownDisabled",isLockedDown());

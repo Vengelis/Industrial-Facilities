@@ -13,7 +13,8 @@ import net.minecraft.client.renderer.blockentity.*;
 import net.minecraft.world.phys.AABB;
 
 public final class SupervisionRenderer implements BlockEntityRenderer<SupervisionConsoleEntity> {
-    private record CachedGraph(NetworkView network, String sector, int page, Language language, WorldGraphSurface.Frame frame) {}
+    private record CachedGraph(NetworkView network, String sector, int page, Language language, WorldGraphSurface.Frame frame,
+                               java.util.List<GraphSignalPainter.Travel> signals, java.util.List<GraphLayout.Point> timedNodes) {}
     private final Map<SupervisionConsoleEntity, CachedGraph> cache = new WeakHashMap<>();
 
     public SupervisionRenderer(BlockEntityRendererProvider.Context context) {}
@@ -34,7 +35,8 @@ public final class SupervisionRenderer implements BlockEntityRenderer<Supervisio
         pose.translate(entity.firstColumn() - .34, entity.bottomRow() + canvas.rows() - .14, .36);
         float height = canvas.rows() - (canvas.fullHeight() ? .28f : 1.22f);
         pose.scale((canvas.columns() - .32f) / canvas.width(), -height / canvas.height(), 1);
-        var frame = graph(entity, font);
+        var graph = graph(entity, font);
+        var frame = graph.frame();
         var out = buffers.getBuffer(RenderType.textBackground());
         for (var rect : frame.background()) {
             int x = rect.x(), y = rect.y(), right = x + rect.width(), bottom = y + rect.height();
@@ -43,8 +45,24 @@ public final class SupervisionRenderer implements BlockEntityRenderer<Supervisio
             out.addVertex(pose.last(), right, y, 0).setColor(rect.color()).setLight(LightTexture.FULL_BRIGHT);
             out.addVertex(pose.last(), x, y, 0).setColor(rect.color()).setLight(LightTexture.FULL_BRIGHT);
         }
+        pose.pushPose();
+        pose.translate(0, 0, .006);
+        if (entity.getLevel() != null) GraphSignalPainter.draw((x, y, w, h, color) -> {
+            out.addVertex(pose.last(), x, y + h, 0).setColor(color).setLight(LightTexture.FULL_BRIGHT);
+            out.addVertex(pose.last(), x + w, y + h, 0).setColor(color).setLight(LightTexture.FULL_BRIGHT);
+            out.addVertex(pose.last(), x + w, y, 0).setColor(color).setLight(LightTexture.FULL_BRIGHT);
+            out.addVertex(pose.last(), x, y, 0).setColor(color).setLight(LightTexture.FULL_BRIGHT);
+        }, graph.signals(), entity.getLevel().getGameTime() + partial, canvas);
+        pose.popPose();
         pose.translate(0, 0, .014);
-        for (var glyph : frame.glyphs()) {
+        drawText(frame.glyphs(), font, pose, buffers);
+        if (entity.getLevel() != null)
+            drawText(GraphInk.countdowns(font, graph.timedNodes(), entity.getLevel().getGameTime()), font, pose, buffers);
+        pose.popPose();
+    }
+
+    private static void drawText(java.util.List<WorldGraphSurface.Glyph> glyphs, Font font, PoseStack pose, MultiBufferSource buffers) {
+        for (var glyph : glyphs) {
             pose.pushPose();
             pose.translate(glyph.x(), glyph.y(), 0);
             pose.scale(glyph.scale(), glyph.scale(), 1);
@@ -52,21 +70,21 @@ public final class SupervisionRenderer implements BlockEntityRenderer<Supervisio
                 Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             pose.popPose();
         }
-        pose.popPose();
     }
 
-    private WorldGraphSurface.Frame graph(SupervisionConsoleEntity entity, Font font) {
+    private CachedGraph graph(SupervisionConsoleEntity entity, Font font) {
         var cached = cache.get(entity);
         var network = entity.view();
         var language = Language.getInstance();
         if (cached != null && cached.network() == network && cached.sector().equals(entity.sector())
-                && cached.page() == entity.page() && cached.language() == language) return cached.frame();
+                && cached.page() == entity.page() && cached.language() == language) return cached;
 
         var page = GraphLayout.page(network, entity.page());
         var surface = new WorldGraphSurface(page.canvas());
-        GraphInk.draw(surface, font, entity.sector(), page, entity.isDisplay() ? "display_no_sector" : "no_sector");
+        var traces = GraphInk.draw(surface, font, entity.sector(), page, entity.isDisplay() ? "display_no_sector" : "no_sector");
         var frame = surface.finish();
-        cache.put(entity, new CachedGraph(network, entity.sector(), entity.page(), language, frame));
-        return frame;
+        var next = new CachedGraph(network, entity.sector(), entity.page(), language, frame, GraphSignalPainter.plan(page, traces), GraphInk.timedNodes(page));
+        cache.put(entity, next);
+        return next;
     }
 }

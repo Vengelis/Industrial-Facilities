@@ -1,5 +1,6 @@
 package fr.vengelis.industrialfacilities.access;
 
+import fr.vengelis.industrialfacilities.frequency.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,8 +48,32 @@ public final class KeypassData extends SavedData {
         if(bindings.values().stream().filter(b->belongs(b,manager)).count()>=MAX_READERS)return "link_limit";
         reader.ensureCode();bindings.put(reader.instanceId,new Binding(site(reader),site(manager),player.getUUID(),dimension(reader)));setDirty();return "linked";
     }
+    private FrequencyEndpoint managerFor(ServerLevel level, UUID reader) {
+        var managers = FrequencyNetwork.get(level).senders(level, reader).stream()
+            .filter(peer -> peer.type() == FrequencyEndpoint.Type.KEYPASS_MANAGER).toList();
+        var binding = bindings.get(reader);
+        if (binding != null)
+            for (var manager : managers) if (manager.id().equals(binding.manager.id)) return manager;
+        return managers.isEmpty() ? null : managers.getFirst();
+    }
+    public boolean frequencyBinding(ServerLevel level, UUID manager, UUID reader) {
+        var selected = managerFor(level, reader);
+        return selected != null && selected.id().equals(manager);
+    }
     public List<Reader> readers(KeypassTerminalEntity manager){
-        return bindings.values().stream().filter(b->belongs(b,manager)).map(b->new Reader(b.reader.id,b.reader.pos,b.configured(),names.getOrDefault(b.reader.id,""))).toList();
+        if (!(manager.getLevel() instanceof ServerLevel level)) return List.of();
+        var network = FrequencyNetwork.get(level);
+        var result = new ArrayList<Reader>();
+        for (Binding binding : bindings.values()) {
+            if (belongs(binding, manager) && network.legacy(manager.instanceId, binding.reader.id))
+                result.add(new Reader(binding.reader.id, binding.reader.pos, binding.configured(), readerName(binding.reader.id)));
+        }
+        for (var peer : network.peers(level, manager.instanceId)) {
+            if (peer.type() != FrequencyEndpoint.Type.KEYPASS || !frequencyBinding(level, manager.instanceId, peer.id())) continue;
+            Binding binding = bindings.get(peer.id());
+            result.add(new Reader(peer.id(), peer.pos(), binding != null && belongs(binding, manager) && binding.configured(), readerName(peer.id())));
+        }
+        return result;
     }
     public String readerName(KeypassTerminalEntity reader){return reader.manager()?"":readerName(reader.instanceId);}
     public String readerName(UUID reader){return names.getOrDefault(reader,"");}
@@ -57,22 +82,37 @@ public final class KeypassData extends SavedData {
     }
     public String rename(ServerPlayer player,KeypassTerminalEntity manager,UUID reader,String name){
         if(!mayManage(player,manager))return "link_denied";
-        var binding=bindings.get(reader);if(binding==null||!belongs(binding,manager))return "not_linked";
+        if (readers(manager).stream().noneMatch(row -> row.id().equals(reader))) return "not_linked";
         String clean=cleanReaderName(name);if(clean==null)return "invalid_name";
         if(clean.isEmpty())names.remove(reader);else names.put(reader,clean);
         setDirty();return clean.isEmpty()?"name_cleared":"name_saved";
     }
     public String edit(ServerPlayer player,KeypassTerminalEntity manager,UUID reader,String pin,boolean unlink){
         if(!mayManage(player,manager))return "link_denied";
-        var b=bindings.get(reader);if(b==null||!belongs(b,manager))return "not_linked";
-        if(unlink){bindings.remove(reader);setDirty();return "unlinked";}
+        var row = readers(manager).stream().filter(value -> value.id().equals(reader)).findFirst().orElse(null);
+        if (row == null) return "not_linked";
+        if (unlink) {
+            if (frequencyBinding(player.serverLevel(), manager.instanceId, reader)) return "frequency_unlink";
+            bindings.remove(reader);
+            setDirty();
+            return "unlinked";
+        }
+        if (!pin.isEmpty() && !validPin(pin)) return "invalid_pin";
+        var b = bindings.get(reader);
+        if (b == null || !belongs(b, manager)) {
+            b = new Binding(new Site(reader, row.position()), site(manager), manager.creator, dimension(manager));
+            bindings.put(reader, b);
+        }
         if(pin.isEmpty()){b.salt=b.digest=new byte[0];setDirty();return "revoked";}
-        if(!validPin(pin))return "invalid_pin";
         b.salt=new byte[16];RANDOM.nextBytes(b.salt);b.digest=digest(b.salt,pin);setDirty();return "saved";
     }
     Verification verify(KeypassTerminalEntity reader,String pin){
         var b=bindings.get(reader.instanceId);
-        if(b==null||reader.manager()||!b.reader.equals(site(reader))||!b.owner.equals(reader.creator)||!b.dimension.equals(dimension(reader))||!b.configured())return Verification.UNSET;
+        if(b==null||reader.manager()||!b.reader.equals(site(reader))||!b.dimension.equals(dimension(reader))||!b.configured())return Verification.UNSET;
+        var level = (ServerLevel) reader.getLevel();
+        if (FrequencyNetwork.get(level).legacy(b.manager.id, reader.instanceId)) {
+            if (!b.owner.equals(reader.creator)) return Verification.UNSET;
+        } else if (!frequencyBinding(level, b.manager.id, reader.instanceId)) return Verification.UNSET;
         return MessageDigest.isEqual(b.digest,digest(b.salt,pin))?Verification.OK:Verification.DENIED;
     }
     public void removeDevice(UUID id){boolean named=names.remove(id)!=null;if(bindings.values().removeIf(b->b.reader.id.equals(id)||b.manager.id.equals(id))||named)setDirty();}

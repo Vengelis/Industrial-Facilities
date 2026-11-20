@@ -19,6 +19,24 @@ public final class AutomationOutputs {
         else {var requests=world.get(target);if(requests!=null){requests.remove(source);if(requests.isEmpty())world.remove(target);}}
         refresh(level,target);
     }
+    public static void frequencyChanged(ServerLevel level) {
+        var world = SERVERS.get(level.getServer());
+        if (world == null) return;
+        var network = fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.get(level);
+        String dimension = level.dimension().location().toString();
+        var affected = new ArrayList<Target>();
+        var targets = world.entrySet().iterator();
+        while (targets.hasNext()) {
+            var entry = targets.next();
+            Target target = entry.getKey();
+            if (!target.dimension.equals(dimension)) continue;
+            if (entry.getValue().keySet().removeIf(source -> !network.legacy(source, target.instance)
+                    && !network.connected(level, source, target.instance)))
+                affected.add(target);
+            if (entry.getValue().isEmpty()) targets.remove();
+        }
+        for (Target target : affected) refresh(level, target);
+    }
     public static void release(ServerLevel level,UUID source){
         var world=SERVERS.get(level.getServer());if(world==null)return;List<Target> changed=new ArrayList<>();
         var iterator=world.entrySet().iterator();while(iterator.hasNext()){var entry=iterator.next();if(entry.getValue().remove(source)!=null)changed.add(entry.getKey());if(entry.getValue().isEmpty())iterator.remove();}

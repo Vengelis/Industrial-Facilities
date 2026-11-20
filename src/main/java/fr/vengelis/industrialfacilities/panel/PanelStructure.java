@@ -3,6 +3,8 @@ package fr.vengelis.industrialfacilities.panel;
 import fr.vengelis.industrialfacilities.block.LuminousPanelBlock;
 import fr.vengelis.industrialfacilities.block.LuminousPanelSurfaceBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import fr.vengelis.industrialfacilities.frequency.FrequencyNetwork;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -131,6 +133,9 @@ public record PanelStructure(BlockPos origin, Direction facing, Direction right,
     public static void refresh(Level level, BlockPos pos) {
         PanelStructure group = find(level, pos);
         for (BlockPos member : group.blocks) {
+            if (level instanceof ServerLevel server && (!group.valid || !member.equals(group.origin))
+                && level.getBlockEntity(member) instanceof PanelBlockEntity panel)
+                FrequencyNetwork.remove(server, panel.automationInstanceId, member);
             BlockState state = level.getBlockState(member);
             int edgeMask = group.edges(member);
             if (state.getValue(LuminousPanelBlock.EDGES) != edgeMask) {

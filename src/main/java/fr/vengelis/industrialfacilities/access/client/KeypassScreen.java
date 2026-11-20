@@ -2,6 +2,7 @@ package fr.vengelis.industrialfacilities.access.client;
 
 import java.util.*;
 import fr.vengelis.industrialfacilities.access.KeypassData;
+import fr.vengelis.industrialfacilities.access.AccessTerminalEntity;
 import fr.vengelis.industrialfacilities.access.TerminalDevices;
 import fr.vengelis.industrialfacilities.access.ui.*;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,6 +16,9 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
     private static final int PAGE_SIZE=4,INK=0xE2E5EB,ACCENT=0xFFD089;
     private final List<Button> rows=new ArrayList<>();
     private EditBox input,nameInput;
+    private EditBox duration;
+    private Button applyDuration;
+    private int lastDuration;
     private Button previous,next,save,revoke,unlink,submit,detach,rename;
     private UUID selected;
     private String loadedName="";
@@ -29,6 +33,8 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
     private Button button(int x,int y,int w,int h,Component label,Button.OnPress callback){return addRenderableWidget(Button.builder(label,callback).bounds(leftPos+x,topPos+y,w,h).build());}
     @Override protected void init(){
         String draft=nameInput==null?loadedName:nameInput.getValue();
+        imageWidth = !menu.manager && menu.owner ? Math.clamp(width - 16, 300, 340) : 282;
+        duration = null; applyDuration = null;
         deviceList = null;
         super.init();rows.clear();
         if(menu.manager){
@@ -42,15 +48,17 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
             revoke=button(166,153,51,18,tr("revoke"),b->send(KeypassMenu.REVOKE,""));
             unlink=button(218,153,52,18,tr("unlink"),b->{if(confirmUnlink)send(KeypassMenu.UNLINK,"");else confirmUnlink=true;refresh();});
         }else{
-            field(72,29,138);
-            for(int i=1;i<=9;i++){String digit=Integer.toString(i);button(72+(i-1)%3*47,54+(i-1)/3*24,44,21,Component.literal(digit),b->digit(digit));}
-            button(72,126,44,21,tr("backspace"),b->{String s=input.getValue();if(!s.isEmpty())input.setValue(s.substring(0,s.length()-1));});
-            button(119,126,44,21,Component.literal("0"),b->digit("0"));
-            submit=button(166,126,44,21,tr("ok"),b->send(KeypassMenu.SUBMIT,input.getValue()));
+            int keypadX = menu.owner ? 14 : 72;
+            field(keypadX,29,138);
+            for(int i=1;i<=9;i++){String digit=Integer.toString(i);button(keypadX+(i-1)%3*47,54+(i-1)/3*24,44,21,Component.literal(digit),b->digit(digit));}
+            button(keypadX,126,44,21,tr("backspace"),b->{String s=input.getValue();if(!s.isEmpty())input.setValue(s.substring(0,s.length()-1));});
+            button(keypadX+47,126,44,21,Component.literal("0"),b->digit("0"));
+            submit=button(keypadX+94,126,44,21,tr("ok"),b->send(KeypassMenu.SUBMIT,input.getValue()));
             if(menu.owner){
+                initDuration();
                 devicesButton = button(12, 154, 120, 18, Component.translatable(TerminalDevices.UI + "devices"),
                     ignored -> showDevices(true));
-                detach=button(145,154,125,18,tr("detach"),b->{if(confirmDetach)send(KeypassMenu.DETACH,"");else confirmDetach=true;refresh();});
+                detach=button(imageWidth-137,154,125,18,tr("detach"),b->{if(confirmDetach)send(KeypassMenu.DETACH,"");else confirmDetach=true;refresh();});
                 keypad = children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
                 deviceList = new TerminalLinkList(leftPos, topPos, imageWidth, imageHeight, this::addRenderableWidget,
                     link -> PacketDistributor.sendToServer(new AccessMessages.UnlinkDevice(menu.containerId, link.id(), link.position())),
@@ -59,6 +67,30 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
             }
         }
         refresh();
+    }
+    private void initDuration() {
+        lastDuration = -1;
+        int fieldWidth = Math.min(66, (imageWidth - 184) / 2);
+        duration = new EditBox(font,leftPos+166,topPos+70,fieldWidth,18,Component.translatable("gui.industrial_facilities.access.open_seconds"));
+        duration.setMaxLength(3);
+        duration.setFilter(value -> value.matches("[0-9]{0,3}"));
+        duration.setTooltip(Tooltip.create(Component.translatable("gui.industrial_facilities.terminal_control.range")));
+        duration.setResponder(value -> refreshDuration());
+        addRenderableWidget(duration);
+        applyDuration = button(170+fieldWidth,70,imageWidth-184-fieldWidth,18,
+            Component.translatable("gui.industrial_facilities.access.apply_iris_opening"),
+            ignored -> send(KeypassMenu.OPEN_SECONDS,duration.getValue()));
+    }
+    private void refreshDuration() {
+        if (duration == null || applyDuration == null) return;
+        int seconds = menu.openSeconds.get();
+        if (seconds > 0 && seconds != lastDuration) {
+            lastDuration = seconds;
+            duration.setValue(Integer.toString(seconds));
+        }
+        String value = duration.getValue();
+        int entered = value.isEmpty() ? 0 : Integer.parseInt(value);
+        applyDuration.active = menu.owner && entered >= 1 && entered <= AccessTerminalEntity.MAX_OPEN_SECONDS;
     }
     private void selectReader(KeypassData.Reader reader){
         selected=reader.id();loadedName=reader.name();confirmUnlink=false;input.setValue("");nameInput.setValue(loadedName);refresh();
@@ -76,7 +108,7 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
     private void digit(String digit){if(input.getValue().length()<KeypassData.PIN_LENGTH)input.setValue(input.getValue()+digit);}
     private void send(int kind,String value){
         PacketDistributor.sendToServer(new KeypassMessages.Action(menu.containerId,kind,selected==null?KeypassMessages.NONE:selected,value));
-        if(kind!=KeypassMenu.RENAME)input.setValue("");confirmUnlink=false;confirmDetach=false;refresh();
+        if(kind!=KeypassMenu.RENAME&&kind!=KeypassMenu.OPEN_SECONDS)input.setValue("");confirmUnlink=false;confirmDetach=false;refresh();
     }
     private int pages(){return Math.max(1,(menu.readers.size()+PAGE_SIZE-1)/PAGE_SIZE);}
     private void showDevices(boolean visible) {
@@ -90,6 +122,7 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
     }
     private void refresh(){
         if(input==null)return;
+        refreshDuration();
         if (deviceList != null) {
             deviceList.update(menu.deviceLinks, showingDevices, menu.owner);
             devicesButton.setMessage(Component.translatable(TerminalDevices.UI + "device_count", menu.doors));
@@ -126,6 +159,10 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
             return super.keyPressed(key, scan, modifiers);
         }
         if(nameInput!=null&&nameInput.isFocused()&&key!=256){if(key==257||key==335){renameSelected();return true;}return nameInput.keyPressed(key,scan,modifiers)||key!=258;}
+        if(duration!=null&&duration.isFocused()&&key!=256){
+            if(key==257||key==335){if(applyDuration.active)applyDuration.onPress();return true;}
+            return duration.keyPressed(key,scan,modifiers)||key!=258;
+        }
         if((key==257||key==335)&&input!=null&&KeypassData.validPin(input.getValue())&&(!menu.manager||selected!=null)){send(menu.manager?KeypassMenu.SAVE:KeypassMenu.SUBMIT,input.getValue());return true;}
         if(input!=null&&input.isFocused()&&key!=256)return input.keyPressed(key,scan,modifiers)||key!=258;
         return super.keyPressed(key,scan,modifiers);
@@ -147,9 +184,10 @@ public final class KeypassScreen extends AbstractContainerScreen<KeypassMenu> {
             g.drawCenteredString(font,tr("page",page+1,pages()),imageWidth/2,114,INK);
             if(menu.readers.isEmpty())g.drawCenteredString(font,tr("no_readers"),imageWidth/2,66,INK);
         }else{
+            if (menu.owner) g.drawWordWrap(font,Component.translatable("gui.industrial_facilities.access.open_seconds"),166,43,imageWidth-180,INK);
             if (!menu.owner) g.drawString(font,tr("doors",menu.doors),12,161,INK,false);
         }
-        Component message=menu.status.startsWith(TerminalDevices.UI) ? Component.translatable(menu.status)
+        Component message=menu.status.startsWith("gui.industrial_facilities.") ? Component.translatable(menu.status)
             : tr(menu.status.isEmpty()?(menu.manager?"manager_hint":"reader_hint"):menu.status);
         g.drawString(font,font.plainSubstrByWidth(message.getString(),imageWidth-26),13,186,ACCENT,false);
     }

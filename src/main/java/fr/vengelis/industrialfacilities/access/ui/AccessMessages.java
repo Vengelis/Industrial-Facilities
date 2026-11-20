@@ -92,7 +92,7 @@ public final class AccessMessages {
     public static java.util.function.Consumer<State> receiver=data->{};
     public static java.util.function.Consumer<DeviceList> deviceReceiver = data -> {};
     @SubscribeEvent public static void network(RegisterPayloadHandlersEvent event){
-        var registrar=event.registrar("access_v5");
+        var registrar=event.registrar("access_v6");
         registrar.playToServer(Action.TYPE,Action.CODEC,(data,context)->context.enqueueWork(()->{
             if(context.player().containerMenu instanceof AccessMenu menu&&menu.containerId==data.menuId&&menu.stillValid(context.player()))
                 menu.apply(context.player(),data.action,data.code,data.value);

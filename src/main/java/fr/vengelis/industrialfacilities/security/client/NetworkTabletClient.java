@@ -68,7 +68,8 @@ public final class NetworkTabletClient {
         new LegendEntry("alarm", "automation", "alarm"),
         new LegendEntry("emitter", "automation", "emitter"),
         new LegendEntry("panel", "automation", "panel"),
-        new LegendEntry("keypass", "automation", TerminalLinks.KEYPASS_READER));
+        new LegendEntry("keypass", "automation", TerminalLinks.KEYPASS_READER),
+        new LegendEntry("relay", TerminalLinks.RELAY, TerminalLinks.RELAY));
 
     private record Label(String name, float x, float top, double distance, int color) {}
 
@@ -201,11 +202,20 @@ public final class NetworkTabletClient {
         if (!world.hasChunkAt(link.sourceRoot()) || !world.hasChunkAt(link.targetRoot())) {
             return false;
         }
+        if (link.sourceKind().equals(TerminalLinks.RELAY) || link.targetKind().equals(TerminalLinks.RELAY)) {
+            if (NetworkTabletOutlines.terminalAt(world, link.sourceRoot(), link.sourceId(), link.sourceKind()) == null) return false;
+            return !link.targetKind().equals(TerminalLinks.RELAY)
+                || NetworkTabletOutlines.terminalAt(world, link.targetRoot(), link.targetId(), link.targetKind()) != null;
+        }
         if (link.sourceKind().equals(TerminalLinks.BUTTON) || link.sourceKind().equals(TerminalLinks.LOCKDOWN)) {
             return NetworkTabletOutlines.terminalAt(world, link.sourceRoot(), link.sourceId(), link.sourceKind()) != null
-                && (link.targetKind().equals(TerminalLinks.TERMINAL)
-                    ? NetworkTabletOutlines.terminalAt(world, link.targetRoot(), link.targetId(), link.targetKind()) != null
-                    : world.getBlockEntity(link.targetRoot()) instanceof fr.vengelis.industrialfacilities.security.SignalEmitterEntity);
+                && switch (link.targetKind()) {
+                    case TerminalLinks.TERMINAL ->
+                        NetworkTabletOutlines.terminalAt(world, link.targetRoot(), link.targetId(), link.targetKind()) != null;
+                    case "door" -> world.getBlockEntity(link.targetRoot()) instanceof fr.vengelis.industrialfacilities.door.IndustrialDoorEntity door
+                        && door.size > 0 && link.targetId().equals(door.doorInstanceId);
+                    default -> world.getBlockEntity(link.targetRoot()) instanceof fr.vengelis.industrialfacilities.security.SignalEmitterEntity;
+                };
         }
         // Les lecteurs Keypass peuvent être remplacés pendant la durée de vie de l'instantané.
         return !link.sourceKind().equals(TerminalLinks.KEYPASS_MANAGER)
@@ -240,6 +250,7 @@ public final class NetworkTabletClient {
     }
 
     public static int colorFor(String source, String target) {
+        if (source.equals(TerminalLinks.RELAY) || target.equals(TerminalLinks.RELAY)) return 0x8BE9E3;
         if (source.equals(TerminalLinks.BUTTON)) return 0x60C8F6;
         if (source.equals(TerminalLinks.LOCKDOWN)) return 0xF47360;
         if (source.equals(TerminalLinks.KEYPASS_MANAGER) || target.equals(TerminalLinks.KEYPASS_READER)) {
@@ -296,7 +307,7 @@ public final class NetworkTabletClient {
         for (var link : links) {
             Vec3 from = link.sourceRoot().getCenter().add(0, TERMINAL_HEIGHT_OFFSET, 0);
             Vec3 to = link.targetRoot().getCenter();
-            if (link.targetKind().equals(TerminalLinks.KEYPASS_READER)) {
+            if (link.targetKind().equals(TerminalLinks.KEYPASS_READER) || link.targetKind().equals(TerminalLinks.RELAY)) {
                 to = to.add(0, TERMINAL_HEIGHT_OFFSET, 0);
             }
             if (!event.getFrustum().isVisible(new AABB(from, to).inflate(.1))) {

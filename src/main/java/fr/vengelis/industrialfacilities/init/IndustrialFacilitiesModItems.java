@@ -167,6 +167,7 @@ public class IndustrialFacilitiesModItems {
 	public static final DeferredItem<Item> SUPERVISION_CONSOLE;
 	public static final DeferredItem<Item> SUPERVISION_DISPLAY;
 	public static final DeferredItem<Item> PORTABLE_CONSOLE;
+	public static final DeferredItem<Item> FREQUENCY_ENCODER;
 	static {
 		EXTINGUISHER = REGISTRY.register("extinguisher", ExtinguisherItem::new);
 		EXTINGUISHER_PLACED = block(IndustrialFacilitiesModBlocks.EXTINGUISHER_PLACED);
@@ -310,6 +311,7 @@ public class IndustrialFacilitiesModItems {
 		SUPERVISION_CONSOLE = block(IndustrialFacilitiesModBlocks.SUPERVISION_CONSOLE);
 		SUPERVISION_DISPLAY = block(IndustrialFacilitiesModBlocks.SUPERVISION_DISPLAY);
 		PORTABLE_CONSOLE = REGISTRY.register("portable_console", PortableConsoleItem::new);
+		FREQUENCY_ENCODER = block(IndustrialFacilitiesModBlocks.FREQUENCY_ENCODER);
 	}
 
 	// Start of user code block custom items

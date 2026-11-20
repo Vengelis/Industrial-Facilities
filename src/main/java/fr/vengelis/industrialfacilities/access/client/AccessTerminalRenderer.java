@@ -5,8 +5,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import fr.vengelis.industrialfacilities.IndustrialFacilitiesMod;
 import fr.vengelis.industrialfacilities.access.*;
+import fr.vengelis.industrialfacilities.client.CountdownText;
 import fr.vengelis.industrialfacilities.init.IndustrialFacilitiesModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.*;
@@ -27,6 +29,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import org.joml.Matrix3f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import java.util.*;
 
 /** Inventory and multiblock use the exact same baked, bevelled terminal model. */
@@ -40,6 +45,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     private static final Map<BakedQuad,BakedQuad> OPEN_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<BakedQuad,BakedQuad> DISABLED_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<BakedQuad,BakedQuad> INDICATOR_QUADS=Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<BakedQuad, ScreenPlane> SCREEN_PLANES = Collections.synchronizedMap(new WeakHashMap<>());
     public AccessTerminalRenderer(BlockEntityRendererProvider.Context context){}
     @SubscribeEvent public static void register(EntityRenderersEvent.RegisterRenderers event){event.registerBlockEntityRenderer(AccessContent.TYPE,AccessTerminalRenderer::new);}
     @SubscribeEvent public static void registerScreen(ModelEvent.RegisterAdditional event){
@@ -49,7 +55,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
         event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_lockdown_active_screen")));
         event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(IndustrialFacilitiesMod.MODID,"block/terminal_lockdown_disabled_screen")));
     }
-    @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();DISABLED_QUADS.clear();INDICATOR_QUADS.clear();}
+    @SubscribeEvent public static void modelReloaded(ModelEvent.BakingCompleted event){OPEN_QUADS.clear();DISABLED_QUADS.clear();INDICATOR_QUADS.clear();SCREEN_PLANES.clear();}
     @SubscribeEvent public static void itemColours(RegisterColorHandlersEvent.Item event){
         event.register((stack,index)->0xff000000|colour(index,1,false),IndustrialFacilitiesModItems.TERMINAL_READER.get(),IndustrialFacilitiesModItems.TERMINAL_ENCODER.get(),IndustrialFacilitiesModItems.TERMINAL_BADGE_BANK.get(),IndustrialFacilitiesModItems.KEYPASS_READER.get(),IndustrialFacilitiesModItems.KEYPASS_MANAGER.get());
     }
@@ -76,7 +82,7 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
     private static boolean isScreen(String sprite){
         return switch(sprite){
             case "block/terminal_reader_screen_32","block/terminal_encoder_screen_32","block/terminal_badge_bank_screen_32",
-                 "block/camera_terminal_screen_32","block/keypass_reader_screen_32","block/keypass_manager_screen_32",
+                 "block/camera_terminal_screen_32","block/frequency_encoder_screen_32","block/keypass_reader_screen_32","block/keypass_manager_screen_32",
                  "block/terminal_button_screen_32","block/terminal_lockdown_screen_32" -> true;
             default -> false;
         };
@@ -108,6 +114,8 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
         if(be.getLevel()==null||!be.getBlockState().getValue(AccessTerminalBlock.ASSEMBLED)||be.getBlockState().getValue(AccessTerminalBlock.HALF)!=DoubleBlockHalf.LOWER)return;
         Direction facing=be.getBlockState().getValue(AccessTerminalBlock.FACING);
         boolean lockedDown=be.isLockedDown();
+        String countdown = lockedDown ? "" : CountdownText.remaining(be.screenUntil(), be.getLevel().getGameTime());
+        BakedQuad countdownFace = null;
         var lighting=new Lighting(be,facing);var model=model(be);var random=RandomSource.create(42);
         pose.pushPose();pose.translate(.5,0,.5);
         pose.mulPose(Axis.YP.rotationDegrees(switch(facing){case EAST->90;case NORTH->180;case WEST->270;default->0;}));
@@ -122,12 +130,15 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
                 boolean emissive=isEmissive(quad,be.accessLevel);
                 int packedLight=emissive?LightTexture.FULL_BRIGHT:lighting.sample(quad);
                 BakedQuad display=screenQuad(quad,be.accessGranted,lockedDown);
+                boolean showCountdown = !countdown.isEmpty() && quad.getDirection() == Direction.SOUTH
+                    && isScreen(quad.getSprite().contents().name().getPath());
+                if (showCountdown) countdownFace = quad;
                 if(emissive&&(index==200||index>=100&&index<105))display=remap(display,INDICATOR,INDICATOR_QUADS);
                 // Eyes uses additive blending. A black depth-writing backing
                 // prevents transparent screens and avoids doubling the color.
                 float base=emissive?0f:1f;
                 out.putBulkData(pose.last(),display,base*(color>>16&255)/255f,base*(color>>8&255)/255f,base*(color&255)/255f,1f,packedLight,OverlayTexture.NO_OVERLAY);
-                if(emissive)emissiveQuads.add(new Glow(display,color));
+                if(emissive && !showCountdown)emissiveQuads.add(new Glow(display,color));
             }
         }
         // Request the second buffer only after completing the first pass:
@@ -136,7 +147,53 @@ public final class AccessTerminalRenderer implements BlockEntityRenderer<AccessT
             VertexConsumer glow=buffers.getBuffer(emissiveRenderType());
             for(Glow entry:emissiveQuads){int color=entry.color();glow.putBulkData(pose.last(),entry.quad(),(color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,1f,LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);}
         }
+        if (countdownFace != null) drawCountdown(countdownFace, countdown, be instanceof ControlTerminalEntity, pose, buffers);
         pose.popPose();
+    }
+
+    private static void drawCountdown(BakedQuad face, String countdown, boolean button, PoseStack pose, MultiBufferSource buffers) {
+        var screen = SCREEN_PLANES.computeIfAbsent(face, ScreenPlane::from);
+        Font font = Minecraft.getInstance().font;
+        int width = font.width(countdown);
+        float scale = Math.min(screen.width() * .8f / width, screen.height() * .46f / font.lineHeight);
+        pose.pushPose();
+        pose.translate(screen.center().x, screen.center().y, screen.center().z);
+        pose.mulPose(screen.rotation());
+        pose.translate(0, 0, .0005f); // Separate the digits from the screen depth along its normal.
+        pose.scale(scale, -scale, scale);
+        font.drawInBatch(countdown, -width / 2f, -font.lineHeight / 2f, button ? 0xFFFFD166 : 0xFF76E6A9,
+            false, pose.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        pose.popPose();
+    }
+
+    private record ScreenPlane(Vector3f center, Quaternionf rotation, float width, float height) {
+        static ScreenPlane from(BakedQuad face) {
+            int[] data = face.getVertices();
+            int stride = data.length / 4;
+            var corners = new Vector3f[4];
+            var center = new Vector3f();
+            for (int i = 0; i < corners.length; i++) {
+                int offset = i * stride;
+                corners[i] = new Vector3f(Float.intBitsToFloat(data[offset]), Float.intBitsToFloat(data[offset + 1]),
+                    Float.intBitsToFloat(data[offset + 2]));
+                center.add(corners[i]);
+            }
+            center.mul(.25f);
+
+            var normal = new Vector3f(corners[1]).sub(corners[0])
+                .cross(new Vector3f(corners[2]).sub(corners[0])).normalize();
+            if (normal.z < 0) normal.negate();
+            var right = new Vector3f(0, 1, 0).cross(normal).normalize();
+            var up = new Vector3f(normal).cross(right);
+            float halfWidth = 0, halfHeight = 0;
+            for (var corner : corners) {
+                corner.sub(center);
+                halfWidth = Math.max(halfWidth, Math.abs(corner.dot(right)));
+                halfHeight = Math.max(halfHeight, Math.abs(corner.dot(up)));
+            }
+            var axes = new Matrix3f().setColumn(0, right).setColumn(1, up).setColumn(2, normal);
+            return new ScreenPlane(center, new Quaternionf().setFromNormalized(axes), 2 * halfWidth, 2 * halfHeight);
+        }
     }
     private static final class Lighting{
         final AccessTerminalEntity be;final Direction facing,right;final Map<BlockPos,Integer> cache=new HashMap<>();

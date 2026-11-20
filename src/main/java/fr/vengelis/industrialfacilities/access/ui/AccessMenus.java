@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,6 +30,9 @@ public final class AccessMenus {
         });
     }
     public static void open(Player player,AccessTerminalEntity terminal){
+        open(player, terminal, null);
+    }
+    public static void open(Player player, AccessTerminalEntity terminal, InteractionHand blankHand) {
         if(!(player instanceof ServerPlayer server)||terminal.getLevel()!=player.level()
             ||AccessTerminalEntity.resolve(player.level(),terminal.getBlockPos())!=terminal||!terminal.canInteract(player))return;
         if(terminal.bank){
@@ -39,8 +43,10 @@ public final class AccessMenus {
         String title = terminal instanceof fr.vengelis.industrialfacilities.access.ControlTerminalEntity control
             ? "gui.industrial_facilities.terminal_control." + (control.lockdown() ? "lockdown" : "button")
             : "gui.industrial_facilities.access." + (terminal.encoder ? "encoder" : "reader");
-        server.openMenu(new SimpleMenuProvider((id,inventory,p)->new AccessMenu(id,inventory,terminal), Component.translatable(title)),
+        var opened = server.openMenu(new SimpleMenuProvider((id,inventory,p)->new AccessMenu(id,inventory,terminal), Component.translatable(title)),
             buffer->AccessMenu.writeOpening(buffer,terminal));
+        if (blankHand != null && opened.isPresent() && server.containerMenu instanceof AccessMenu menu
+                && menu.containerId == opened.getAsInt()) menu.insertHeldBlank(server, blankHand);
     }
     public static void openDoor(Player player,IndustrialDoorEntity door){
         if(!(player instanceof ServerPlayer server)||door.getLevel()!=player.level()||door.size<=0)return;

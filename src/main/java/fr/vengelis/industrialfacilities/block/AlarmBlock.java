@@ -1,5 +1,6 @@
 package fr.vengelis.industrialfacilities.block;
 
+import net.minecraft.server.level.ServerLevel;
 import fr.vengelis.industrialfacilities.alarm.*;
 import net.minecraft.core.*;
 import net.minecraft.network.chat.Component;
@@ -55,7 +56,11 @@ public class AlarmBlock extends Block implements EntityBlock {
         return InteractionResult.sidedSuccess(l.isClientSide);
     }
     @Override protected void onRemove(BlockState s,Level l,BlockPos p,BlockState next,boolean moving) {
-        if (!s.is(next.getBlock()) && l.getBlockEntity(p) instanceof AlarmBlockEntity be) be.stopListeners();
+        if (!s.is(next.getBlock()) && l.getBlockEntity(p) instanceof AlarmBlockEntity be) {
+            if (l instanceof ServerLevel server)
+                fr.vengelis.industrialfacilities.frequency.FrequencyNetwork.remove(server, be.automationInstanceId, p);
+            be.stopListeners();
+        }
         super.onRemove(s,l,p,next,moving);
     }
 }

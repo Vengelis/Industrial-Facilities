@@ -1,8 +1,11 @@
 package fr.vengelis.industrialfacilities.access;
 
+import fr.vengelis.industrialfacilities.frequency.*;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorEntity;
 import fr.vengelis.industrialfacilities.door.IndustrialDoorManager;
 import fr.vengelis.industrialfacilities.security.SignalEmitterEntity;
+import fr.vengelis.industrialfacilities.supervision.SignalTraffic;
+import fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,8 +26,12 @@ import net.minecraft.world.level.saveddata.SavedData;
 public final class TerminalControlData extends SavedData {
     static final int MAX_LINKS = 64;
 
-    public record Target(UUID id, BlockPos position, boolean emitter) {}
-    private record Pulse(UUID button, Target reader, UUID code) {}
+    public record Target(UUID id, BlockPos position, boolean emitter, boolean door) {
+        public Target(UUID id, BlockPos position, boolean emitter) { this(id, position, emitter, false); }
+        public boolean terminal() { return !emitter && !door; }
+        public String kind() { return door ? "door" : emitter ? "emitter" : "terminal"; }
+    }
+    private record Pulse(UUID button, Target target, UUID code) {}
     private record ReaderSite(BlockPos position, UUID owner) {}
 
     private static final class Circuit {
@@ -42,6 +49,7 @@ public final class TerminalControlData extends SavedData {
         }
     }
 
+    private boolean frequencyInitialized;
     private final Map<UUID, Circuit> circuits = new HashMap<>();
     private final Map<UUID, Set<Pulse>> requests = new HashMap<>();
     private final Map<UUID, Target> locked = new HashMap<>();
@@ -51,8 +59,13 @@ public final class TerminalControlData extends SavedData {
     private final Map<UUID, Set<UUID>> camerasByDoor = new HashMap<>();
 
     public static TerminalControlData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(
+        var data = level.getDataStorage().computeIfAbsent(
             new SavedData.Factory<>(TerminalControlData::new, TerminalControlData::load), "industrial_terminal_controls");
+        if (!data.frequencyInitialized) {
+            data.frequencyInitialized = true;
+            data.rebuildLocks(level);
+        }
+        return data;
     }
 
     public boolean locked(UUID terminal) {
@@ -62,12 +75,19 @@ public final class TerminalControlData extends SavedData {
     public boolean blocksDoor(ServerLevel level, IndustrialDoorEntity door) {
         UUID doorId = door.doorInstanceId;
         if (doorId == null || locked.isEmpty()) return false;
+        if (locked(doorId)) return true;
+        var network = FrequencyNetwork.get(level);
         for (UUID camera : camerasByDoor.getOrDefault(doorId, Set.of())) {
-            if (locked(camera)) return true;
+            if (locked(camera) && network.legacy(camera, doorId)) return true;
+        }
+        for (var peer : network.senders(level, doorId)) {
+            if (!peer.type().reader() && peer.type() != FrequencyEndpoint.Type.CAMERA_TERMINAL) continue;
+            if (locked(peer.id()) || lockedReaderSites.getOrDefault(new ReaderSite(peer.pos(), peer.owner()), Set.of()).contains(peer.id()))
+                return true;
         }
         if (lockedReaderSites.isEmpty()) return false;
         String dimension = level.dimension().location().toString();
-        return AccessRegistry.get(level.getServer()).hasReader(doorId, reader -> {
+        return AccessDoorService.readers(level, doorId).stream().anyMatch(reader -> {
             if (!dimension.equals(reader.dimension) || !TerminalLinks.inRange(reader.position, door.getBlockPos())) return false;
             Set<UUID> instances = lockedReaderSites.get(new ReaderSite(reader.position, reader.owner));
             // Older registrations had a site and owner but no physical instance UUID.
@@ -96,14 +116,44 @@ public final class TerminalControlData extends SavedData {
     }
 
     public Set<Target> links(ControlTerminalEntity terminal) {
+        if (!(terminal.getLevel() instanceof ServerLevel level)) return Set.of();
         Circuit circuit = circuit(terminal);
-        return circuit == null ? Set.of() : Set.copyOf(circuit.links);
+        return targets(level, terminal.instanceId, terminal.lockdown(), circuit == null ? Set.of() : circuit.links);
     }
+
+    private Set<Target> targets(ServerLevel level, UUID id, boolean lockdown, Set<Target> existing) {
+        var result = new LinkedHashSet<Target>();
+        if (level == null) { result.addAll(existing); return result; }
+        var network = FrequencyNetwork.get(level);
+        for (Target target : existing) if (network.legacy(id, target.id)) result.add(target);
+        for (var peer : network.peers(level, id)) {
+            var type = peer.type();
+            if (type == FrequencyEndpoint.Type.DOOR) {
+                result.add(new Target(peer.id(), peer.pos(), false, true));
+                continue;
+            }
+            // Lockdowns share a channel without disabling their peers; this avoids a cyclic shutdown.
+            if (lockdown ? (type.terminal() && type != FrequencyEndpoint.Type.LOCKDOWN) || type == FrequencyEndpoint.Type.EMITTER : type.reader())
+                result.add(new Target(peer.id(), peer.pos(), type == FrequencyEndpoint.Type.EMITTER));
+        }
+        return result;
+    }
+
+    private Set<Target> targets(ServerLevel level, UUID id, Circuit circuit) {
+        return targets(level, id, circuit.lockdown, circuit.links);
+    }
+
+    public void frequencyChanged(ServerLevel level) { changed(level); }
 
     public boolean on(ControlTerminalEntity terminal, long now) {
         Circuit circuit = circuit(terminal);
         return circuit != null && !locked(terminal.instanceId)
             && (circuit.lockdown ? circuit.on : circuit.until > now);
+    }
+
+    public long activationUntil(ControlTerminalEntity terminal, long now) {
+        Circuit circuit = circuit(terminal);
+        return circuit != null && !circuit.lockdown && !locked(terminal.instanceId) && circuit.until > now ? circuit.until : 0;
     }
 
     private Circuit circuit(ControlTerminalEntity terminal) {
@@ -117,7 +167,7 @@ public final class TerminalControlData extends SavedData {
     }
 
     public static AccessTerminalEntity terminalAt(ServerLevel level, Target target, UUID owner) {
-        if (target.emitter || !TerminalLinks.loaded(level, target.position)) return null;
+        if (!target.terminal() || !TerminalLinks.loaded(level, target.position)) return null;
         var terminal = AccessTerminalEntity.resolve(level, target.position);
         return terminal != null && terminal.getBlockPos().equals(target.position)
             && target.id.equals(terminal.instanceId) && owner.equals(terminal.creator) ? terminal : null;
@@ -130,9 +180,11 @@ public final class TerminalControlData extends SavedData {
     }
 
     static boolean available(ServerLevel level, ControlTerminalEntity source, Target target) {
-        return TerminalLinks.inRange(source.getBlockPos(), target.position)
-            && (target.emitter ? emitterAt(level, target, source.creator) != null
-                               : terminalAt(level, target, source.creator) != null);
+        var peer = FrequencyEndpoint.resolve(level, target.position);
+        if (peer != null && peer.id().equals(target.id)
+            && FrequencyNetwork.get(level).connected(level, source.instanceId, target.id)) return true;
+        if (!TerminalLinks.inRange(source.getBlockPos(), target.position)) return false;
+        return target.emitter ? emitterAt(level, target, source.creator) != null : terminalAt(level, target, source.creator) != null;
     }
 
     String unlinkOffline(ServerLevel level, ControlTerminalEntity terminal, UUID id, BlockPos position) {
@@ -202,58 +254,130 @@ public final class TerminalControlData extends SavedData {
     }
 
     public boolean press(ServerLevel level, ControlTerminalEntity terminal) {
-        Circuit circuit = circuit(terminal);
+        var linked = links(terminal);
+        if (linked.isEmpty() || locked(terminal.instanceId)) return false;
+        Circuit circuit = circuits.computeIfAbsent(terminal.instanceId,
+            id -> new Circuit(terminal.getBlockPos(), terminal.creator, false));
         long now = level.getGameTime();
-        if (circuit == null || circuit.links.isEmpty() || locked(terminal.instanceId)) return false;
-        if (circuit.until > now) return true;
-        removeExpired(now);
+        removeExpired(level, now);
 
         var registry = AccessRegistry.get(level.getServer());
         boolean opened = false;
-        for (Target target : circuit.links) {
+        for (Target target : linked) {
             if (locked(target.id)) continue;
-            var reader = terminalAt(level, target, circuit.owner);
+            if (target.door) {
+                var door = AccessDoorService.resolveDoor(level, target.position);
+                if (door != null && target.position.equals(door.getBlockPos()) && target.id.equals(door.doorInstanceId))
+                    opened |= requestDoor(level, terminal.instanceId, target, null, door);
+                continue;
+            }
+            var peer = FrequencyEndpoint.resolve(level, target.position);
+            UUID owner = peer != null && FrequencyNetwork.get(level).connected(level, terminal.instanceId, target.id)
+                ? peer.owner() : circuit.owner;
+            var reader = terminalAt(level, target, owner);
             if (!reader(reader) || reader.terminalId == null) continue;
             var entry = registry.find(reader.terminalId);
             if (TerminalLinks.loadedReader(level, entry) != reader) continue;
-            for (var link : entry.doors()) {
-                if (!TerminalLinks.admissible(level, target.position, link)) continue;
+            for (var link : AccessDoorService.doors(level, entry)) {
+                if (!TerminalLinks.admissible(level, target.position, target.id, link)) continue;
                 var door = TerminalLinks.loadedDoor(level, link);
-                if (door == null || blocksDoor(level, door) || IndustrialDoorManager.fireAlarmActive(level, door)) continue;
-                requests.computeIfAbsent(link.instance(), id -> new HashSet<>())
-                    .add(new Pulse(terminal.instanceId, target, entry.id));
-                opened = true;
+                if (door != null) opened |= requestDoor(level, terminal.instanceId, target, entry.id, door);
             }
         }
         if (opened) {
             circuit.until = now + terminal.seconds() * 20L;
             setDirty();
+            refreshSignalTraffic(level);
         }
         return opened;
     }
 
+    private boolean requestDoor(ServerLevel level, UUID button, Target target, UUID readerCode, IndustrialDoorEntity door) {
+        if (blocksDoor(level, door) || IndustrialDoorManager.fireAlarmActive(level, door)) return false;
+        requests.computeIfAbsent(door.doorInstanceId, id -> new HashSet<>()).add(new Pulse(button, target, readerCode));
+        return true;
+    }
+
+    /** Derive traffic from live requests rather than replaying the initial button press. */
+    public void refreshSignalTraffic(ServerLevel level) {
+        long now = level.getGameTime();
+        var registry = AccessRegistry.get(level.getServer());
+        String dimension = level.dimension().location().toString();
+        for (var circuitEntry : circuits.entrySet()) {
+            UUID id = circuitEntry.getKey(); Circuit circuit = circuitEntry.getValue();
+            var emissions = new LinkedHashSet<SignalTraffic.Emission>();
+            if (!locked(id) && (circuit.lockdown ? circuit.on : circuit.until > now)) {
+                var linked = targets(level, id, circuit);
+                if (circuit.lockdown) {
+                    for (Target target : linked)
+                        emissions.add(new SignalTraffic.Emission(id, target.id, SignalKind.LOCKDOWN));
+                } else for (var request : requests.entrySet()) {
+                    for (Pulse pulse : request.getValue()) {
+                        Target target = pulse.target;
+                        if (!id.equals(pulse.button) || !linked.contains(target) || locked(target.id)) continue;
+                        AccessRegistry.DoorLink link = null;
+                        if (target.door) {
+                            if (target.id.equals(request.getKey()))
+                                link = new AccessRegistry.DoorLink(dimension, target.position, target.id);
+                        } else {
+                            var reader = registry.find(pulse.code);
+                            if (reader != null && reader.position.equals(target.position) && reader.dimension.equals(dimension)
+                                && (reader.owner.equals(circuit.owner) || FrequencyNetwork.get(level).connected(level, id, target.id)))
+                                link = AccessDoorService.doors(level, reader).stream()
+                                    .filter(door -> door.instance().equals(request.getKey())
+                                        && TerminalLinks.admissible(level, reader.position, target.id, door))
+                                    .findFirst().orElse(null);
+                        }
+                        if (link == null) continue;
+                        if (TerminalLinks.loaded(level, link.position())) {
+                            var door = TerminalLinks.loadedDoor(level, link);
+                            if (door == null || blocksDoor(level, door) || IndustrialDoorManager.fireAlarmActive(level, door)) continue;
+                        }
+                        emissions.add(new SignalTraffic.Emission(id, target.id, SignalKind.OPEN));
+                        if (target.terminal())
+                            emissions.add(new SignalTraffic.Emission(target.id, link.instance(), SignalKind.OPEN));
+                    }
+                }
+            }
+            SignalTraffic.maintainAll(level, id, emissions, circuit.lockdown ? Long.MAX_VALUE : circuit.until);
+        }
+    }
+
     public boolean buttonRequests(ServerLevel level, IndustrialDoorEntity door) {
+        return buttonOpenUntil(level, door) > level.getGameTime();
+    }
+
+    /** Latest valid timed request: any remaining button can still hold the door open. */
+    public long buttonOpenUntil(ServerLevel level, IndustrialDoorEntity door) {
         Set<Pulse> candidates = requests.get(door.doorInstanceId);
-        if (candidates == null) return false;
+        if (candidates == null) return 0;
         if (candidates.removeIf(pulse -> {
             Circuit source = circuits.get(pulse.button);
-            return source == null || source.until <= level.getGameTime() || !source.links.contains(pulse.reader);
+            return source == null || source.until <= level.getGameTime() || !targets(level, pulse.button, source).contains(pulse.target);
         })) {
             if (candidates.isEmpty()) requests.remove(door.doorInstanceId);
             setDirty();
         }
+        long until = 0;
         for (Pulse pulse : candidates) {
             Circuit source = circuits.get(pulse.button);
-            if (locked(pulse.button) || locked(pulse.reader.id)) continue;
+            if (locked(pulse.button) || locked(pulse.target.id)) continue;
+            if (pulse.target.door) {
+                if (pulse.target.id.equals(door.doorInstanceId) && pulse.target.position.equals(door.getBlockPos()))
+                    until = Math.max(until, source.until);
+                continue;
+            }
             var entry = AccessRegistry.get(level.getServer()).find(pulse.code);
-            if (entry != null && entry.position.equals(pulse.reader.position) && entry.owner.equals(source.owner)
+            if (entry != null && entry.position.equals(pulse.target.position)
+                    && (entry.owner.equals(source.owner) || FrequencyNetwork.get(level).connected(level, pulse.button, pulse.target.id))
                     && entry.dimension.equals(level.dimension().location().toString())
-                    && entry.doors().stream().anyMatch(link -> link.instance().equals(door.doorInstanceId)
-                        && link.position().equals(door.getBlockPos()) && TerminalLinks.admissible(level, entry.position, link))) {
-                return true;
+                    && AccessDoorService.doors(level, entry).stream().anyMatch(link -> link.instance().equals(door.doorInstanceId)
+                        && link.position().equals(door.getBlockPos())
+                        && TerminalLinks.admissible(level, entry.position, pulse.target.id, link))) {
+                until = Math.max(until, source.until);
             }
         }
-        return false;
+        return until;
     }
 
     void cancelDoorRequests(UUID door) {
@@ -282,17 +406,18 @@ public final class TerminalControlData extends SavedData {
     }
 
     public void remove(ServerLevel level, UUID endpoint) {
+        SignalTraffic.stopOrigin(level, endpoint);
         recordCameraDoors(endpoint, Set.of());
         boolean changed = circuits.remove(endpoint) != null;
         for (Circuit circuit : circuits.values()) changed |= circuit.links.removeIf(target -> target.id.equals(endpoint));
         if (changed) changed(level);
     }
 
-    private void removeExpired(long now) {
+    private void removeExpired(ServerLevel level, long now) {
         for (var pulses : requests.values()) {
             pulses.removeIf(pulse -> {
                 Circuit source = circuits.get(pulse.button);
-                return source == null || source.until <= now || !source.links.contains(pulse.reader);
+                return source == null || source.until <= now || !targets(level, pulse.button, source).contains(pulse.target);
             });
         }
         requests.values().removeIf(Collection::isEmpty);
@@ -301,7 +426,7 @@ public final class TerminalControlData extends SavedData {
     private void changed(ServerLevel level) {
         Set<Target> refresh = new HashSet<>(emitters);
         Set<Target> previouslyLocked = new HashSet<>(locked.values());
-        rebuildLocks();
+        rebuildLocks(level);
         for (Target target : locked.values())
             if (!previouslyLocked.remove(target)) syncTerminal(level, target);
         for (Target target : previouslyLocked) syncTerminal(level, target);
@@ -310,7 +435,8 @@ public final class TerminalControlData extends SavedData {
             if (TerminalLinks.loaded(level, target.position)
                 && level.getBlockEntity(target.position) instanceof SignalEmitterEntity emitter && target.id.equals(emitter.instanceId))
                 emitter.updatePower();
-        removeExpired(level.getGameTime());
+        removeExpired(level, level.getGameTime());
+        refreshSignalTraffic(level);
         setDirty();
     }
 
@@ -319,15 +445,17 @@ public final class TerminalControlData extends SavedData {
         if (terminal != null && target.id.equals(terminal.instanceId)) terminal.sync();
     }
 
-    private void rebuildLocks() {
+    private void rebuildLocks(ServerLevel level) {
         locked.clear();
         emitters.clear();
         lockedReaderSites.clear();
         Map<UUID, Integer> incoming = new HashMap<>();
         circuits.forEach((id, circuit) -> { if (circuit.lockdown) incoming.put(id, 0); });
-        circuits.values().stream().filter(c -> c.lockdown).forEach(circuit -> {
-            for (Target target : circuit.links) if (!target.emitter)
-                incoming.computeIfPresent(target.id, (id, count) -> count + 1);
+        Map<UUID, Set<Target>> linked = new HashMap<>();
+        circuits.forEach((id, circuit) -> linked.put(id, targets(level, id, circuit)));
+        incoming.keySet().forEach(id -> {
+            for (Target target : linked.get(id)) if (target.terminal())
+                incoming.computeIfPresent(target.id, (targetId, count) -> count + 1);
         });
         var ready = new ArrayDeque<UUID>();
         incoming.forEach((id, count) -> { if (count == 0) ready.add(id); });
@@ -335,13 +463,13 @@ public final class TerminalControlData extends SavedData {
             UUID id = ready.removeFirst();
             Circuit circuit = circuits.get(id);
             boolean engaged = circuit.on && !locked(id);
-            for (Target target : circuit.links) {
+            for (Target target : linked.get(id)) {
                 if (engaged && target.emitter) emitters.add(target);
                 if (engaged && !target.emitter) {
                     locked.put(target.id, target);
-                    blockReaderSite(target, circuit.owner);
+                    if (target.terminal()) blockReaderSite(level, id, target, circuit.owner);
                 }
-                if (!target.emitter) {
+                if (target.terminal()) {
                     Integer remaining = incoming.computeIfPresent(target.id, (targetId, count) -> count - 1);
                     if (remaining != null && remaining == 0) ready.add(target.id);
                 }
@@ -352,13 +480,18 @@ public final class TerminalControlData extends SavedData {
             Circuit circuit = circuits.get(id);
             if (circuit != null && !circuit.lockdown) {
                 circuit.until = 0;
-                for (Target reader : circuit.links) if (!reader.emitter) blockReaderSite(reader, circuit.owner);
+                for (Target reader : linked.get(id)) if (reader.terminal()) blockReaderSite(level, id, reader, circuit.owner);
             }
         }
-        for (var pulses : requests.values()) pulses.removeIf(pulse -> locked(pulse.reader.id));
+        for (var pulses : requests.values()) pulses.removeIf(pulse -> locked(pulse.target.id));
     }
 
-    private void blockReaderSite(Target target, UUID owner) {
+    private void blockReaderSite(ServerLevel level, UUID source, Target target, UUID owner) {
+        if (level != null) {
+            var peer = FrequencyNetwork.get(level).peers(level, source).stream()
+                .filter(device -> device.id().equals(target.id)).findFirst();
+            if (peer.isPresent()) owner = peer.get().owner();
+        }
         lockedReaderSites.computeIfAbsent(new ReaderSite(target.position, owner), site -> new HashSet<>()).add(target.id);
     }
 
@@ -367,11 +500,12 @@ public final class TerminalControlData extends SavedData {
         tag.putUUID("Id", target.id);
         tag.putLong("Position", target.position.asLong());
         tag.putBoolean("Emitter", target.emitter);
+        if (target.door) tag.putBoolean("DirectDoor", true);
         return tag;
     }
 
     private static Target readTarget(CompoundTag tag) {
-        return new Target(tag.getUUID("Id"), BlockPos.of(tag.getLong("Position")), tag.getBoolean("Emitter"));
+        return new Target(tag.getUUID("Id"), BlockPos.of(tag.getLong("Position")), tag.getBoolean("Emitter"), tag.getBoolean("DirectDoor"));
     }
 
     @Override
@@ -394,10 +528,10 @@ public final class TerminalControlData extends SavedData {
         var pulses = new ListTag();
         requests.forEach((door, entries) -> {
             for (Pulse pulse : entries) {
-                var row = writeTarget(pulse.reader);
+                var row = writeTarget(pulse.target);
                 row.putUUID("Door", door);
                 row.putUUID("Button", pulse.button);
-                row.putUUID("Code", pulse.code);
+                if (pulse.code != null) row.putUUID("Code", pulse.code);
                 pulses.add(row);
             }
         });
@@ -439,9 +573,10 @@ public final class TerminalControlData extends SavedData {
         }
         for (Tag item : tag.getList("Requests", Tag.TAG_COMPOUND)) {
             var row = (CompoundTag) item;
-            if (row.hasUUID("Door") && row.hasUUID("Button") && row.hasUUID("Code") && row.hasUUID("Id")) {
+            if (row.hasUUID("Door") && row.hasUUID("Button") && row.hasUUID("Id")
+                    && (row.getBoolean("DirectDoor") || row.hasUUID("Code"))) {
                 data.requests.computeIfAbsent(row.getUUID("Door"), id -> new HashSet<>())
-                    .add(new Pulse(row.getUUID("Button"), readTarget(row), row.getUUID("Code")));
+                    .add(new Pulse(row.getUUID("Button"), readTarget(row), row.hasUUID("Code") ? row.getUUID("Code") : null));
             }
         }
         for (Tag item : tag.getList("CameraDoors", Tag.TAG_COMPOUND)) {
@@ -454,7 +589,7 @@ public final class TerminalControlData extends SavedData {
             }
             data.recordCameraDoors(row.getUUID("Terminal"), doors);
         }
-        data.rebuildLocks();
+        data.rebuildLocks(null);
         return data;
     }
 }

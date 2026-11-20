@@ -3,6 +3,9 @@ package fr.vengelis.industrialfacilities.access;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import fr.vengelis.industrialfacilities.frequency.*;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
@@ -14,6 +17,8 @@ import fr.vengelis.industrialfacilities.door.IndustrialDoorStyle;
 import fr.vengelis.industrialfacilities.item.BadgeWalletItem;
 import fr.vengelis.industrialfacilities.security.AutomationOutputs;
 import fr.vengelis.industrialfacilities.security.CameraTerminalEntity;
+import fr.vengelis.industrialfacilities.supervision.SignalTraffic;
+import fr.vengelis.industrialfacilities.supervision.NetworkView.SignalKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +29,6 @@ import net.minecraft.world.level.Level;
 /** Vérifie les liaisons entre lecteurs et portes et applique les demandes d'ouverture côté serveur. */
 public final class AccessDoorService {
     private static final double INTERACTION_RANGE_SQUARED = 8 * 8;
-    private static final int ACCESS_DURATION_TICKS = 100;
 
     public static IndustrialDoorEntity resolveDoor(Level level, BlockPos pos) {
         if (!loaded(level, pos) || !(level.getBlockEntity(pos) instanceof IndustrialDoorEntity part)) {
@@ -65,13 +69,41 @@ public final class AccessDoorService {
     public static boolean isSecured(IndustrialDoorEntity door) {
         return door.getLevel() instanceof ServerLevel level
             && door.doorInstanceId != null
-            && !AccessRegistry.get(level.getServer()).readers(door.doorInstanceId).isEmpty();
+            && !readers(level, door.doorInstanceId).isEmpty();
+    }
+
+    public static List<AccessRegistry.DoorLink> doors(ServerLevel level, AccessRegistry.Entry reader) {
+        var network = FrequencyNetwork.get(level);
+        var result = new LinkedHashSet<AccessRegistry.DoorLink>();
+        for (var door : reader.doors())
+            if (network.legacy(reader.instanceId(), door.instance())) result.add(door);
+        for (var device : network.peers(level, reader.instanceId()))
+            if (device.type() == FrequencyEndpoint.Type.DOOR)
+                result.add(new AccessRegistry.DoorLink(reader.dimension, device.pos(), device.id()));
+        return List.copyOf(result);
+    }
+
+    public static Collection<AccessRegistry.Entry> readers(ServerLevel level, UUID door) {
+        var registry = AccessRegistry.get(level.getServer());
+        var network = FrequencyNetwork.get(level);
+        var result = new LinkedHashSet<AccessRegistry.Entry>();
+        for (var reader : registry.readers(door))
+            if (network.legacy(reader.instanceId(), door)) result.add(reader);
+        for (var device : network.senders(level, door)) {
+            if (!device.type().reader()) continue;
+            var reader = registry.byInstance(device.id());
+            if (reader != null && reader.owner.equals(device.owner()) && reader.position.equals(device.pos())
+                && reader.dimension.equals(level.dimension().location().toString()))
+                result.add(reader);
+        }
+        return result;
     }
 
     public static boolean canConfigure(Player player, IndustrialDoorEntity door) {
         return door.getLevel() instanceof ServerLevel level
             && player.level() == level
             && door.size != 0
+            && (door.placedBy == null || door.placedBy.equals(player.getUUID()))
             && canConfigureOwner(player.getUUID(), door);
     }
 
@@ -147,11 +179,18 @@ public final class AccessDoorService {
             cancelAccessRequest(door);
             return false;
         }
-        if (IndustrialDoorManager.fireAlarmActive(level, door)) return false;
-        if (level.getGameTime() < door.accessOpenUntil) {
-            if (!controls.locked(door.accessRequester) && stillLinkedRequester(level, door)) return true;
-            cancelAccessRequest(door);
+        if (IndustrialDoorManager.fireAlarmActive(level, door)) {
+            SignalTraffic.stop(level, door.accessRequester, door.accessRequester, door.doorInstanceId);
+            return false;
         }
+        if (level.getGameTime() < door.accessOpenUntil) {
+            if (!controls.locked(door.accessRequester) && stillLinkedRequester(level, door)) {
+                SignalTraffic.maintainUntil(level, door.accessRequester, door.accessRequester, door.doorInstanceId,
+                    SignalKind.OPEN, door.accessOpenUntil);
+                return true;
+            }
+        }
+        cancelAccessRequest(door);
         if (controls.buttonRequests(level, door)) return true;
         if ((!isSecured(door) || door.allowLinkedRedstone) && level.hasNeighborSignal(door.getBlockPos())) {
             return true;
@@ -162,48 +201,68 @@ public final class AccessDoorService {
 
     private static void cancelAccessRequest(IndustrialDoorEntity door) {
         if (door.accessOpenUntil == 0 && door.accessRequester == null) return;
+        if (door.getLevel() instanceof ServerLevel level)
+            SignalTraffic.stop(level, door.accessRequester, door.accessRequester, door.doorInstanceId);
         door.accessOpenUntil = 0;
         door.accessRequester = null;
         door.sync();
     }
 
-    private static boolean stillLinkedRequester(ServerLevel level, IndustrialDoorEntity door) {
-        return door.accessRequester == null || AccessRegistry.get(level.getServer()).hasReader(door.doorInstanceId,
-            reader -> reader.instanceId == null || door.accessRequester.equals(reader.instanceId));
+    /** Timed holds only; redstone and maintained camera outputs have no countdown. */
+    public static long holdOpenUntil(ServerLevel level, IndustrialDoorEntity door) {
+        var controls = TerminalControlData.get(level);
+        if (controls.blocksDoor(level, door) || IndustrialDoorManager.fireAlarmActive(level, door)) return 0;
+        long access = door.accessOpenUntil > level.getGameTime() && !controls.locked(door.accessRequester)
+            && stillLinkedRequester(level, door) ? door.accessOpenUntil : 0;
+        return Math.max(access, controls.buttonOpenUntil(level, door));
     }
 
-    /** Le voyant reste vert pendant la fermeture ou si un obstacle maintient la porte ouverte. */
+    private static boolean stillLinkedRequester(ServerLevel level, IndustrialDoorEntity door) {
+        return door.accessRequester == null || readers(level, door.doorInstanceId).stream()
+            .anyMatch(reader -> reader.instanceId() == null || door.accessRequester.equals(reader.instanceId()));
+    }
+
+    record ReaderScreen(boolean granted, long until) {
+        private static final ReaderScreen IDLE = new ReaderScreen(false, 0);
+    }
+
     public static boolean readerGranted(AccessTerminalEntity terminal) {
+        return readerScreen(terminal).granted();
+    }
+
+    /** The lock icon can stay green during closing, while the timer only shows a timed hold. */
+    static ReaderScreen readerScreen(AccessTerminalEntity terminal) {
         if (!(terminal.getLevel() instanceof ServerLevel level) || terminal.encoder || terminal.bank
             || terminal.isLockedDown() || terminal.terminalId == null || AccessTerminalEntity.resolve(level, terminal.getBlockPos()) != terminal) {
-            return false;
+            return ReaderScreen.IDLE;
         }
 
         var reader = AccessRegistry.get(level.getServer()).find(terminal.terminalId);
-        if (TerminalLinks.loadedReader(level, reader) != terminal || reader.doors().isEmpty()) {
-            return false;
-        }
+        if (TerminalLinks.loadedReader(level, reader) != terminal) return ReaderScreen.IDLE;
 
+        long now = level.getGameTime();
+        long until = 0;
+        boolean granted = false;
         boolean hasUnloadedDoor = false;
-        for (var link : reader.doors()) {
-            if (!TerminalLinks.admissible(level, terminal.getBlockPos(), link)) {
-                continue;
-            }
+        for (var link : doors(level, reader)) {
+            if (!TerminalLinks.admissible(level, terminal.getBlockPos(), terminal.instanceId, link)) continue;
             if (!TerminalLinks.loaded(level, link.position())) {
                 hasUnloadedDoor = true;
                 continue;
             }
             var door = TerminalLinks.loadedDoor(level, link);
-            if (door != null && (door.accessOpenUntil > level.getGameTime() || door.targetOpen || door.progress > 0)) {
-                return true;
+            if (door != null && (door.accessOpenUntil > now || door.targetOpen || door.progress > 0)) {
+                granted = true;
+                if (door.accessOpenUntil > now || door.targetOpen) until = Math.max(until, holdOpenUntil(level, door));
             }
         }
 
         // Conserve le dernier état connu tant qu'une porte liée n'est pas chargée.
-        return hasUnloadedDoor && terminal.accessGranted;
+        return new ReaderScreen(granted || hasUnloadedDoor && terminal.accessGranted, until);
     }
 
     public static void clearControllerLinks(ServerLevel level, BlockPos position, UUID oldInstance) {
+        FrequencyNetwork.remove(level, oldInstance, position);
         TerminalControlData.get(level).forgetDoor(oldInstance);
         var readers = AccessRegistry.get(level.getServer())
             .invalidateDoor(level.dimension().location().toString(), position, oldInstance);
@@ -373,22 +432,20 @@ public final class AccessDoorService {
         var controls = TerminalControlData.get(level);
         boolean lockdown = false;
         boolean fireAlarmActive = false;
-        for (var link : reader.doors()) {
-            if (!TerminalLinks.admissible(level, terminal.getBlockPos(), link)) {
-                continue;
-            }
+        for (var link : doors(level, reader)) {
+            if (!TerminalLinks.admissible(level, terminal.getBlockPos(), terminal.instanceId, link)) continue;
             var door = TerminalLinks.loadedDoor(level, link);
             if (door == null) continue;
             if (controls.blocksDoor(level, door)) {
                 lockdown = true;
             } else if (IndustrialDoorManager.fireAlarmActive(level, door)) {
                 fireAlarmActive = true;
-            } else if (door.accessOpenUntil <= level.getGameTime() && !door.targetOpen) {
+            } else {
                 doorsToOpen.add(door);
             }
         }
 
-        // Le badge n'est débité qu'une fois, après avoir trouvé au moins une porte à ouvrir.
+        // Une seule utilisation par validation, même pour plusieurs portes déjà ouvertes.
         if (doorsToOpen.isEmpty()) {
             if (lockdown) return AccessBadges.Result.fail(ControlTerminalBlock.UI + "door_locked");
             return AccessBadges.Result.fail(fireAlarmActive
@@ -397,17 +454,18 @@ public final class AccessDoorService {
         if (!consumeAccess.getAsBoolean()) {
             return AccessBadges.Result.fail("Ce badge est épuisé.");
         }
-        long end = level.getGameTime();
         for (var door : doorsToOpen) {
-            int duration = ACCESS_DURATION_TICKS + Math.max(0, door.motionTicks(true) - DoorMotionConfig.DEFAULT_TICKS);
+            int openingAllowance = door.isAtOpenLimit() ? 0 : Math.max(0, door.motionTicks(true) - DoorMotionConfig.DEFAULT_TICKS);
+            int duration = terminal.openSeconds() * 20 + openingAllowance;
+            if (door.accessRequester != null && !door.accessRequester.equals(terminal.instanceId))
+                SignalTraffic.stop(level, door.accessRequester, door.accessRequester, door.doorInstanceId);
             door.accessOpenUntil = level.getGameTime() + duration;
             door.accessRequester = terminal.instanceId;
-            end = Math.max(end, door.accessOpenUntil);
+            SignalTraffic.maintainUntil(level, terminal.instanceId, terminal.instanceId, door.doorInstanceId,
+                SignalKind.OPEN, door.accessOpenUntil);
             door.sync();
         }
-        terminal.grantedUntil = end;
-        terminal.accessGranted = true;
-        terminal.sync();
+        terminal.updateAccessState();
         refreshLinkedReaders(level, registry, reader.id, doorsToOpen);
         return AccessBadges.Result.success("Accès autorisé.");
     }
@@ -418,7 +476,7 @@ public final class AccessDoorService {
         Set<UUID> refreshed = new HashSet<>();
         refreshed.add(activeReader);
         for (var door : openedDoors) {
-            for (var entry : registry.readers(door.doorInstanceId)) {
+            for (var entry : readers(level, door.doorInstanceId)) {
                 if (!refreshed.add(entry.id)) {
                     continue;
                 }
